@@ -1,2 +1,3 @@
 # WGU
-School Projects
+Tracking Projects done for completion of WGU programs
+
