@@ -38,8 +38,6 @@ def connect_db(host="localhost", port=27017):
     client = MongoClient(host, port)
     return client
 
-
-
 if __name__ == "__main__":
     client = connect_db()
-    insert_to_db()
+    insert_to_db(None, None)
