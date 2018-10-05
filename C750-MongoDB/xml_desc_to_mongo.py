@@ -28,16 +28,21 @@ if __name__ == "__main__":
 	print(db.autos.find_one())
 
 """
-import describeXML
+import describeXML as dXML
 from pymongo import MongoClient
 
 def insert_to_db(json, db):
-    print("hello world")
+    print(json)
 
 def connect_db(host="localhost", port=27017):
     client = MongoClient(host, port)
     return client
 
+def test(infile = 'map', data_name = 'map_xml'):
+	client = connect_db()
+	db = client[data_name]
+	xml_desc = dXML.get_xml_description(infile)
+	insert_to_db(xml_desc,db)
+
 if __name__ == "__main__":
-    client = connect_db()
-    insert_to_db(None, None)
+	test()

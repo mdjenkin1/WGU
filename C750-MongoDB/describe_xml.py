@@ -27,6 +27,7 @@ import xml.etree.cElementTree as ET
 import copy
 import sys
 import pprint
+from datetime import datetime as dt
 
 xml_description = {'skipped':[], 'elements':[]}
 
@@ -87,7 +88,12 @@ def guess_type(test_value):
             float(test_value)
             guess = 'float'
         except ValueError:
-            guess = 'str'
+            try:
+                #2018-02-05T03:43:12Z
+                dt.strptime(test_value, '%Y-%m-%dT%H:%M:%SZ')
+                guess = 'datetime'
+            except:
+                guess = 'str'
     finally:
         return guess
 
