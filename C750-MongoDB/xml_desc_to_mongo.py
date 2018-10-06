@@ -1,5 +1,5 @@
 """
-Generic script to insert a JSON formated stream into a specified local MongoDB listening on the default port
+Generic script to insert xml described  MongoDB listening on the default port
 
 script from lesson
 #!/usr/bin/env python
@@ -28,21 +28,25 @@ if __name__ == "__main__":
 	print(db.autos.find_one())
 
 """
-import describeXML as dXML
+import describe_xml as dxml
+import pprint
 from pymongo import MongoClient
 
-def insert_to_db(json, db):
-    print(json)
+def insert_to_db(data, db, doc):
+    for item in data: 
+        #pprint.pprint(item)
+        db[doc].insert(item)
 
 def connect_db(host="localhost", port=27017):
     client = MongoClient(host, port)
     return client
 
-def test(infile = 'map', data_name = 'map_xml'):
+def test(infile = 'map.small.snip', doc = 'map'):
 	client = connect_db()
-	db = client[data_name]
-	xml_desc = dXML.get_xml_description(infile)
-	insert_to_db(xml_desc,db)
+	db = client['xml_descriptions']
+	xml_desc = dxml.get_xml_description(infile)
+	insert_to_db(xml_desc['elements'], db, doc)
+	#print(db[doc].find_one())
 
 if __name__ == "__main__":
 	test()

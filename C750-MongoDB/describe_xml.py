@@ -60,19 +60,26 @@ def get_element(osm_file, tags=None):
 def get_elem_desc(elem):
     desc_elem = {
         'name': elem.tag,
-        'attrib': {}, #set(elem.keys()),
+        'attrib': {}, 
         'nested_elements': set()
     }
 
+    # Populate the types of attributes with 
     for key in elem.keys():
         attrib_types = set()
         if elem.attrib[key]:
             attrib_types.add(guess_type(elem.attrib[key]))
-
         desc_elem['attrib'].update({key : attrib_types})
+    if len(desc_elem['attrib']) == 0:
+        desc_elem['attrib'] = None
 
     for child in elem:
         desc_elem['nested_elements'].add(child.tag)
+    if len(desc_elem['nested_elements']) == 0:
+        desc_elem['nested_elements'] = None
+
+    
+
     return desc_elem
 
 # Take an assumed string value and guess at its type.
@@ -102,15 +109,20 @@ def merge_elem(elem_orig, new_elem):
 
     if elem_orig['attrib'] != new_elem['attrib']:
         for key, val in new_elem['attrib'].items():
-            if key in elem_orig['attrib'].keys():
+            if elem_orig['attrib'] == None:
+                elem_orig['attrib'] = {key: val}
+            elif key in elem_orig['attrib'].keys():
                 elem_orig['attrib'][key].update(val)
             else:
                 elem_orig['attrib'].update({key: val})
         has_change = True
 
-    if not new_elem['nested_elements'].issubset(elem_orig['nested_elements']):
-        elem_orig['nested_elements'].update(new_elem['nested_elements'])
-        has_change = True
+    if not (new_elem['nested_elements'] == None):
+        if (elem_orig['nested_elements'] == None):
+            elem_orig['nested_elements'] = new_elem['nested_elements']
+        elif not new_elem['nested_elements'].issubset(elem_orig['nested_elements']):
+            elem_orig['nested_elements'].update(new_elem['nested_elements'])
+            has_change = True
 
     return elem_orig, has_change
 
@@ -148,6 +160,7 @@ def get_xml_description(filename, skip_some=None):
                         xml_desc.pop('elements', None)
                         xml_desc.update({'elements': new_elem_list})
 
+    
     return xml_desc
 
 def test(infile = 'map'):
