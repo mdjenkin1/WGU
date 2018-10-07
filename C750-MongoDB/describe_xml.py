@@ -7,7 +7,7 @@ What elements contain nested elements?
 Element Description structure
 {
         name: string
-        attrib: {attrib_name:set(types...)},
+        attribs: {attrib_name:set(types...)},
         nested_elements: set(),
         is_root = boolean
 }
@@ -60,7 +60,7 @@ def get_element(osm_file, tags=None):
 def get_elem_desc(elem):
     desc_elem = {
         'name': elem.tag,
-        'attrib': {}, 
+        'attribs': {}, 
         'nested_elements': set()
     }
 
@@ -69,9 +69,9 @@ def get_elem_desc(elem):
         attrib_types = set()
         if elem.attrib[key]:
             attrib_types.add(guess_type(elem.attrib[key]))
-        desc_elem['attrib'].update({key : attrib_types})
-    if len(desc_elem['attrib']) == 0:
-        desc_elem['attrib'] = None
+        desc_elem['attribs'].update({key : attrib_types})
+    if len(desc_elem['attribs']) == 0:
+        desc_elem['attribs'] = None
 
     for child in elem:
         desc_elem['nested_elements'].add(child.tag)
@@ -107,14 +107,14 @@ def guess_type(test_value):
 def merge_elem(elem_orig, new_elem):
     has_change = False
 
-    if elem_orig['attrib'] != new_elem['attrib']:
-        for key, val in new_elem['attrib'].items():
-            if elem_orig['attrib'] == None:
-                elem_orig['attrib'] = {key: val}
-            elif key in elem_orig['attrib'].keys():
-                elem_orig['attrib'][key].update(val)
+    if elem_orig['attribs'] != new_elem['attribs']:
+        for key, val in new_elem['attribs'].items():
+            if elem_orig['attribs'] == None:
+                elem_orig['attribs'] = {key: val}
+            elif key in elem_orig['attribs'].keys():
+                elem_orig['attribs'][key].update(val)
             else:
-                elem_orig['attrib'].update({key: val})
+                elem_orig['attribs'].update({key: val})
         has_change = True
 
     if not (new_elem['nested_elements'] == None):
@@ -160,10 +160,18 @@ def get_xml_description(filename, skip_some=None):
                         xml_desc.pop('elements', None)
                         xml_desc.update({'elements': new_elem_list})
 
-    
+    # need to convert sets to lists as mongodb doesn't have a mapping to python sets
+    for element in xml_desc['elements']:
+        if element['nested_elements']:
+            element['nested_elements'] = list(element['nested_elements'])
+        if element['attribs']:
+            for key, val in element['attribs'].items():
+                #print('Need to set {} to {}'.format(key,list(val)))
+                element['attribs'][key] = list(val)
+
     return xml_desc
 
-def test(infile = 'map'):
+def test(infile = 'map.small.snip'):
     xml_desc = get_xml_description(infile)
     pprint.pprint(xml_desc)
 
