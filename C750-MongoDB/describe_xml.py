@@ -143,6 +143,7 @@ def get_xml_description(filename, skip_some=None):
 
     for element in get_element(filename, tagNames):
             new_elem = get_elem_desc(element)
+            pprint.pprint(new_elem)
             # Check if the new element already exists in the list of elements. 
             # If not, add it. 
             # Otherwise, merge it with the existing entry and update the element list.
@@ -152,7 +153,6 @@ def get_xml_description(filename, skip_some=None):
             else:
                 for elem in existing_elem_desc:
                     merged_elem, has_change = merge_elem(elem, new_elem)
-                
                     if has_change:
                         new_elem_list = []
                         new_elem_list[:] = [x for x in xml_desc['elements'] if not (x.get('name') == new_elem['name'])]
@@ -166,12 +166,12 @@ def get_xml_description(filename, skip_some=None):
             element['nested_elements'] = list(element['nested_elements'])
         if element['attribs']:
             for key, val in element['attribs'].items():
-                #print('Need to set {} to {}'.format(key,list(val)))
+                print('Need to set {} to {}'.format(key,list(val)))
                 element['attribs'][key] = list(val)
 
     return xml_desc
 
-def test(infile = 'map.small.snip'):
+def test(infile = 'map'):
     xml_desc = get_xml_description(infile)
     pprint.pprint(xml_desc)
 
