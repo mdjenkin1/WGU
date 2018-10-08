@@ -34,7 +34,6 @@ from pymongo import MongoClient
 
 def insert_to_db(data, db, doc):
     for item in data: 
-        #pprint.pprint(item)
         db[doc].insert(item)
 
 def connect_db(host="localhost", port=27017):
@@ -46,7 +45,6 @@ def test(infile = 'map', doc = 'map'):
 	db = client['xml_descriptions']
 	xml_desc = dxml.get_xml_description(infile)
 	insert_to_db(xml_desc['elements'], db, doc)
-	print(db[doc].find_one())
 
 if __name__ == "__main__":
 	test()
