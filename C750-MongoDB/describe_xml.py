@@ -148,7 +148,7 @@ def merge_elem(elem_orig, new_elem):
 # skip_some is the number of tag occurances that must be beat for that tag to not be skipped. 
 def get_xml_description(filename, skip_some=None):
     elem_types = get_elem_type_counts(filename)
-    pprint.pprint(elem_types)
+    #pprint.pprint(elem_types)
 
     tag_names = []
     xml_desc = {'skipped':[], 'elements':[]}
@@ -166,15 +166,15 @@ def get_xml_description(filename, skip_some=None):
     #for key in elem_types:
     #    tag_names.append(key)
 
-    found_tags = set()
+    #found_tags = set() #part of tag troubleshooting
     for element in get_element(filename):
             new_elem = get_elem_desc(element)
             
             # troubleshooting what tags we're getting
-            num_found_tags = len(found_tags)
-            found_tags.add(new_elem['name'])
-            if num_found_tags < len(found_tags):
-                print("added tag: {}".format(new_elem['name']))
+            #num_found_tags = len(found_tags)
+            #found_tags.add(new_elem['name'])
+            #if num_found_tags < len(found_tags):
+            #    print("added tag: {}".format(new_elem['name']))
 
             #pprint.pprint(new_elem)
             # Check if the new element already exists in the list of elements. 
@@ -203,7 +203,7 @@ def get_xml_description(filename, skip_some=None):
             for key, val in element['attribs'].items():
                 #print('Need to set {} to {}'.format(key,list(val)))
                 element['attribs'][key] = list(val)
-    pprint.pprint(xml_desc)
+    #pprint.pprint(xml_desc)
     return xml_desc
 
 def test(infile = 'map'):
