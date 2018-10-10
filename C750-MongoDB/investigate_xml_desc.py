@@ -11,9 +11,12 @@ import pprint
 # What data types do those attributes have?
 # Return which attributes have more than one data type.
 # Which elements have those attributes?
-def many_typed_attribs(db):
+def many_typed_attribs(db, coll):
     all_attribs = []
     multi_attribs = []
+
+    db[coll].find({},{'attribs': 1}).pretty()
+    pprint.pprint(all_attribs)
     return multi_attribs
 
 ## Which elements are nested in other elements?
@@ -28,7 +31,7 @@ def connect_db(host="localhost", port=27017):
 def test(db_name = 'xml_descriptions', coll = "map"):
     client = connect_db()
     db = client[db_name]
-    pprint.pprint(many_typed_attribs(db))
+    pprint.pprint(many_typed_attribs(db, coll))
     pass
 
 if __name__ == "__main__":
