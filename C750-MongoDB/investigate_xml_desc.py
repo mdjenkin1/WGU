@@ -3,7 +3,7 @@ Find answers to generic questions about xml metadata.
 xml metadata is assumed to be loaded to mongodb
 """
 
-import pymongo
+from pymongo import MongoClient
 import pprint
 
 ## Which have attributes have more than one data type?
