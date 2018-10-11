@@ -14,3 +14,5 @@ Originally C750-MongoDB. This project is now extra-curricular
 * map: XML from Open Street Map https://www.openstreetmap.org/#map=13/40.7478/-111.8452
 * map.snip: a medium sized snip from the middle of map. (Don't forget to encase them in a root tag)
 * map.small.snip: an extra small sized snip from map
+* *.pyc: python cache files
+* ~*.docx: Word cache files
