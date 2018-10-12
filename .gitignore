@@ -3,3 +3,4 @@ map.small.snip
 map.snip
 *.pyc
 ~*.docx
+*.tmp
