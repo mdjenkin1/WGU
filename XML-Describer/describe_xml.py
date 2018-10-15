@@ -42,7 +42,6 @@ def get_elem_type_counts(filename):
 # This is used to provide full elements, with their nested children for parsing
 # logic added to return all tags unless a set of tags are requested
 def get_element(filename, tags=None):
-    """Yield element if it is the right type of tag"""
 
     context = ET.iterparse(filename, events=('start', 'end'))
     _, root = next(context)

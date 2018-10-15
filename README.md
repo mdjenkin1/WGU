@@ -6,7 +6,10 @@ Tracking Projects done for completion of WGU programs
 
 * Project_Map.docx: project outline.
 * OSM_Case_Study.md: Markdown version of the project report
-* desc_tag_attribs.py: OSM tag elements are using generic 'k', 'v' attributes to hold their data. Lets get better information.
+* desc_tag_attribs.py: OSM tag elements are using generic 'k', 'v' attributes to hold their data.
+* element_getter.py: serves up full elements iteratively.
+
+Lets get better information.
 
 ## XML-Describer
 
