@@ -19,9 +19,7 @@ answer these questions with the following data structure:
 import element_getter as EG
 import pprint
 
-attrib_list = []
-
-def update_attrib_list(k, v):
+def update_attrib_list(attrib_list, k, v):
     #print("{} : {}".format(k, v))
     not_updated = True
     while not_updated:
@@ -35,18 +33,21 @@ def update_attrib_list(k, v):
         if not_updated:
             attrib_list.append({'k': k, 'v': [v]})
             not_updated = False
+    return attrib_list
 
 def test(infile = 'map'):
+    attrib_list = []
     for element in EG.get_element(infile):
     #    pprint.pprint(element)
         if 'k' in element.attrib.keys():
         #   print(element.attrib['k'])
             if 'v' in element.attrib.keys():
-                update_attrib_list(element.attrib['k'], element.attrib['v'])
+                attrib_list = update_attrib_list(attrib_list, element.attrib['k'], element.attrib['v'])
             else:
                 print("XML issue key {} does not have a value".format(element.attrib['k']))
-    pprint.pprint(attrib_list)
+    #pprint.pprint(attrib_list)
+    return attrib_list
 
 
 if __name__ == "__main__":
-    test('map')
+    pprint.pprint(test('map'))
