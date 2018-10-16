@@ -35,7 +35,7 @@ def update_attrib_list(attrib_list, k, v):
             not_updated = False
     return attrib_list
 
-def test(infile = 'map'):
+def get_tag_attrib_list(infile = 'map'):
     attrib_list = []
     for element in EG.get_element(infile):
     #    pprint.pprint(element)
@@ -48,6 +48,8 @@ def test(infile = 'map'):
     #pprint.pprint(attrib_list)
     return attrib_list
 
+def test(infile = 'map'):
+    get_tag_attrib_list(infile)
 
 if __name__ == "__main__":
     pprint.pprint(test('map'))
