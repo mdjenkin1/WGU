@@ -18,6 +18,7 @@ Originally C750-MongoDB. This project is now extra-curricular. Will be re-incorp
 * describe_xml.py: Given an assumed valid XML file, provide a description of the Elements it contains
 * xml_desc_to_mongo.py: wrapper for loading xml descriptions to MongoDB
 * investigate_xml_desc.py: generate a report on potential items of interest in the xml description.
+* map_to_mongo.py: load actual map information to local mongoDB.
 
 ## Git Ignored Files
 
