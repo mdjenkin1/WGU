@@ -1,7 +1,6 @@
 """
 Load OSM data to a local MongoDB
-node data:
-{
+nodes: [{
     type: "node"
     id: value,
     lat: value,
@@ -14,10 +13,9 @@ node data:
     tags:[
         {k_value: v_value}
     ]
-}
+}]
 
-way data:
-{
+ways: [{
     type: "way"
     id: value,
     version: value,
@@ -31,10 +29,9 @@ way data:
     nd_ref:[
         value
     ]
-}
+}]
 
-relation data:
-{
+relations: [{
     type: "relation"
     id: value,
     version: value,
@@ -50,14 +47,14 @@ relation data:
         ref: value,
         role: value},
     ]
-}
+}]
 
 """
-import pymongo
+from pymongo import MongoClient
 import xml.etree.cElementTree as ET
 import pprint
 
-def load_file(infile):
+def get_osm_map_data(infile):
     # parse elements from file
     nodes = []
     ways = []
@@ -65,9 +62,7 @@ def load_file(infile):
     new_node = None
     new_way = None
     new_relation = None
-    #for _, elem in ET.iterparse(infile, events=("start",)):
-    #    if elem.tag in ("note","meta","bounds","osm",):
-    #        print("skipping {}".format(elem.tag))
+    
     for _, elem in ET.iterparse(infile, events=("start",)):
         if elem.tag == "node":
             if new_node:
@@ -76,7 +71,8 @@ def load_file(infile):
             for key in elem.keys():
                 new_node[key] = elem.attrib[key]
             for tag in elem.iter("tag"):
-                new_node["tags"].append({tag.attrib["v"]: tag.attrib["k"]})
+                new_node["tags"].append({tag.attrib["k"]: tag.attrib["v"]})
+    nodes.append(new_node)
 
     for _, elem in ET.iterparse(infile, events=("start",)):
         if elem.tag == "way":
@@ -86,31 +82,42 @@ def load_file(infile):
             for key in elem.keys():
                 new_way[key] = elem.attrib[key]
             for tag in elem.iter("tag"):
-                new_way["tags"].append({tag.attrib["v"]: tag.attrib["k"]})
+                new_way["tags"].append({tag.attrib["k"]: tag.attrib["v"]})
             for nd in elem.iter("nd"):
                 new_way["nd_ref"].append(nd.attrib["ref"])
+    ways.append(new_way)
 
     for _, elem in ET.iterparse(infile, events=("start",)):
         if elem.tag == "relation":
+            if new_relation:
+                relations.append(new_relation)
             new_relation = {"type" : "relation", "tags": [], "members": []}
             for key in elem.keys():
                 new_relation[key] = elem.attrib[key]
             for mem in elem.iter("member"):
-                #new_relation.append({key : elem.attrib[key]})
+                new_relation["members"].append({"type": mem.attrib["type"], "ref": mem.attrib["ref"], "role": mem.attrib["role"]})
                 pass
             for tag in elem.iter("tag"):
-                new_relation["tags"].append({tag.attrib["v"]: tag.attrib["k"]})
-        #else:
-        #    print("Unknown Element Found: {}".format(elem.tag))
+                new_relation["tags"].append({tag.attrib["k"]: tag.attrib["v"]})
+    relations.append(new_relation)
 
-    # add parse to mongoDB
-    for node in nodes:
-        if len(node["tags"]) > 0:
-            pprint.pprint(node)
-    pass
+    map_data = {
+        'nodes': nodes,
+        'ways': ways,
+        'relations': relations
+    }
+    return map_data
 
-def test(infile):
-    load_file(infile)
+def load_osm_map_data(data, host, port, db_name):
+    client = MongoClient(host, port)
+    db = client[db_name]
+    db['nodes'].insert_many(data['nodes'])
+    db['ways'].insert_many(data['ways'])
+    db['relations'].insert_many(data['relations'])
+
+def load_file(infile, db_name = 'salt_lake_city_raw'):
+    map_data = get_osm_map_data(infile)
+    load_osm_map_data(map_data, 'localhost', 27017, db_name)
 
 if __name__ == "__main__":
-    test(infile = 'map')
+    load_file(infile = 'map')
