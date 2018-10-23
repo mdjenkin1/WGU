@@ -10,8 +10,9 @@ nodes: [{
     changeset: value,
     uid: value,
     user: value,
-    tags:[
-        {k_value: v_value}
+    tags: [
+        {"k": k_value, "v": v_value},
+        ...
     ]
 }]
 
@@ -23,8 +24,9 @@ ways: [{
     changeset: value,
     uid: value,
     user: value,
-    tags:[
-        {k_value: v_value}
+    tags: [
+        {"k": k_value, "v": v_value},
+        ...
     ]
     nd_ref:[
         value
@@ -39,10 +41,11 @@ relations: [{
     changeset: value,
     uid: value,
     user: value,
-    tags:[
-        {k_value: v_value}
+    tags: [
+        {"k": k_value, "v": v_value},
+        ...
     ]
-    member:[
+    members:[
         {type: value,
         ref: value,
         role: value},
@@ -71,7 +74,7 @@ def get_osm_map_data(infile):
             for key in elem.keys():
                 new_node[key] = elem.attrib[key]
             for tag in elem.iter("tag"):
-                new_node["tags"].append({tag.attrib["k"]: tag.attrib["v"]})
+                new_node["tags"].append({"k": tag.attrib["k"], "v": tag.attrib["v"]})
     nodes.append(new_node)
 
     for _, elem in ET.iterparse(infile, events=("start",)):
@@ -82,7 +85,7 @@ def get_osm_map_data(infile):
             for key in elem.keys():
                 new_way[key] = elem.attrib[key]
             for tag in elem.iter("tag"):
-                new_way["tags"].append({tag.attrib["k"]: tag.attrib["v"]})
+                new_way["tags"].append({"k": tag.attrib["k"], "v": tag.attrib["v"]})
             for nd in elem.iter("nd"):
                 new_way["nd_ref"].append(nd.attrib["ref"])
     ways.append(new_way)
@@ -98,7 +101,7 @@ def get_osm_map_data(infile):
                 new_relation["members"].append({"type": mem.attrib["type"], "ref": mem.attrib["ref"], "role": mem.attrib["role"]})
                 pass
             for tag in elem.iter("tag"):
-                new_relation["tags"].append({tag.attrib["k"]: tag.attrib["v"]})
+                new_relation["tags"].append({"k": tag.attrib["k"], "v": tag.attrib["v"]})
     relations.append(new_relation)
 
     map_data = {
