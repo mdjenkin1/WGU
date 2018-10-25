@@ -118,9 +118,9 @@ def load_osm_map_data(data, host, port, db_name):
     db['ways'].insert_many(data['ways'])
     db['relations'].insert_many(data['relations'])
 
-def load_file(infile, db_name = 'salt_lake_city_raw'):
+def test(infile, db_name):
     map_data = get_osm_map_data(infile)
-    load_osm_map_data(map_data, 'localhost', 27017, db_name)
+    load_osm_map_data(map_data, 'localhost', 27017, 'salt_lake_city_raw')
 
 if __name__ == "__main__":
-    load_file(infile = 'map')
+    test('map', 'salt_lake_city_raw')

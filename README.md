@@ -8,6 +8,7 @@ Tracking Projects done for completion of WGU programs
 * OSM_Case_Study.md: Markdown version of the project report
 * desc_tag_attribs.py: OSM tag elements are using generic 'k', 'v' attributes to hold their data.
 * element_getter.py: serves up full elements iteratively.
+* slc_street_cleanup.py: Expand abbreviated coordinate street direction designations in SLC map data to full length names.
 
 Lets get better information.
 

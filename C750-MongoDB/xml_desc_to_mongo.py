@@ -2,7 +2,7 @@
 Generic script to insert xml description to local MongoDB listening on the default port
 """
 
-import describe_xml as dxml
+import desc_tag_attribs as dxml
 import pprint
 from pymongo import MongoClient
 
