@@ -68,9 +68,42 @@ relations: [{
 """
 
 import map_to_mongo as m2m
+import re
 
-def clean_slc_streets(street):
+addr_house_re = re.compile(r'^addr:housenumber', re.IGNORECASE)
+addr_street_re = re.compile(r'^addr:street', re.IGNORECASE)
+direction_abbr_re = re.compile(r'\b[NESW]\b', re.IGNORECASE)
+ave_street_re = re.compile(r'^[NESW] Street$', re.IGNORECASE)
+
+def clean_slc_streets(raw_map_data):
+    for node in raw_map_data['nodes']:
+        for tag in node['tags']:
+            if is_street_addr(tag['k']):
+                #print("{} is a street or house address".format(tag['k']))
+                tag['v'] = expand_street_abbr(tag['v'])
+                print("{} should have expanded directions".format(tag['v']))
+
+    for node in raw_map_data['ways']:
+        for tag in node['tags']:
+            if is_street_addr(tag['k']):
+                #print("{} is a street or house address".format(tag['k']))
+                tag['v'] = expand_street_abbr(tag['v'])
+                print("{} should have expanded directions".format(tag['v']))
+
     return True
+
+def expand_street_abbr(street):
+    if ave_street_re.search(street):
+        return street
+    elif direction_abbr_re.search(street):
+        return street
+    else:
+        return street
+
+def is_street_addr(street):
+    is_street = addr_street_re.search(street)
+    is_house = addr_house_re.search(street)
+    return (is_street or is_house)
 
 def test(infile = "map"):
     # get raw map data
@@ -78,7 +111,7 @@ def test(infile = "map"):
     # clean the raw map data
     cln_map_data = clean_slc_streets(raw_map_data)
     # load the clean data to mongodb
-    m2m.load_osm_map_data(cln_map_data, 'localhost', 27017, 'salt_lake_city_clean')
+    #m2m.load_osm_map_data(cln_map_data, 'localhost', 27017, 'salt_lake_city_clean')
     pass
 
 if __name__ == "__main__":
