@@ -4,11 +4,12 @@ Tracking Projects done for completion of WGU programs
 
 ## C750-MongoDB
 
-* Project_Map.docx: project outline.
-* OSM_Case_Study.md: Markdown version of the project report
-* desc_tag_attribs.py: OSM tag elements are using generic 'k', 'v' attributes to hold their data.
-* element_getter.py: serves up full elements iteratively.
-* slc_street_cleanup.py: Expand abbreviated coordinate street direction designations in SLC map data to full length names.
+* **Project_Map.docx:** project outline.
+* **OSM_Case_Study.md:** Markdown version of the project report
+* **desc_tag_attribs.py:** OSM tag elements are using generic 'k', 'v' attributes to hold their data.
+* **element_getter.py:** serves up full elements iteratively.
+* **slc_street_cleanup.py:** Expand abbreviated coordinate street direction designations in SLC map data to full length names.
+* **map_to_mongo.py:** load actual map information to local mongoDB.
 
 Lets get better information.
 
@@ -16,10 +17,9 @@ Lets get better information.
 
 Originally C750-MongoDB. This project is now extra-curricular. Will be re-incorporated into the C750-MongoDB project as a dictionary for the XML data.
 
-* describe_xml.py: Given an assumed valid XML file, provide a description of the Elements it contains
-* xml_desc_to_mongo.py: wrapper for loading xml descriptions to MongoDB
-* investigate_xml_desc.py: generate a report on potential items of interest in the xml description.
-* map_to_mongo.py: load actual map information to local mongoDB.
+* **describe_xml.py:** Given an assumed valid XML file, provide a description of the Elements it contains
+* **xml_desc_to_mongo.py:** wrapper for loading xml descriptions to MongoDB
+* **investigate_xml_desc.py:** scrap of a script that doesn't do anything. Original Plan: generate a report on potential items of interest in the xml description.
 
 ## Git Ignored Files
 

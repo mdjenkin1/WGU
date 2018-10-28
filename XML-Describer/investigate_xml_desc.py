@@ -15,7 +15,7 @@ def many_typed_attribs(db, coll):
     all_attribs = []
     multi_attribs = []
 
-    db[coll].find({},{'attribs': 1}).pretty()
+    db[coll].find({},{'attribs': 1})
     pprint.pprint(all_attribs)
     return multi_attribs
 
