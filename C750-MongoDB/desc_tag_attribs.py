@@ -1,5 +1,5 @@
 """
-OSM data investigation
+Created for OSM data investigation
 'k' attributes only exist in tags.
 Tags only exist in Nodes, Ways, and Relations.
 Which 'k' attributes exist for each parent tag type?
@@ -16,16 +16,15 @@ answer these questions with the following data structure:
     ...
 ]
 """
-import element_getter as EG
+import element_getter as eg
+import sys
 import pprint
 
 def update_attrib_list(attrib_list, k, v):
-    #print("{} : {}".format(k, v))
     not_updated = True
     while not_updated:
         for attr in attrib_list:
             if attr['k'] == k:
-                #print('updating {} with {}'.format(k, v))
                 attr['v'].append(v)
                 attr['v'] = set(attr['v'])
                 attr['v'] = list(attr['v'])
@@ -37,19 +36,17 @@ def update_attrib_list(attrib_list, k, v):
 
 def get_tag_attrib_list(infile = 'map'):
     attrib_list = []
-    for element in EG.get_element(infile):
-    #    pprint.pprint(element)
+    for element in eg.get_element(infile):
         if 'k' in element.attrib.keys():
-        #   print(element.attrib['k'])
             if 'v' in element.attrib.keys():
                 attrib_list = update_attrib_list(attrib_list, element.attrib['k'], element.attrib['v'])
             else:
                 print("XML issue key {} does not have a value".format(element.attrib['k']))
-    #pprint.pprint(attrib_list)
     return attrib_list
 
-def test(infile = 'map'):
-    get_tag_attrib_list(infile)
-
 if __name__ == "__main__":
-    pprint.pprint(test('map'))
+    if len(sys.argv[1:]) >= 1:
+        for infile in sys.argv[1:]:
+            pprint.pprint(get_tag_attrib_list(infile))
+    else:
+        pprint.pprint(get_tag_attrib_list('map'))
