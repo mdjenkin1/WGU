@@ -1,5 +1,5 @@
 """
-Load OSM data to a local MongoDB
+Load OSM data to MongoDB
 nodes: [{
     type: "node"
     id: value,
@@ -58,58 +58,74 @@ import xml.etree.cElementTree as ET
 import pprint
 
 def get_osm_map_data(infile):
-    # parse elements from file
+    # Prepare return structures
     nodes = []
     ways = []
     relations = []
-    new_node = None
-    new_way = None
-    new_relation = None
+    
+    # Due to the nature of start/end events...
+    # We will capture previous element data when encountering a new element of the same type.
+    # To do this, we need to start with null elements of the expected types
+    parsed_node = None
+    parsed_way = None
+    parsed_relation = None
     
     for _, elem in ET.iterparse(infile, events=("start",)):
         if elem.tag == "node":
-            if new_node:
-                nodes.append(new_node)
-            new_node = {"type": "node", "tags": []}
-            for key in elem.keys():
-                new_node[key] = elem.attrib[key]
-            for tag in elem.iter("tag"):
-                new_node["tags"].append({"k": tag.attrib["k"], "v": tag.attrib["v"]})
-    nodes.append(new_node)
-
-    for _, elem in ET.iterparse(infile, events=("start",)):
+            if parsed_node:
+                nodes.append(parsed_node)
+            parsed_node = parse_node_elem(elem)
         if elem.tag == "way":
-            if new_way:
-                ways.append(new_way)
-            new_way = {"type": "way", "tags": [], "nd_ref": []}
-            for key in elem.keys():
-                new_way[key] = elem.attrib[key]
-            for tag in elem.iter("tag"):
-                new_way["tags"].append({"k": tag.attrib["k"], "v": tag.attrib["v"]})
-            for nd in elem.iter("nd"):
-                new_way["nd_ref"].append(nd.attrib["ref"])
-    ways.append(new_way)
-
-    for _, elem in ET.iterparse(infile, events=("start",)):
+            if parsed_way:
+                ways.append(parsed_way)
+            parsed_way = parse_way_elem(elem)
         if elem.tag == "relation":
-            if new_relation:
-                relations.append(new_relation)
-            new_relation = {"type" : "relation", "tags": [], "members": []}
-            for key in elem.keys():
-                new_relation[key] = elem.attrib[key]
-            for mem in elem.iter("member"):
-                new_relation["members"].append({"type": mem.attrib["type"], "ref": mem.attrib["ref"], "role": mem.attrib["role"]})
-                pass
-            for tag in elem.iter("tag"):
-                new_relation["tags"].append({"k": tag.attrib["k"], "v": tag.attrib["v"]})
-    relations.append(new_relation)
+            if parsed_relation:
+                relations.append(parsed_relation)
+            parsed_relation = parse_relation_elem(elem)
+    
+    # Explicitly capture the last elements encountered.
+    # We need to do this as there's not another start event to trigger a capture
+    nodes.append(parsed_node)
+    ways.append(parsed_way)
+    relations.append(parsed_relation)
 
+    # Package elements for delivery and deliver
     map_data = {
         'nodes': nodes,
         'ways': ways,
         'relations': relations
     }
     return map_data
+
+def parse_node_elem(elem):
+    parsed_node = {"type": "node", "tags": []}
+    for key in elem.keys():
+        parsed_node[key] = elem.attrib[key]
+    for tag in elem.iter("tag"):
+        parsed_node["tags"].append({"k": tag.attrib["k"], "v": tag.attrib["v"]})
+    return parsed_node
+
+def parse_way_elem(elem):
+    parsed_way = {"type": "way", "tags": [], "nd_ref": []}
+    for key in elem.keys():
+        parsed_way[key] = elem.attrib[key]
+    for tag in elem.iter("tag"):
+        parsed_way["tags"].append({"k": tag.attrib["k"], "v": tag.attrib["v"]})
+    for nd in elem.iter("nd"):
+        parsed_way["nd_ref"].append(nd.attrib["ref"])
+    return parsed_way
+
+def parse_relation_elem(elem):
+    parsed_relation = {"type" : "relation", "tags": [], "members": []}
+    for key in elem.keys():
+        parsed_relation[key] = elem.attrib[key]
+    for mem in elem.iter("member"):
+        parsed_relation["members"].append({"type": mem.attrib["type"], "ref": mem.attrib["ref"], "role": mem.attrib["role"]})
+        pass
+    for tag in elem.iter("tag"):
+        parsed_relation["tags"].append({"k": tag.attrib["k"], "v": tag.attrib["v"]})
+    return parsed_relation
 
 def load_osm_map_data(data, host, port, db_name):
     client = MongoClient(host, port)

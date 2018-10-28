@@ -72,33 +72,78 @@ import re
 
 addr_house_re = re.compile(r'^addr:housenumber', re.IGNORECASE)
 addr_street_re = re.compile(r'^addr:street', re.IGNORECASE)
-direction_abbr_re = re.compile(r'\b[NESW]\b', re.IGNORECASE)
+direction_abbr_re = re.compile(r'(.*?)\b([NESW])\b(.*$)', re.IGNORECASE)
+possessive_re = re.compile(r'\'\bs\b', re.IGNORECASE)
 ave_street_re = re.compile(r'^[NESW] Street$', re.IGNORECASE)
+period_first_re = re.compile(r'^\.')
 
-def clean_slc_streets(raw_map_data):
+direction_abbr_map = {
+    'N': "North",
+    'n': "North",
+    'E': "East",
+    'e': "East",
+    'S': "South",
+    's': "South",
+    'W': "West",
+    'w': "West"
+}
+
+def clean_slc_raw_data(raw_map_data):
     for node in raw_map_data['nodes']:
         for tag in node['tags']:
             if is_street_addr(tag['k']):
-                #print("{} is a street or house address".format(tag['k']))
-                tag['v'] = expand_street_abbr(tag['v'])
-                print("{} should have expanded directions".format(tag['v']))
+                tag['v'] = process_slc_addr(tag['v'])
 
     for node in raw_map_data['ways']:
         for tag in node['tags']:
             if is_street_addr(tag['k']):
-                #print("{} is a street or house address".format(tag['k']))
-                tag['v'] = expand_street_abbr(tag['v'])
-                print("{} should have expanded directions".format(tag['v']))
+                tag['v'] = process_slc_addr(tag['v'])
 
-    return True
+    return raw_map_data
 
-def expand_street_abbr(street):
-    if ave_street_re.search(street):
-        return street
-    elif direction_abbr_re.search(street):
-        return street
+def process_slc_addr(addr):
+    
+    if ave_street_re.search(addr):
+        # Avenue addresses have names that look like abbreviations but aren't. Nothing to do here.
+        return addr
+
+    elif direction_abbr_re.search(addr):
+        # address an issue where our regex for determining an abbreviated South is catching possessive names.
+        # e.g. Saint Mary's Drive should not be changed to Saint Mary'South Drive
+        has_possessive = False
+        if possessive_re.search(addr):
+            has_possessive = True
+            addr = addr.replace("'", "&quot")
+
+        # Fix all directional abbreviations in the address.
+        while direction_abbr_re.search(addr):
+            addr = expand_abbr(addr, direction_abbr_re, direction_abbr_map)
+
+        # The other half of fixing possessive names
+        if has_possessive:
+            addr = addr.replace("&quot", "'")
+
+        return addr
+
     else:
-        return street
+        return addr
+
+# abbr_re is expected to be a regex with 3 match groups:
+# 1: everything before the abbreviation (head)
+# 2: the abbreviation
+# 3: everything after the abbreviation (tail)
+def expand_abbr(org_string, abbr_re, expand_map):
+    str_sections = abbr_re.search(org_string)
+    head = str_sections.group(1)
+    expanded = expand_map[str_sections.group(2)]
+    
+    # Drop any periods left over from the abbreviation
+    if period_first_re.search(str_sections.group(3)):
+        tail = str_sections.group(3)[1:]
+    else:
+        tail = str_sections.group(3)
+
+    return head + expanded + tail
 
 def is_street_addr(street):
     is_street = addr_street_re.search(street)
@@ -106,13 +151,9 @@ def is_street_addr(street):
     return (is_street or is_house)
 
 def test(infile = "map"):
-    # get raw map data
     raw_map_data = m2m.get_osm_map_data(infile)
-    # clean the raw map data
-    cln_map_data = clean_slc_streets(raw_map_data)
-    # load the clean data to mongodb
-    #m2m.load_osm_map_data(cln_map_data, 'localhost', 27017, 'salt_lake_city_clean')
-    pass
+    cln_map_data = clean_slc_raw_data(raw_map_data)
+    m2m.load_osm_map_data(cln_map_data, 'localhost', 27017, 'salt_lake_city_clean')
 
 if __name__ == "__main__":
-    test("map")
+    test()
