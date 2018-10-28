@@ -1,5 +1,5 @@
 """
-Generic script to insert xml description to local MongoDB listening on the default port
+Generic script for inserting JSON formated xml descriptions to local MongoDB listening on the default port
 """
 
 import desc_tag_attribs as txml

@@ -1,7 +1,7 @@
 """
 element getter from X750-MongoDB course case study data.py
-This is used to provide full elements, with their nested children for parsing
-logic added to return all tags unless a set of tags are requested
+This provides parseable full elements, including nested children
+Added logic to return all tags unless a set of tags are requested
 """
 
 import xml.etree.cElementTree as ET
@@ -28,4 +28,4 @@ if __name__ == "__main__":
         for infile in sys.argv[1:]:
             test(infile)
     else:
-        test('map.small.snip')
+        test()
