@@ -24,7 +24,7 @@ XML Description data here
 * Which elements are nested?
 * What tag values exist?
 * Which tags values are used the most?
-* What is 'tiger:' data
+* What is 'tiger:' data?
 * How common is it for address data to be entered with abbreviated directionals?
 * Which casing of address directionals is most used?
 * Finally, make street address directionals uniform.
@@ -34,3 +34,5 @@ XML Description data here
 * Valid name abbreviations could be mistaken as abbreviations for street directions by our regex. Additional logic may be necessary to prevent this in other use cases. An investigation of our current data set shows this logic is unnecessary for now.
 
 ## Conclusion
+
+Python and MongoDB are powerful tools for data manipulation.
