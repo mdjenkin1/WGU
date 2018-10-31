@@ -1,7 +1,7 @@
 """
 element getter from X750-MongoDB course case study data.py
 This provides parseable full elements, including nested children
-Added logic to return all tags unless a set of tags are requested
+Modified to return all tags unless a subset of tags are requested
 """
 
 import xml.etree.cElementTree as ET
