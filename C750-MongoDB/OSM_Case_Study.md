@@ -52,9 +52,40 @@ In the exploration of the data set, the following questions were asked and probl
 
 ## Investigation
 
-### XML Metadata
+### Parsing and Collecting XML Metadata
 
 To begin my investigation, I took the stance of someone that has no foreknowledge of OSM data. This approach allowed me to view the data in a method of discovery that can be applied to completely foreign data sets. The first step in this discovery process was to obtain information about the XML schema used to structure the data.
+
+XML at its most basic is a structured collection of elements. Therefore, we can structure a description of XML as a list of element descriptions.  
+
+Elements can be described by their name, attributes, text and what elements are nested in them. Element names are unique for each element type. Although elements of the same name do not necessarily need to have the same attributes, nested elements or text. For the other element aspects, we're not interested in actual values yet. We are interested in the data types stored in those aspects.  
+
+This leads to the following data structures for storing XML Metadata.
+
+#### XML Description structure
+
+    {
+        elements:[  
+            {elem1},  
+            ...,  
+            {elemN}  
+        ]
+    }
+
+#### Element Description Structure
+
+    {  
+        name: string  
+        attribs: {attrib_name:[types...], ...},  
+        nested_elements: [types...],  
+        text: [types...]  
+    }
+
+To generate this JSON formated metadata from an XML document, I wrote the describe_xml.py script. One of the benefits of having metadata in JSON format is the ease of loading it to a MongoDB engine. To facilitate loading XML descriptions to a local MongoDB instance, the xml_desc_to_mongo.py script has been provided.
+
+The xml_desc_to_mongo.py script contains a method named load_xml_desc_to_mongo. This method takes three arguments, the name of the file to parse, the collection to store it in, and optionally the database for that collection. If no database is defined, the description will be loaded to a collection in the xml_description database. For my purposes of investigating OSM map data, I will be loading this data to a collection named osm_map. This structuring of our database allows for creating a database containing collections of xml metadata.
+
+### Investigating OSM XML Metadata
 
 ## Additional Ideas
 

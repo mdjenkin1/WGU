@@ -4,7 +4,7 @@ What elements exist in the XML?
 What types of values are assigned to 
 What elements contain nested elements?
 
-Element Description structure
+Element Description structure:
 {
     name: string
     attribs: {attrib_name:set(types...)},
