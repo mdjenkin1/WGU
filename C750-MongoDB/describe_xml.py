@@ -170,13 +170,13 @@ def get_xml_description(filename):
 
     # Convert sets to lists as MongoDB doesn't have a mapping for python sets
     for element in xml_desc['elements']:
-        if element['nested_elements']:
+        if element['nested_elements'] is not None:
             element['nested_elements'] = list(element['nested_elements'])
-        if element['attribs']:
+        if element['attribs'] is not None:
             for key, val in element['attribs'].items():
                 element['attribs'][key] = list(val)
-        if element['text']:
-            element['text'] = list(element['nested_elements'])
+        if element['text'] is not None:
+            element['text'] = list(element['text'])
 
     return xml_desc
 

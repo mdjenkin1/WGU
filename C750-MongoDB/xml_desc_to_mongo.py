@@ -14,10 +14,7 @@ def load_xml_desc_to_mongo(infile, coll, db_name = 'xml_descriptions'):
 	client = connect_db()
 	db = client[db_name]
 	xml_desc = dxml.get_xml_description(infile)
-	#db[coll].insert_many(xml_desc['elements'])
-	for elem in xml_desc['elements']:
-		pprint.pprint(elem)
-		db[coll].insert(elem)
+	db[coll].insert_many(xml_desc['elements'])
 
 def test():
 	load_xml_desc_to_mongo('map', 'osm_map')
