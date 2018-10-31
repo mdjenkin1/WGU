@@ -175,6 +175,8 @@ def get_xml_description(filename):
         if element['attribs']:
             for key, val in element['attribs'].items():
                 element['attribs'][key] = list(val)
+        if element['text']:
+            element['text'] = list(element['nested_elements'])
 
     return xml_desc
 
