@@ -81,14 +81,63 @@ This leads to the following data structures for storing XML Metadata.
         text: [types...]  
     }
 
-To generate this JSON formated metadata from an XML document, I wrote the describe_xml.py script. One of the benefits of having metadata in JSON format is the ease of loading it to a MongoDB engine. To facilitate loading XML descriptions to a local MongoDB instance, the xml_desc_to_mongo.py script has been provided.
+The reason for targeting metadata in these data structures is for ease of loading it to a MongoDB engine. The describe_xml.py script was written specifically to generate XML metadata in this format. As a companion script, xml_desc_to_mongo.py was created to facilitate the loading of XML metadata to a local MongoDB instance.  
 
-The xml_desc_to_mongo.py script contains a method named load_xml_desc_to_mongo. This method takes three arguments, the name of the file to parse, the collection to store it in, and optionally the database for that collection. If no database is defined, the description will be loaded to a collection in the xml_description database. For my purposes of investigating OSM map data, I will be loading this data to a collection named osm_map. This structuring of our database allows for creating a database containing collections of xml metadata.
+ Structure of data storage was a consideration when writing xml_desc_to_mongo.py. The load_xml_desc_to_mongo method will store the metadata of whichever xml document you pass it into the collection you name. By default, that collection will be stored in a database named "xml_descriptions". The intent is "xml_descriptions" will serve as a library of XML metadata well into the future.
 
 ### Investigating OSM XML Metadata
 
+After running xml_desc_to_mongo.py, the metadata was generated and loaded to my local MongoDB engine. There was nothing to do but start investigating. So I fired up a MongoDB client and opened the newly populated xml_descriptions database.
+
+
+    C:\Users\mdjen>mongo
+    MongoDB shell version v4.0.2
+    connecting to: mongodb://127.0.0.1:27017
+    MongoDB server version: 4.0.2
+
+    > use xml_descriptions
+    switched to db xml_descriptions
+    >
+
+
+To begin my investigation, I took a quick look at the metadata in its entirety.
+
+    > db.osm_map.find()
+    { "_id" : ObjectId("5bd9aed24aa1033ccc473753"), "name" : "note", "attribs" : null, "nested_elements" : null, "text" : [ "str" ] }
+    { "_id" : ObjectId("5bd9aed24aa1033ccc473754"), "name" : "meta", "attribs" : { "osm_base" : [ "datetime" ] }, "nested_elements" : null, "text" : [ null ] }
+    { "_id" : ObjectId("5bd9aed24aa1033ccc473755"), "name" : "bounds", "attribs" : { "minlat" : [ "float" ], "minlon" : [ "float" ], "maxlat" : [ "float" ], "maxlon" : [ "float" ] }, "nested_elements" : null, "text" : [ null ] }
+    { "_id" : ObjectId("5bd9aed24aa1033ccc473756"), "name" : "node", "attribs" : { "id" : [ "int" ], "lat" : [ "float" ], "lon" : [ "float" ], "version" : [ "int" ], "timestamp" : [ "datetime" ], "changeset" : [ "int" ], "uid" : [ "int" ], "user" : [ "str" ] }, "nested_elements" : [ "tag" ], "text" : [ null, "str" ] }
+    { "_id" : ObjectId("5bd9aed24aa1033ccc473757"), "name" : "tag", "attribs" : { "k" : [ "str" ], "v" : [ "str", "datetime", "float", "int" ] }, "nested_elements" : null, "text" : [ null ] }
+    { "_id" : ObjectId("5bd9aed24aa1033ccc473758"), "name" : "nd", "attribs" : { "ref" : [ "int" ] }, "nested_elements" : null, "text" : [ null ] }
+    { "_id" : ObjectId("5bd9aed24aa1033ccc473759"), "name" : "way", "attribs" : { "id" : [ "int" ], "version" : [ "int" ], "timestamp" : [ "datetime" ], "changeset" : [ "int" ], "uid" : [ "int" ], "user" : [ "str" ] }, "nested_elements" : [ "tag", "nd" ], "text" : [ "str" ] }
+    { "_id" : ObjectId("5bd9aed24aa1033ccc47375a"), "name" : "member", "attribs" : { "type" : [ "str" ], "ref" : [ "int" ], "role" : [ "str" ] }, "nested_elements" : null, "text" : [ null ] }
+    { "_id" : ObjectId("5bd9aed24aa1033ccc47375b"), "name" : "relation", "attribs" : { "id" : [ "int" ], "version" : [ "int" ], "timestamp" : [ "datetime" ], "changeset" : [ "int" ], "uid" : [ "int" ], "user" : [ "str" ] }, "nested_elements" : [ "member", "tag" ], "text" : [ "str" ] }
+    { "_id" : ObjectId("5bd9aed24aa1033ccc47375c"), "name" : "osm", "attribs" : null, "nested_elements" : null, "text" : [ null ] }
+    >
+
+What I'm looking for are any values that don't make sense. For instance, the 'v' attribute of the tag element has a variety of data types. This suggests a type of generic element that describes a variety of data. When it comes time to investigate the actual data, it would be beneficial to investigate the data types stored in tag elements.  
+
+Also note, no elements are nested in tag elements. However, tag elements are nested in relation, way and node elements. This may be easier to see by limiting the fields returned by our query.
+
+    > db.osm_map.find({}, {"_id":0, "name":1, "nested_elements":1})
+    { "name" : "note", "nested_elements" : null }
+    { "name" : "meta", "nested_elements" : null }
+    { "name" : "bounds", "nested_elements" : null }
+    { "name" : "node", "nested_elements" : [ "tag" ] }
+    { "name" : "tag", "nested_elements" : null }
+    { "name" : "nd", "nested_elements" : null }
+    { "name" : "way", "nested_elements" : [ "tag", "nd" ] }
+    { "name" : "member", "nested_elements" : null }
+    { "name" : "relation", "nested_elements" : [ "member", "tag" ] }
+    { "name" : "osm", "nested_elements" : null }
+    >
+
+Looking at the values for nested_elements, I notice there are elements that are not nested in other elements and do not have nested elements. It would be valuable to have a query that identifies such elements. Therefore, I generated that query.
+
 ## Additional Ideas
 
+* Update the loading scripts to enable writing to remote MongoDB engines.
+* Update the loading scripts to merge instead of append datasets.
 * Valid name abbreviations could be mistaken as abbreviations for street directions by our regex. Additional logic may be necessary to prevent this in other use cases. An investigation of our current data set shows this logic is unnecessary for now.
 * The current attitude towards tiger data speaks nothing about its state in the dataset. Is there any value in determining the current state of that data and cleaning as necessary?
 
