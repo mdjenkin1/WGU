@@ -30,6 +30,7 @@ The follow list of scripts were used to perform the data investigation. A brief 
 * [desc_tag_attribs.py](.\desc_tag_attribs.py): restructures tag data to facilitate investigation of data uniformity.
 * [xml_desc_to_mongo.py](.\xml_desc_to_mongo.py): loads the meta-data from describe_xml.py to MongoDB for investigation
 * [tag_attr_desc_to_mongo.py](.\tag_attr_desc_to_mongo.py): loads the structured tag data from desc_tag_attribs.py to Mongodb for investigation
+* [xml_metadata_inquiries.py](xml_metadata_inquiries.py): A collection of functions for making investigations of xml descriptions.
 * [map_to_mongo.py](.\map_to_mongo.py): loads unaltered OSM data to mongodb.
 * [slc_street_cleanup.py](.\slc_street_cleanup.py): produces uniform street and house number addressing and loads it to mongodb.
 
@@ -115,9 +116,9 @@ To begin my investigation, I took a quick look at the metadata in its entirety.
     { "_id" : ObjectId("5bd9aed24aa1033ccc47375c"), "name" : "osm", "attribs" : null, "nested_elements" : null, "text" : [ null ] }
     >
 
-What I'm looking for are any values that don't make sense. For instance, the 'v' attribute of the tag element has a variety of data types. This suggests a type of generic element that describes a variety of data. When it comes time to investigate the actual data, it would be beneficial to investigate the data types stored in tag elements.  
+What I'm looking for are any values that don't make sense. For instance, the 'v' attribute of the tag element has a variety of data types. This suggests a type of generic element that describes a variety of data or an element that has an attribute in need of cleaning. Context suggests the former. Either way, when it comes time to investigate actual data, it would be beneficial to investigate the data types stored in tag elements.  
 
-Also note, no elements are nested in tag elements. However, tag elements are nested in relation, way and node elements. This may be easier to see by limiting the fields returned by our query.
+Also noted are no elements nested in tag elements. However, tag elements are nested in relation, way and node elements. This may be easier to see by limiting the fields returned by our query.
 
     > db.osm_map.find({}, {"_id":0, "name":1, "nested_elements":1})
     { "name" : "note", "nested_elements" : null }
@@ -132,7 +133,44 @@ Also note, no elements are nested in tag elements. However, tag elements are nes
     { "name" : "osm", "nested_elements" : null }
     >
 
-Looking at the values for nested_elements, I notice there are elements that are not nested in other elements and do not have nested elements. It would be valuable to have a query that identifies such elements. Therefore, I generated that query.
+Looking at the values for nested_elements, I notice there are elements that are not nested in other elements and do not have nested elements. It would be valuable to have a query that identifies such elements.
+
+To create that query, I first found a list of all element tags
+
+    > db.osm_map.aggregate([{$project: {"_id": "$name"}}])
+    { "_id" : "note" }
+    { "_id" : "meta" }
+    { "_id" : "bounds" }
+    { "_id" : "node" }
+    { "_id" : "tag" }
+    { "_id" : "nd" }
+    { "_id" : "way" }
+    { "_id" : "member" }
+    { "_id" : "relation" }
+    { "_id" : "osm" }
+    >
+
+I then found all elements with nested_elements.
+
+    > db.osm_map.aggregate([{$match: {"nested_elements": {$ne: null}}}, {$group: {"_id": "$name"}}])
+    { "_id" : "way" }
+    { "_id" : "relation" }
+    { "_id" : "node" }
+    >
+
+Next, I found all elements that are nested_elements.
+
+    > db.osm_map.aggregate([{$match: {"nested_elements": {$ne: null}}}, {$unwind: "$nested_elements"}, {$group: {"_id": "$nested_elements"}}])
+    { "_id" : "member" }
+    { "_id" : "nd" }
+    { "_id" : "tag" }
+    >
+
+It was at this point I hit a limitation of the MongoDB engine that doesn't exist in a traditional SQL based database. There is no way to perform a set operation on multiple aggregation results within the MongoDB client. To work around this limitation, I returned to Python to combine the queries into the dataset I wanted.
+
+    λ  python .\xml_metadata_inquiries.py
+    These are the elements that have no nested elements and are not nested elements.
+    {'note', 'meta', 'bounds', 'osm'}
 
 ## Additional Ideas
 
@@ -143,4 +181,5 @@ Looking at the values for nested_elements, I notice there are elements that are 
 
 ## Conclusion
 
+MongoDB is a powerful engine for manipulating and investigating structured data. Although it does have its limitations.
 Python and MongoDB are powerful tools for data manipulation.
