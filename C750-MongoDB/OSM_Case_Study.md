@@ -37,9 +37,7 @@ The follow list of scripts were used to perform the data investigation. A brief 
 
 * [element_getter.py](.\element_getter.py): provides a method of element iteration that serves full elements.
 * [describe_xml.py](.\describe_xml.py): generates meta-data about an XML data structure.
-* [desc_tag_attribs.py](.\desc_tag_attribs.py): restructures tag data to facilitate investigation of data uniformity.
 * [xml_desc_to_mongo.py](.\xml_desc_to_mongo.py): loads the meta-data from describe_xml.py to MongoDB for investigation
-* [tag_attr_desc_to_mongo.py](.\tag_attr_desc_to_mongo.py): loads the structured tag data from desc_tag_attribs.py to Mongodb for investigation
 * [xml_metadata_inquiries.py](xml_metadata_inquiries.py): A collection of functions for making investigations of xml descriptions.
 * [map_to_mongo.py](.\map_to_mongo.py): loads unaltered OSM data to mongodb.
 * [slc_street_cleanup.py](.\slc_street_cleanup.py): produces uniform street and house number addressing and loads it to mongodb.
@@ -50,9 +48,10 @@ This exploration of XML data from the OSM Project proceeded through many phases.
 
 * XML Metadata Investigation
   * How are XML files constructed?
-  * How can we describe the elements that comprise XML documents?
+  * How the elements that comprise XML documents be described?
   * What elements exist within an OSM XML dataset?
   * What are the relationships between elements in the dataset?
+  * Which elements show properties that might require cleaning?
 * OSM XML Data Investigation
 
 ## Investigation
@@ -180,7 +179,7 @@ It was at this point I hit a limitation of the MongoDB engine that doesn't exist
 
 ### OSM Data Investigation
 
-From the investigation of the OSM XML metadata, my curiosity of the tag elements was peaked.
+Investigation of OSM XML metadata directed me to look closer at nested tag elements. To get a good look at the tag data, I first needed to extract actual data from the OSM file. As only way, relation and node elements have nested tags, the extract was limited to these elements.
 
 
 ## Additional Ideas
