@@ -19,7 +19,17 @@ Overpass API data source
 [https://overpass-api.de/api/map?bbox=-112.1155,40.6387,-111.7255,40.9140](https://overpass-api.de/api/map?bbox=-112.1155,40.6387,-111.7255,40.9140)
 
 This provided a map dataset approximately 105mb in size.  
-![map size](./images/map_size.PNG)
+
+```PowerShell
+λ  gci map
+
+Directory: C:\Users\mdjen\Documents\GitHub\WGU\C750-MongoDB
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+-a----       10/15/2018   5:40 AM      108017568 map
+```
 
 ### Included Scripts
 
@@ -36,20 +46,14 @@ The follow list of scripts were used to perform the data investigation. A brief 
 
 ### Questions Asked / Problem Areas
 
-In the exploration of the data set, the following questions were asked and problem areas addressed.  
+This exploration of XML data from the OSM Project proceeded through many phases. In each phase of exploration a different aspect of the dataset was explored. The following questions were asked and problem areas identified during the exploration.
 
-* What elements exist within that file?
-* What attributes do those elements have?
-* What data types are found for those attributes?
-* Which elements are nested?
-* What tag values exist?
-* Which tags values are used the most?
-* Who is providing this data?
-* What is 'tiger:' data?
-* How common is it for address data to be entered with abbreviated directionals?
-* Which casing of address directionals is most used?
-* Which addresses are valid but look like abbreviated directionals?
-* Finally, make street address directionals uniform.
+* XML Metadata Investigation
+  * How are XML files constructed?
+  * How can we describe the elements that comprise XML documents?
+  * What elements exist within an OSM XML dataset?
+  * What are the relationships between elements in the dataset?
+* OSM XML Data Investigation
 
 ## Investigation
 
@@ -171,6 +175,13 @@ It was at this point I hit a limitation of the MongoDB engine that doesn't exist
     λ  python .\xml_metadata_inquiries.py
     These are the elements that have no nested elements and are not nested elements.
     {'note', 'meta', 'bounds', 'osm'}
+
+*Note: When converting the queries from the Mongo Client to Python Script, it was necessary to encase the aggregation operators in quotes and replace the nulls with Nones.*
+
+### OSM Data Investigation
+
+From the investigation of the OSM XML metadata, my curiosity of the tag elements was peaked.
+
 
 ## Additional Ideas
 
