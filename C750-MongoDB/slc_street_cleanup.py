@@ -99,6 +99,11 @@ def clean_slc_raw_data(raw_map_data):
         for tag in node['tags']:
             if is_street_addr(tag['k']):
                 tag['v'] = process_slc_addr(tag['v'])
+                
+    for node in raw_map_data['relations']:
+        for tag in node['tags']:
+            if is_street_addr(tag['k']):
+                tag['v'] = process_slc_addr(tag['v'])
 
     return raw_map_data
 

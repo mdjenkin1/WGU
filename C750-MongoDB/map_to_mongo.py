@@ -13,7 +13,8 @@ nodes: [{
     tags: [
         {"k": k_value, "v": v_value},
         ...
-    ]
+    ],
+    text: value
 }]
 
 ways: [{
@@ -30,7 +31,8 @@ ways: [{
     ]
     nd_ref:[
         value
-    ]
+    ],
+    text: value
 }]
 
 relations: [{
@@ -49,7 +51,8 @@ relations: [{
         {type: value,
         ref: value,
         role: value},
-    ]
+    ],
+    text: value
 }]
 
 """
@@ -99,7 +102,7 @@ def get_osm_map_data(infile):
     return map_data
 
 def parse_node_elem(elem):
-    parsed_node = {"type": "node", "tags": []}
+    parsed_node = {"type": "node", "tags": [], "text": elem.text}
     for key in elem.keys():
         parsed_node[key] = elem.attrib[key]
     for tag in elem.iter("tag"):
@@ -107,7 +110,7 @@ def parse_node_elem(elem):
     return parsed_node
 
 def parse_way_elem(elem):
-    parsed_way = {"type": "way", "tags": [], "nd_ref": []}
+    parsed_way = {"type": "way", "tags": [], "nd_ref": [], "text": elem.text}
     for key in elem.keys():
         parsed_way[key] = elem.attrib[key]
     for tag in elem.iter("tag"):
@@ -117,7 +120,7 @@ def parse_way_elem(elem):
     return parsed_way
 
 def parse_relation_elem(elem):
-    parsed_relation = {"type" : "relation", "tags": [], "members": []}
+    parsed_relation = {"type" : "relation", "tags": [], "members": [], "text": elem.text}
     for key in elem.keys():
         parsed_relation[key] = elem.attrib[key]
     for mem in elem.iter("member"):
