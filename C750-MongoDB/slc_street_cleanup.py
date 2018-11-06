@@ -73,7 +73,7 @@ import re
 addr_house_re = re.compile(r'^addr:housenumber', re.IGNORECASE)
 addr_street_re = re.compile(r'^addr:street', re.IGNORECASE)
 direction_abbr_re = re.compile(r'(.*?)\b([NESW])\b(.*$)', re.IGNORECASE)
-abbutted_direction_re = re.compile(r'([0-9]+)([NESW])', re.IGNORECASE)
+abutted_direction_re = re.compile(r'([0-9]+)([NESW])', re.IGNORECASE)
 possessive_re = re.compile(r'\'\bs\b', re.IGNORECASE)
 ave_street_re = re.compile(r'^[NESW] Street$', re.IGNORECASE)
 period_first_re = re.compile(r'^\.')
@@ -113,7 +113,7 @@ def process_slc_addr(addr):
         # Avenue addresses have names that look like abbreviations but aren't. Nothing to do here.
         return addr
 
-    elif direction_abbr_re.search(addr) or abbutted_direction_re.search(addr):
+    elif direction_abbr_re.search(addr) or abutted_direction_re.search(addr):
         # address an issue where our regex for determining an abbreviated South is catching possessive names.
         # e.g. Saint Mary's Drive should not be changed to Saint Mary'South Drive
         has_possessive = False
@@ -121,9 +121,9 @@ def process_slc_addr(addr):
             has_possessive = True
             addr = addr.replace("'", "&quot")
 
-        # separate any abbutted street directions
-        while abbutted_direction_re.search(addr):
-            addr = space_split(addr, abbutted_direction_re)
+        # separate any abutted street directions
+        while abutted_direction_re.search(addr):
+            addr = space_split(addr, abutted_direction_re)
         
         # Fix all directional abbreviations in the address.
         while direction_abbr_re.search(addr):
