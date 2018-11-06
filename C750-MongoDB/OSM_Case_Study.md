@@ -8,7 +8,7 @@ In this case study, I have used Python and MongoDB to investigate the structure 
 
 The area chosen for investigation is my home city of Salt Lake City, Utah. This area was chosen as I have some familiarity with the area's addressing and landmarks.  
 
-Salt Lake City addresses its streets using a direction based grid system. At the center of the grid, is the LDS Temple. The address provides a distance as a number of city blocks times 100 and a direction of travel away from the temple. For example, 350 East would be three and a half city blocks East of the LDS Temple. The address portions describing the direction of travel away from the LDS Temple will be referred to as "directional".
+Salt Lake City addresses its streets using a direction based grid system. At the center of the grid, is the LDS Temple. The address provides a distance as a number of city blocks times 100 and a direction of travel away from the temple. For example, 350 East would be three and a half city blocks East of the LDS Temple. The address portion describing the direction of travel away from the LDS Temple will be referred to as "directional".
 
 The map data was obtained from [https://www.openstreetmap.org/](https://www.openstreetmap.org/). From this site, I performed a search for "Salt Lake City". The first item in the search results was selected as the area of interest. From here, I went to the data's export page. A direct link to this export page has been provided below. Due to the size of the data set, I found it best to utilize the prepared Overpass API source.
 
@@ -653,7 +653,9 @@ None
 >>>
 ```
 
-I've decided to leave this strings handling behavior in the script to illustrate an issue that can be addressed in future iterations of the script. 
+I've decided to leave this string handling behavior in the script as is. My intent is to illustrate an issue that can be addressed in future iterations of the script. It would be simple to cast address values as raw strings before transforming them. That solution would take care of this one edge case. 
+
+Instead, there's value to be gained in considering why this CRLF character is encoded and interpreted as it is. There can be other non-printed control characters encoded in this manner. A better solution would take into consideration why these control characters might be included in our strings and manipulate the string accordingly when these characters are encountered.
 
 ## Additional Ideas
 
