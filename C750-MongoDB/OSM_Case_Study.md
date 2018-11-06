@@ -8,7 +8,7 @@ In this case study, I have used Python and MongoDB to investigate the structure 
 
 The area chosen for investigation is my home city of Salt Lake City, Utah. This area was chosen as I have some familiarity with the area's addressing and landmarks.  
 
-Salt Lake City addresses its streets using a direction based grid system. At the center of the grid, is the LDS Temple. The address provides a distance as a number of city blocks times 100 and a direction of travel away from the temple. For example, 350 East would be three and a half city blocks East of the LDS Temple. The address portions describing the direction of travel away from the LDS Temple will be referred to as "directionals".
+Salt Lake City addresses its streets using a direction based grid system. At the center of the grid, is the LDS Temple. The address provides a distance as a number of city blocks times 100 and a direction of travel away from the temple. For example, 350 East would be three and a half city blocks East of the LDS Temple. The address portions describing the direction of travel away from the LDS Temple will be referred to as "directional".
 
 The map data was obtained from [https://www.openstreetmap.org/](https://www.openstreetmap.org/). From this site, I performed a search for "Salt Lake City". The first item in the search results was selected as the area of interest. From here, I went to the data's export page. A direct link to this export page has been provided below. Due to the size of the data set, I found it best to utilize the prepared Overpass API source.
 
@@ -570,39 +570,90 @@ Finishing our scan for false positives doesn't find any more. There's now enough
 >
 ```
 
-It's worth noting that there are abbreviated directionals utilizing periods. These will also need to be handled when it comes time to clean the data.
+It's worth noting there are abbreviated directionals utilizing periods. These are being identified by our regular expression will need to have their periods handled when it comes time to clean the data.
 
-Another consideration are abbreviations that are abutted to the number portion of the address. These will need to be separated from the number with a space and expanded. 
-
-There is one decision to make in regards to expanding the directional abbreviations, casing. Should the directionals be all caps or title cased? I think it best to follow what is most common in the unmodified dataset. A quick look into the way tags shows there is only one all caps entry in the nodes dataset. The convention is to use title case for the directionals.
+Another consideration are abbreviations that are abutted to the number portion of the address. These will need to be separated from the number with a space and expanded.
 
 ```
-> db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
-{ "_id" : "tags.k", "count" : 11294 }
-> db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
-{ "_id" : "tags.k", "count" : 353 }
-> db.relations.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
-{ "_id" : "tags.k", "count" : 21 }
-> db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSOUTH|NORTH|EAST|WEST\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
-> db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSOUTH|NORTH|EAST|WEST\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
-{ "_id" : "tags.k", "count" : 1 }
-> db.relations.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSOUTH|NORTH|EAST|WEST\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+> db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{$or: [{"tags.v": /[0-9]+[NSEWnsew]\b/},{"tags.v": /\b[NESWnesw]\b/}]}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$project: {"addr": "$tags.v"}}, {$group: {"_id": "$tag_key", "count": {"$sum": 1}}}])
+{ "_id" : null, "count" : 209 }
+> db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{$or: [{"tags.v": /[0-9]+[NSEWnsew]\b/},{"tags.v": /\b[NESWnesw]\b/}]}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$project: {"addr": "$tags.v"}}, {$group: {"_id": "$tag_key", "count": {"$sum": 1}}}])
+{ "_id" : null, "count" : 149 }
+> db.relations.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{$or: [{"tags.v": /[0-9]+[NSEWnsew]\b/},{"tags.v": /\b[NESWnesw]\b/}]}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$project: {"addr": "$tags.v"}}, {$group: {"_id": "$tag_key", "count": {"$sum": 1}}}])
+{ "_id" : null, "count" : 7 }
 >
 ```
+
+There does need to be a decision made about casing the expanded directional abbreviations. Should the directionals be all caps or title cased? I think it best to follow what is most common in the unmodified dataset. A quick look into the way tags shows there is only one all caps entry in the nodes dataset. The convention is to use title case for the directionals. 
+
+Also included in the casing queries are an exclusion of items that will be changed in our clean up. This allows a dual purposing of these counts. First, it assists us to determine casing convention. Second, it gives us a count of items that are not expected to be cleaned. With a count of items expected to be changed and a count of items expected to not change, we can set an expected value for these queries post cleaning. Any difference between actual values and expected values will provide insight to the accuracy of our cleanup script.
+
+```
+> db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$match: {"tags.v": {"$not": /\b[NESWnesw]\b/}}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+{ "_id" : "tags.k", "count" : 11288 }
+> db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$match: {"tags.v": {"$not": /\b[NESWnesw]\b/}}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+{ "_id" : "tags.k", "count" : 348 }
+> db.relations.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$match: {"tags.v": {"$not": /\b[NESWnesw]\b/}}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+{ "_id" : "tags.k", "count" : 21 }
+> db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSOUTH|NORTH|EAST|WEST\b/}]}}, {$match: {"tags.v": {"$not": /\b[NESWnesw]\b/}}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+> db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSOUTH|NORTH|EAST|WEST\b/}]}}, {$match: {"tags.v": {"$not": /\b[NESWnesw]\b/}}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+{ "_id" : "tags.k", "count" : 1 }
+> db.relations.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSOUTH|NORTH|EAST|WEST\b/}]}}, {$match: {"tags.v": {"$not": /\b[NESWnesw]\b/}}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+>
+```
+
+With this information, we can expect the given number of counts in each collection after cleanup
+
+* Ways: 11288 + 209 = 11,497
+* Nodes: 348 + 149 = 497
+* Relations: 21 + 7 = 28
 
 ##### Street Abbreviation Clean Up
 
 Now that we have an idea of what addressing data exists and plan on how to clean it, there's nothing left to do but do it. Extracting and loading the data is something we've solved with the map_to_mongo.py script. I could reinvent those processes. Instead, I've expanded on them with the transformation script: slc_street_cleanup.py. Running this script produces a new, cleaner dataset with expanded street directionals.
 
+
 ```
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
-{ "_id" : "tags.k", "count" : 11914 }
+> db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+{ "_id" : "tags.k", "count" : 11497 }
 > db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
-{ "_id" : "tags.k", "count" : 498 }
+{ "_id" : "tags.k", "count" : 496 }
 > db.relations.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
 { "_id" : "tags.k", "count" : 28 }
 >
 ```
+
+Except for node data, the counts have gone up by the expected amounts. As the difference is only one, it would be good to take a look at this single value.
+
+```
+> db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{$or: [{"tags.v": /[0-9]+[NSEWnsew]\b/},{"tags.v": /\b[NESWnesw]\b/}]}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$project: {"addr": "$tags.v"}}])
+{ "_id" : ObjectId("5be1990086e7793790470312"), "addr" : "3540 2200 W\nSalt Lake City, UT 84119" }
+>
+```
+
+There is more wrong with this entry than just the abbreviated directional. I suspect it is not being caught because of differences between how MongoDB and Python handle string interpretations. In this case I suspect that Python is interpreting '\n' as a CRLF character instead of a literal backslash + n. A quick jump into a Python shell and my suspicions were validated.
+
+```Python
+>>> import re
+>>> victim = "3540 2200 W\nSalt Lake City, UT 84119"
+>>> victim_raw = r'3540 2200 W\nSalt Lake City, UT 84119'
+>>> direction_abbr_re = re.compile(r'(.*?)\b([NESW])\b(.*$)', re.IGNORECASE)
+>>> str_sections = direction_abbr_re.search(victim)
+>>> str_sections_raw = direction_abbr_re.search(victim_raw)
+>>> print(victim)
+3540 2200 W
+Salt Lake City, UT 84119
+>>> print(victim_raw)
+3540 2200 W\nSalt Lake City, UT 84119
+>>> print(str_sections)
+None
+>>> print(str_sections_raw)
+<re.Match object; span=(0, 37), match='3540 2200 W\\nSalt Lake City, UT 84119'>
+>>>
+```
+
+I've decided to leave this strings handling behavior in the script to illustrate an issue that can be addressed in future iterations of the script. 
 
 ## Additional Ideas
 

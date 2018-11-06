@@ -73,8 +73,8 @@ import re
 addr_house_re = re.compile(r'^addr:housenumber', re.IGNORECASE)
 addr_street_re = re.compile(r'^addr:street', re.IGNORECASE)
 direction_abbr_re = re.compile(r'(.*?)\b([NESW])\b(.*$)', re.IGNORECASE)
-abutted_direction_re = re.compile(r'([0-9]+)([NESW])', re.IGNORECASE)
-possessive_re = re.compile(r'\'\bs\b', re.IGNORECASE)
+abutted_direction_re = re.compile(r'([0-9]+)([NESW])\b', re.IGNORECASE)
+possessive_re = re.compile(r'\'\b[NESW]\b', re.IGNORECASE)
 ave_street_re = re.compile(r'^[NESW] Street$', re.IGNORECASE)
 period_first_re = re.compile(r'^\.')
 
