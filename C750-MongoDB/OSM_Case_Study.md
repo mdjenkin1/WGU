@@ -655,7 +655,7 @@ None
 
 I've decided to leave this string handling behavior in the script as is. My intent is to illustrate an issue that can be addressed in future iterations of the script. It would be simple to cast address values as raw strings before transforming them. That solution would take care of this one edge case. 
 
-Instead, there's value to be gained in considering why this CRLF character is encoded and interpreted as it is. There can be other non-printed control characters encoded in this manner. A better solution would take into consideration why these control characters might be included in our strings and manipulate the string accordingly when these characters are encountered.
+Instead, there's value to be gained in considering why this CRLF character is included and interpreted as it is. There can be other non-printed control characters encoded in this manner. A better solution would take into consideration why these control characters might be included in our strings and manipulate the string accordingly when these characters are encountered. If strings containing control characters were converted to raw strings before cleaning, unhandled control characters would be missed.
 
 ## Additional Ideas
 
