@@ -29,16 +29,7 @@ import sys
 import pprint
 from datetime import datetime as dt
 
-xml_description = {'skipped':[], 'elements':[]}
-
-# Returns a dict of all tag names found in our xml doc with a count of the tag's occurrence 
-def get_elem_type_counts(filename):
-    elem_types = {}
-    for _, elem in ET.iterparse(filename):
-        elem_types[elem.tag] = elem_types.get(elem.tag, 0) + 1
-    return elem_types
-
-# Primary function for scraping values to describe an element
+# Function for scraping element descriptions
 def get_elem_desc(elem):
     desc_elem = {
         'name': elem.tag,
@@ -47,12 +38,12 @@ def get_elem_desc(elem):
         'text' : set()
     }
 
-    # Populate the types of attributes with 
+    # Populate the description
     for key in elem.keys():
         attrib_types = set()
         if elem.attrib[key]:
             attrib_types.add(guess_type(elem.attrib[key]))
-        desc_elem['attribs'].update({key : attrib_types})
+        desc_elem['attribs'].update({key: attrib_types})
     if len(desc_elem['attribs']) == 0:
         desc_elem['attribs'] = None
 
@@ -139,34 +130,13 @@ def merge_elem(elem_orig, new_elem):
     return elem_orig, has_change
 
 def get_xml_description(filename):
-    elem_types = get_elem_type_counts(filename)
-
     # Using a dictionary for xml descriptions even though there's only element descriptions for now.
-    # This is in consideration for future expansion of our xml_descriptions 
+    # This is in consideration for future expansion 
     xml_desc = {'elements':[]}
 
     for element in eg.get_element(filename):
-            new_elem = get_elem_desc(element)
-            
-            # Determine if we've encountered this element type before.
-            # If no, add it.
-            # Otherwise, check if ther's any change if the new and existing are merged
-            existing_elem_desc = list(filter(lambda e: e['name'] == new_elem['name'], xml_desc['elements']))
-            if len(existing_elem_desc) == 0:
-                xml_desc['elements'].append(new_elem)
-            else:
-                for elem in existing_elem_desc:
-                    merged_elem, has_change = merge_elem(elem, new_elem)
-                    if has_change:
-                        # To update our list of elements:
-                        # Make a copy of the current list minus the modified element
-                        # Add the modified element to the copy
-                        # Replace the old list with the new list
-                        new_elem_list = []
-                        new_elem_list[:] = [x for x in xml_desc['elements'] if not (x.get('name') == new_elem['name'])]
-                        new_elem_list.append(merged_elem)
-                        xml_desc.pop('elements', None)
-                        xml_desc.update({'elements': new_elem_list})
+        new_elem = get_elem_desc(element)
+        xml_desc = desc_update(xml_desc, new_elem)
 
     # Convert sets to lists as MongoDB doesn't have a mapping for python sets
     for element in xml_desc['elements']:
@@ -179,6 +149,30 @@ def get_xml_description(filename):
             element['text'] = list(element['text'])
 
     return xml_desc
+
+
+def desc_update(xml_desc, new_elem):
+    # Determine if we've encountered this element type before.
+    # If no, add it.
+    # Otherwise, check if there's any change if the new and existing are merged
+    existing_elem_desc = list(filter(lambda e: e['name'] == new_elem['name'], xml_desc['elements']))
+    if len(existing_elem_desc) == 0:
+        xml_desc['elements'].append(new_elem)
+    else:
+        for elem in existing_elem_desc:
+            merged_elem, has_change = merge_elem(elem, new_elem)
+            if has_change:
+                # To update our list of elements:
+                # Make a copy of the current list minus the modified element
+                # Add the modified element to the copy
+                # Replace the old list with the new list
+                new_elem_list = []
+                new_elem_list[:] = [x for x in xml_desc['elements'] if not (x['name'] == merged_elem['name'])]
+                new_elem_list.append(merged_elem)
+                xml_desc.pop('elements', None)
+                xml_desc.update({'elements': new_elem_list})
+    
+    return(xml_desc)
 
 def test(infile = 'map'):
     xml_desc = get_xml_description(infile)
