@@ -174,77 +174,78 @@ When it comes time to process actual data stored in the OSM data, these elements
 
 Having investigated the metadata generated from the OSM XML data, we can now turn our attention to the actual data. From studying the metadata, elements with nested tag type elements seemed to have the greatest potential for items requiring cleaning. Before getting started on this next task, it's important to decide how to structure the data we will be extracting.
 
-For structuring the actual data, there's no reason to deviate too far from the XML metadata element structure. The base structure would remain the same. Instead of value types, I would store actual values. Instead of one entry to describe all elements of and encountered type, there would be one entry per encountered element. Nested elements needed a bit more to describe. This is one area that could do with more iteration.
+For structuring the actual data, there's no reason to deviate too far from the XML metadata element structure. The base structure would remain the same. Instead of value types, we store actual values. Instead of one entry to describe all elements of and encountered type, there would be one entry per encountered element. Where there is deviation is in how nested elements and attributes are handled.
 
-To handle nested elements, I decided to store them directly to the parent element as a list of element descriptions. The limitation here was needing a different structure for the three element types being saved. This design requires functions specific for handling the individual element types being handled. I can't help but think there is some way to address this divergence from data structuring. Ultimately, I determined such an exercise is out of scope for this project and must be tabled for future design. I therefore settled on the following data structures to describe our three element types.
+Each element has a different set of possible attributes and nested element types. Nested elements need to describe full elements. It only makes sense to include nested elements in a list for each type of nested element. Handling nested elements in this manner means each parent element type will have its own structure. This enables us to expand element attributes to the root level of each element in our dataset. To accommodate this structuring of element data, each parent element type will be added to a collection of elements sharing the same type.
+
+Our investigation of OSM XML metadata has our investigation targeting elements of type: node, way and relations. Also thanks to the metadata, we can extract all the fields needed to store elements of these types. After extracting the information from our metadata and restructuring it for our design, we end with the following structures.
 
 ```JSON
 nodes: [{
-    type: "node"
-    id: value,
-    lat: value,
-    lon: value,
-    version: value,
-    timestamp: value,
-    changeset: value,
-    uid: value,
-    user: value,
-    tags: [
+{
+    "type" : "node",
+    "id" : value,
+    "lat" : value,
+    "lon" : value,
+    "version" : value,
+    "timestamp" : value,
+    "changeset" : value,
+    "uid" : value,
+    "user" : value,
+    "tags" : [
         {"k": k_value, "v": v_value},
         ...
     ],
-    text: value
+    "text" : value
 }]
 
 ways: [{
-    type: "way"
-    id: value,
-    version: value,
-    timestamp: value,
-    changeset: value,
-    uid: value,
-    user: value,
-    tags: [
+    "type" : "way",
+    "id" : value,
+    "version" : value,
+    "timestamp" :value,
+    "changeset" : value,
+    "uid" : value,
+    "user" : value,
+    "nd_ref": [
+        values,
+        ...
+    ],
+    "tags" : [
         {"k": k_value, "v": v_value},
         ...
-    ]
-    nd_ref:[
-        value
     ],
-    text: value
+    "text" : value
 }]
 
 relations: [{
-    type: "relation"
-    id: value,
-    version: value,
-    timestamp: value,
-    changeset: value,
-    uid: value,
-    user: value,
-    tags: [
+    "type" : "relation",
+    "id" : value,
+    "version" : value,
+    "timestamp" : value,
+    "changeset" : value,
+    "uid" : value,
+    "user" : value,
+    "tags" : [
         {"k": k_value, "v": v_value},
         ...
-    ]
-    members:[
-        {type: value,
-        ref: value,
-        role: value},
     ],
-    text: value
+    "members":[
+        {"type": value, "ref": value, "role": value},
+        ...
+    ],
+    "text" : value
 }]
 ```
 
-To maintain uniformity when loading data to the MongoDB engine, each element type was loaded to its own collection.
-
 #### Raw Data
 
-With it settled on how to structure the data, it was now time to parse the XML and load it to MongoDB. The map_to_mongo.py script did the heavy lifting for this task. With a loaded database and Mongo client, I was now prepared to investigate the data set.
+With it settled on how to structure the data, it was now time to parse the XML and load it to MongoDB. The map_to_mongo.py script did the heavy lifting for this task. With a loaded database and Mongo client, we're now prepared to investigate the data set.
 
 ##### Tag Type Counts
 First thing, I took a look at is how many tags actually exist in the dataset.
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "tags.k"}}, {$group: {"_id": "$tag_key", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}])
 { "_id" : "tags.k", "count" : 472374 }
 > db.nodes.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "tags.k"}}, {$group: {"_id": "$tag_key", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}])
@@ -256,7 +257,7 @@ First thing, I took a look at is how many tags actually exist in the dataset.
 
 For every tag in the relations data, there's more than ten in the node data. There's also ten times as many tags in way data as there is in node data. With so few tags in relation data, it might be best to see what its most common tag types are.
 
-```
+```JSON
 > db.relations.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "$tags.k"}}, {$group: {"_id": "$tag_key", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}]).pretty()
 { "_id" : "type", "count" : 1017 }
 { "_id" : "restriction", "count" : 733 }
@@ -284,7 +285,7 @@ Type "it" for more
 
 Approximately a third of the tags in relations being of type "type", is a curious thing. This suggests a case for an nested element that might be better served as an attribute. For now, we're instead going to look at the most common tags in node and way elements.
 
-```
+```JSON
 > db.nodes.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "$tags.k"}}, {$group: {"_id": "$tag_key", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}]).pretty()
 { "_id" : "highway", "count" : 4985 }
 { "_id" : "name", "count" : 3995 }
@@ -334,7 +335,7 @@ Type "it" for more
 
 Node tag data is more diverse in it's key values. Highway is the most common type of node tag and makes up little more than one tenth of all node tags.
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "$tags.k"}}, {$group: {"_id": "$tag_key", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}]).pretty()
 { "_id" : "building", "count" : 87344 }
 { "_id" : "addr:housenumber", "count" : 35200 }
@@ -366,7 +367,7 @@ Way tags, like relation tags, are a more lopsided. The most common way tag type 
 
 One type of way tag that I found curious are the "tiger:" tags. There seems to be an awful lot of them.
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "$tags.k", "tag_value": "$tags.v"}}, {"$match": {"tag_key": {$regex: "^tiger"}}}, {$group: {"_id": "$tag_key", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}])
 { "_id" : "tiger:county", "count" : 10504 }
 { "_id" : "tiger:cfcc", "count" : 10392 }
@@ -394,7 +395,7 @@ Type "it" for more
 
 Some of these Tiger tags have intuitive types. Others not so much. Maybe a quick look at the values of the "tiger:cfcc" tags will be helpful.
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "$tags.k", "tag_value": "$tags.v"}}, {"$match": {"tag_key": {$regex: "^tiger:cfcc$"}}}, {$group: {"_id": "$tag_value", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}])
 { "_id" : "A41", "count" : 9485 }
 { "_id" : "A21", "count" : 356 }
@@ -428,7 +429,7 @@ A better exercise, in scope with this course, is the addressing of Salt Lake Cit
 
 What I expect has happened with OSM data is a mixing of directional abbreviations in both house and street addresses. It's common for people to provide a single letter for the directional rather than the full word when handing out an address. As there are "addr:housenumber" and "addr:street" tags exist in all of our parent element types, It would also be a good exercise for applying uniform data cleanup to different data loads.
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
 { "_id" : "tags.k", "count" : 70296 }
 > db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
@@ -440,7 +441,7 @@ What I expect has happened with OSM data is a mixing of directional abbreviation
 
 A straight count shows the way elements account for a disproportionate number of all street and housenumber address tags. It doesn't tell us how many are using abbreviated directionals.
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
 { "_id" : "tags.k", "count" : 473 }
 > db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
@@ -453,7 +454,7 @@ A straight count shows the way elements account for a disproportionate number of
 
 These numbers are much more manageable, but we haven't yet looked for false positives.
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}]}}, {$project: {"addr": "$tags.v"}}])
 { "_id" : ObjectId("5bdf759186e7792414502bda"), "addr" : "300 N" }
 { "_id" : ObjectId("5bdf759186e7792414502d3e"), "addr" : "239 S Main St" }
@@ -511,7 +512,7 @@ Type "it" for more
 
 The initial selection looks good. However, false positives can be hiding in deeper . Grabbing a few more entries from the way elements, we've found our first false positives. It appears our regex is improperly retrieving possessives. 
 
-```
+```JSON
 { "_id" : ObjectId("5bdf759186e7792414504f08"), "addr" : "Carl's Jr." }
 ...
 { "_id" : ObjectId("5bdf759186e779241450f928"), "addr" : "Saint Mary's Drive" }
@@ -526,7 +527,7 @@ The initial selection looks good. However, false positives can be hiding in deep
 
 Not satisfied that we've found all the false positives, I continue my scan of the hits retrieved. My diligence is met with success. There are streets in an area known as 'The Avenues'. The streets running North and South in 'The Avenues' are named with letters. Some of these streets have been caught in our search.
 
-```
+```JSON
 { "_id" : ObjectId("5bdf759186e779241451780c"), "addr" : "N Street" }
 { "_id" : ObjectId("5bdf759186e779241451781c"), "addr" : "N Street" }
 { "_id" : ObjectId("5bdf759186e7792414517826"), "addr" : "S Street" }
@@ -537,7 +538,7 @@ Not satisfied that we've found all the false positives, I continue my scan of th
 
 Finishing our scan for false positives doesn't find any more. There's now enough information to modify our selection of values to clean by excluding our false positives. Adding the exclusions to our query provides the latest counts.
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
 { "_id" : "tags.k", "count" : 206 }
 > db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
@@ -551,7 +552,7 @@ It's worth noting there are abbreviated directionals utilizing periods. These ar
 
 Another consideration are abbreviations that are abutted to the number portion of the address. These will need to be separated from the number with a space and expanded.
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{$or: [{"tags.v": /[0-9]+[NSEWnsew]\b/},{"tags.v": /\b[NESWnesw]\b/}]}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$project: {"addr": "$tags.v"}}, {$group: {"_id": "$tag_key", "count": {"$sum": 1}}}])
 { "_id" : null, "count" : 209 }
 > db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{$or: [{"tags.v": /[0-9]+[NSEWnsew]\b/},{"tags.v": /\b[NESWnesw]\b/}]}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$project: {"addr": "$tags.v"}}, {$group: {"_id": "$tag_key", "count": {"$sum": 1}}}])
@@ -565,7 +566,7 @@ There does need to be a decision made about casing the expanded directional abbr
 
 Also included in the casing queries are an exclusion of items that will be changed in our clean up. This allows a dual purposing of these counts. First, it assists us to determine casing convention. Second, it gives us a count of items that are not expected to be cleaned. With a count of items expected to be changed and a count of items expected to not change, we can set an expected value for these queries post cleaning. Any difference between actual values and expected values will provide insight to the accuracy of our cleanup script.
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$match: {"tags.v": {"$not": /\b[NESWnesw]\b/}}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
 { "_id" : "tags.k", "count" : 11288 }
 > db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$match: {"tags.v": {"$not": /\b[NESWnesw]\b/}}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
@@ -590,7 +591,7 @@ With this information, we can expect the given number of counts in each collecti
 Now that we have an idea of what addressing data exists and plan on how to clean it, there's nothing left to do but do it. Extracting and loading the data is something we've solved with the map_to_mongo.py script. I could reinvent those processes. Instead, I've expanded on them with the transformation script: slc_street_cleanup.py. Running this script produces a new, cleaner dataset with expanded street directionals.
 
 
-```
+```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
 { "_id" : "tags.k", "count" : 11497 }
@@ -603,7 +604,7 @@ Now that we have an idea of what addressing data exists and plan on how to clean
 
 Except for node data, the counts have gone up by the expected amounts. As the difference is only one, it would be good to take a look at this single value.
 
-```
+```JSON
 > db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{$or: [{"tags.v": /[0-9]+[NSEWnsew]\b/},{"tags.v": /\b[NESWnesw]\b/}]}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$project: {"addr": "$tags.v"}}])
 { "_id" : ObjectId("5be1990086e7793790470312"), "addr" : "3540 2200 W\nSalt Lake City, UT 84119" }
 >

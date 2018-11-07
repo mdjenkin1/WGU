@@ -1,0 +1,31 @@
+### Questions Asked / Problem Areas
+
+This exploration of XML data from the OSM Project proceeded through many phases. In each phase of exploration a different aspect of the dataset was explored. The following questions were asked and problem areas identified during the exploration.
+
+* XML Metadata Investigation
+  * How can we structure a high level abstraction of XML data?
+  * What elements exist within an OSM XML dataset?
+  * What are the relationships between elements in the dataset?
+  * Which elements show properties that might require cleaning?
+  * Add more generic queries for XML metadata (many typed attributes)
+  * Differences between SQL and NoSQL
+  * Growth of the metadata query script
+* OSM XML Data Investigation
+
+Future use of XML metadata generators
+
+When designing and creating these ETL scripts for XML metadata, I was mindful that I will encounter many forms of XML in the future.  The load_xml_desc_to_mongo method will store the metadata of whichever xml document you pass it into the collection you name. By default, that collection will be stored in a database named "xml_descriptions". The intent is "xml_descriptions" will serve as a library of XML metadata well into the future.
+
+
+### Metadata Investigation Results
+
+Investigation of OSM XML metadata directed me to look closer at nested tag elements. To get a good look at the tag data, I first needed to extract actual data from the OSM file. As only the way, relation and node elements have nested elements, the extract was limited to these elements. To facilitate the extract map_to_mongo.py was created. The first step was to determine how to structure our element data.
+
+ This is one area that could do with more iteration.
+ I can't help but think there is some way to address this divergence from data structuring. Ultimately, I determined such an exercise is out of scope for this project and must be tabled for future design. I therefore settled on the following data structures to describe our three element types.
+
+ Nested elements needed a bit more to describe.
+
+To handle nested elements, I decided to store them directly to the parent element as a list of element descriptions tagged for which element type they belong. That's to say, each element The limitation here was needing a different structure for the three element types being saved. This design requires functions specific for handling the individual element types being handled. 
+
+Future automation of xml data structure generation
