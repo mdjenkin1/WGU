@@ -240,10 +240,10 @@ relations: [{
 
 #### Raw Data
 
-With it settled on how to structure the data, it was now time to parse the XML and load it to MongoDB. The map_to_mongo.py script did the heavy lifting for this task. With a loaded database and Mongo client, we're now prepared to investigate the data set.
+With it settled on how to structure the data, it was now time to parse the XML and load it to MongoDB. The map_to_mongo.py script did the heavy lifting. With a loaded database and Mongo client, we're now prepared to investigate the data set.
 
 ##### Tag Type Counts
-First thing, I took a look at is how many tags actually exist in the dataset.
+First thing, I took a look at is how many unique tag keys actually exist in the dataset.
 
 ```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "tags.k"}}, {$group: {"_id": "$tag_key", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}])
@@ -255,7 +255,7 @@ First thing, I took a look at is how many tags actually exist in the dataset.
 >
 ```
 
-For every tag in the relations data, there's more than ten in the node data. There's also ten times as many tags in way data as there is in node data. With so few tags in relation data, it might be best to see what its most common tag types are.
+For every tag in the relations data, there's more than ten in the node data. There's almost ten times again as many tags in way data as there is in node data. With so few tags in relation data, it might be best to see what its most common tag types are.
 
 ```JSON
 > db.relations.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "$tags.k"}}, {$group: {"_id": "$tag_key", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}]).pretty()
@@ -283,7 +283,9 @@ Type "it" for more
 >
 ```
 
-Approximately a third of the tags in relations being of type "type", is a curious thing. This suggests a case for an nested element that might be better served as an attribute. For now, we're instead going to look at the most common tags in node and way elements.
+Approximately a third of the tags in relations being of type "type", is a curious thing. This suggests a case for an nested element that might be better served as an attribute. It could be an interesting exercise to determine what value of type are being tagged in relations. 
+
+For now, we're instead going to look at the most common tags in node and way elements. With such a greater number of available tag elements, we're sure to find something in need of cleaning.
 
 ```JSON
 > db.nodes.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "$tags.k"}}, {$group: {"_id": "$tag_key", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}]).pretty()
@@ -333,7 +335,7 @@ Type "it" for more
 >
 ```
 
-Node tag data is more diverse in it's key values. Highway is the most common type of node tag and makes up little more than one tenth of all node tags.
+In comparison to relation elements, node elements seem to have more diverse tags. Highway is the most common type of node tag and makes up little more than one tenth of all node tags. The next two most common tag types each account for approximately 8% of all node tags. 
 
 ```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$project: {"tag_key": "$tags.k"}}, {$group: {"_id": "$tag_key", "count": {$sum: 1}}}, {"$sort": {"count" : -1}}]).pretty()
@@ -361,7 +363,7 @@ Type "it" for more
 >
 ```
 
-Way tags, like relation tags, are a more lopsided. The most common way tag type is building and accounts for approximately 20 percent of all way tags. 
+Way tags, like relation tags, are a bit lopsided towards one type. The with building tags being the most common at approximately 20 percent of all way tags. More than double the number of addr:housenumber tags.
 
 ##### Tiger Data
 
@@ -423,11 +425,13 @@ Nope, not helpful at all. That query only left me with more questions. So it's t
 
 Based on the information found in the OSM wiki, Tiger data is a prime candidate for cleaning. There's even a communal effort documenting known issues and methods for correcting it. As is, there's already quite a bit of automation to clean tiger data. Current efforts for cleaning imported Tiger data is of the manual type. Researching the import automation and manual cleaning of Tiger is out of scope for this project.
 
+This exploration of raw data returns a lot of areas worth investigating. Although, it also presents an issue with selection paralysis. In selecting an area to begin cleaning, I noticed that all three types of elements have address tags. As correcting issues with addressing is very much in scope with this course, I decided to focus on uniform addressing of Salt Lake City data.
+
 ##### Street Abbreviation Investigation.
 
-A better exercise, in scope with this course, is the addressing of Salt Lake City. Having lived my entire life in Salt Lake, I've found it curious how differently other cities manage addresses. In Salt Lake City, the house and street address can be broken further into two parts; a number and a direction. In other words, Salt Lake uses a coordinate system. Each number and directional combination describes how many blocks, in which direction away from the Mormon temple the address is. To avoid the need of decimals, city blocks are numbered as hundreds. As an example, 200 South is a street that runs East/West and is 2 blocks South of the Mormon Temple. 450 East is half a block between 400 East and 500 East.
+ Having lived my entire life in Salt Lake, I've found it curious how differently other cities manage addresses. In Salt Lake City, the house and street address can be broken further into two parts; a number and a direction. In other words, Salt Lake uses a coordinate system. Each number and directional combination describes how many blocks, in which direction away from the Mormon temple the address is. To avoid the need of decimals, city blocks are numbered as hundreds. As an example, 200 South is a street that runs East/West and is 2 blocks South of the Mormon Temple. 450 East is half a block between 400 East and 500 East.
 
-What I expect has happened with OSM data is a mixing of directional abbreviations in both house and street addresses. It's common for people to provide a single letter for the directional rather than the full word when handing out an address. As there are "addr:housenumber" and "addr:street" tags exist in all of our parent element types, It would also be a good exercise for applying uniform data cleanup to different data loads.
+What I suspect has happened with OSM data is a mixing of directional abbreviations in both house and street addresses. It's common for people to provide a single letter for the directional rather than the full word when handing out an address. With "addr:housenumber" and "addr:street" tags existing in all of our parent element types, these tag types would be a good exercise in applying uniform data cleanup to different data loads.
 
 ```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
@@ -439,23 +443,23 @@ What I expect has happened with OSM data is a mixing of directional abbreviation
 >
 ```
 
-A straight count shows the way elements account for a disproportionate number of all street and housenumber address tags. It doesn't tell us how many are using abbreviated directionals.
+A straight count shows the way elements accounting for a disproportionate number of all street and housenumber address tags. A straight count doesn't tell us how many are using abbreviated directionals. To get an idea of how many will need to be cleaned, we'll need to introduce some filtering by way of regular expression.
 
 ```JSON
-> db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+> db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {"tags.v": /\b[NESWnesw]\b/}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
 { "_id" : "tags.k", "count" : 473 }
-> db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+> db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {"tags.v": /\b[NESWnesw]\b/}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
 { "_id" : "tags.k", "count" : 109 }
-> db.relations.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
+> db.relations.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {"tags.v": /\b[NESWnesw]\b/}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
 { "_id" : "tags.k", "count" : 7 }
 >
 >
 ```
 
-These numbers are much more manageable, but we haven't yet looked for false positives.
+Without even looking for false positives, these numbers are very low compared to the total number of addr:street and addr:housenumber tags.
 
 ```JSON
-> db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}]}}, {$project: {"addr": "$tags.v"}}])
+> db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {"tags.v": /\b[NESWnesw]\b/}}, {$project: {"addr": "$tags.v"}}])
 { "_id" : ObjectId("5bdf759186e7792414502bda"), "addr" : "300 N" }
 { "_id" : ObjectId("5bdf759186e7792414502d3e"), "addr" : "239 S Main St" }
 { "_id" : ObjectId("5bdf759186e7792414502e31"), "addr" : "S 1400 East" }
@@ -477,7 +481,7 @@ These numbers are much more manageable, but we haven't yet looked for false posi
 { "_id" : ObjectId("5bdf759186e7792414504c4b"), "addr" : "361/363 N" }
 { "_id" : ObjectId("5bdf759186e7792414504cf4"), "addr" : "4400 S 700 E" }
 Type "it" for more
-> db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}]}}, {$project: {"addr": "$tags.v"}}])
+> db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {"tags.v": /\b[NESWnesw]\b/}]}, {$project: {"addr": "$tags.v"}}])
 { "_id" : ObjectId("5bdf758286e779241442a3b6"), "addr" : "4408 S" }
 { "_id" : ObjectId("5bdf758286e77924144390e6"), "addr" : "2100 S" }
 { "_id" : ObjectId("5bdf758286e779241443985e"), "addr" : "1264 W" }
@@ -499,7 +503,7 @@ Type "it" for more
 { "_id" : ObjectId("5bdf758386e7792414448643"), "addr" : "1309 S" }
 { "_id" : ObjectId("5bdf758386e7792414448b5f"), "addr" : "307 W 600 S" }
 Type "it" for more
-> db.relations.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}]}}, {$project: {"addr": "$tags.v"}}])
+> db.relations.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {"tags.v": /\b[NESWnesw]\b/}}, {$project: {"addr": "$tags.v"}}])
 { "_id" : ObjectId("5bdf759586e779241451f349"), "addr" : "2210 E" }
 { "_id" : ObjectId("5bdf759586e779241451f34a"), "addr" : "2170 E" }
 { "_id" : ObjectId("5bdf759586e779241451f34b"), "addr" : "2251 E" }
@@ -510,7 +514,7 @@ Type "it" for more
 >
 ```
 
-The initial selection looks good. However, false positives can be hiding in deeper . Grabbing a few more entries from the way elements, we've found our first false positives. It appears our regex is improperly retrieving possessives. 
+The initial selection looks good. However, false positives can be hiding deeper in the data. Grabbing a few more entries from the way elements returned our first false positives. It appears our regex is improperly retrieving possessives. 
 
 ```JSON
 { "_id" : ObjectId("5bdf759186e7792414504f08"), "addr" : "Carl's Jr." }
@@ -525,7 +529,7 @@ The initial selection looks good. However, false positives can be hiding in deep
 { "_id" : ObjectId("5bdf759186e779241450f930"), "addr" : "Saint Mary's Drive" }
 ```
 
-Not satisfied that we've found all the false positives, I continue my scan of the hits retrieved. My diligence is met with success. There are streets in an area known as 'The Avenues'. The streets running North and South in 'The Avenues' are named with letters. Some of these streets have been caught in our search.
+Not satisfied that we've found all the false positives, I continue my scan of the hits. My diligence is met with success. There are streets in an area known as 'The Avenues'. The streets running North and South in 'The Avenues' are named with letters. Some of these streets have been caught in our search.
 
 ```JSON
 { "_id" : ObjectId("5bdf759186e779241451780c"), "addr" : "N Street" }
@@ -536,7 +540,7 @@ Not satisfied that we've found all the false positives, I continue my scan of th
 { "_id" : ObjectId("5bdf759186e77924145178b4"), "addr" : "N Street" }
 ```
 
-Finishing our scan for false positives doesn't find any more. There's now enough information to modify our selection of values to clean by excluding our false positives. Adding the exclusions to our query provides the latest counts.
+Additional scanning for false positives doesn't yield any more. There's now enough information to modify our selection of values to clean by excluding our false positives. Adding exclusion matches to our query to eliminate the false positives provides more accurate counts.
 
 ```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\b[NESWnesw]\b/}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
@@ -548,9 +552,9 @@ Finishing our scan for false positives doesn't find any more. There's now enough
 >
 ```
 
-It's worth noting there are abbreviated directionals utilizing periods. These are being identified by our regular expression will need to have their periods handled when it comes time to clean the data.
+It's worth noting there are abbreviated directionals utilizing periods. These are being identified by our regular expression. The cleaning solution will need to handle these stray periods.
 
-Another consideration are abbreviations that are abutted to the number portion of the address. These will need to be separated from the number with a space and expanded.
+Another consideration are abbreviations that are abutted to the number portion of the address. These will need to be separated from the number with a space before they're expanded. Including regex to catch these for cleaning produces the final counts for cleaning.
 
 ```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{$or: [{"tags.v": /[0-9]+[NSEWnsew]\b/},{"tags.v": /\b[NESWnesw]\b/}]}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$project: {"addr": "$tags.v"}}, {$group: {"_id": "$tag_key", "count": {"$sum": 1}}}])
@@ -562,9 +566,9 @@ Another consideration are abbreviations that are abutted to the number portion o
 >
 ```
 
-There does need to be a decision made about casing the expanded directional abbreviations. Should the directionals be all caps or title cased? I think it best to follow what is most common in the unmodified dataset. A quick look into the way tags shows there is only one all caps entry in the nodes dataset. The convention is to use title case for the directionals. 
+There's still a decision to make about casing for the expanded directional abbreviations. Should the directionals be all caps or title cased? I think it best to follow what is most common in the unmodified dataset. A quick look into the way tags shows there is only one all caps entry in the nodes dataset. The clear convention is to use title case for the directionals. 
 
-Also included in the casing queries are an exclusion of items that will be changed in our clean up. This allows a dual purposing of these counts. First, it assists us to determine casing convention. Second, it gives us a count of items that are not expected to be cleaned. With a count of items expected to be changed and a count of items expected to not change, we can set an expected value for these queries post cleaning. Any difference between actual values and expected values will provide insight to the accuracy of our cleanup script.
+Also included in the casing queries are an exclusion of items that will be changed in our clean up. This allows a dual purposing of these counts. First, it assists us to determine casing convention. Second, it gives us a count of items that are not expected to be cleaned. With a count of items expected to be changed and a count of items expected to not change, we can set expected values for these queries post cleaning. Any difference between actual values and expected values will provide insight to the accuracy of the cleanup script.
 
 ```JSON
 > db.ways.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{"tags.v": /\bSouth|North|East|West\b/}]}}, {$match: {"tags.v": {"$not": /\b[NESWnesw]\b/}}}, {$group: {"_id": "tags.k", "count": {$sum: 1}}}])
@@ -580,7 +584,7 @@ Also included in the casing queries are an exclusion of items that will be chang
 >
 ```
 
-With this information, we can expect the given number of counts in each collection after cleanup
+With this information, we can expect the the following number of counts in each collection after cleanup. Specifically, the number of tags with only full directional names plus the number of tags identified for abbreviation expansion should produce the total number of tags with full directionals after cleaning.
 
 * Ways: 11288 + 209 = 11,497
 * Nodes: 348 + 149 = 497
@@ -588,7 +592,7 @@ With this information, we can expect the given number of counts in each collecti
 
 ##### Street Abbreviation Clean Up
 
-Now that we have an idea of what addressing data exists and plan on how to clean it, there's nothing left to do but do it. Extracting and loading the data is something we've solved with the map_to_mongo.py script. I could reinvent those processes. Instead, I've expanded on them with the transformation script: slc_street_cleanup.py. Running this script produces a new, cleaner dataset with expanded street directionals.
+Now that we have an idea of what addressing data exists and plan on how to clean it, there's nothing left to do but do it. Extracting and loading the data is something we've solved with the map_to_mongo.py script. I could reinvent that process. Instead, I've expanded on it with a transformation script (slc_street_cleanup.py) to modify the data between the extract and load steps. Running this script produces a more uniform dataset with expanded street directionals.
 
 
 ```JSON
@@ -602,7 +606,7 @@ Now that we have an idea of what addressing data exists and plan on how to clean
 >
 ```
 
-Except for node data, the counts have gone up by the expected amounts. As the difference is only one, it would be good to take a look at this single value.
+Except for node data, the counts are at the expected values. As the node data is off by only one, it would be good to take a look at this single value and determine why it wasn't cleaned.
 
 ```JSON
 > db.nodes.aggregate([{$unwind: "$tags"}, {$match: {$or: [{"tags.k": /^addr:str/},{"tags.k": /^addr:hou/}]}}, {$match: {$and: [{$or: [{"tags.v": /[0-9]+[NSEWnsew]\b/},{"tags.v": /\b[NESWnesw]\b/}]}, {"tags.v": {$not: /[NESWnesw] Street$/}}, {"tags.v": {$not: /'[NESWnesw]/}}]}}, {$project: {"addr": "$tags.v"}}])
@@ -631,21 +635,16 @@ None
 >>>
 ```
 
-I've decided to leave this string handling behavior in the script as is. My intent is to illustrate an issue that can be addressed in future iterations of the script. It would be simple to cast address values as raw strings before transforming them. That solution would take care of this one edge case. 
+I've decided to leave this string handling behavior in the script as is. My intent is to illustrate an issue that can be addressed in future iterations of the script. It would be simple to cast address values as raw strings before transforming them. That solution would surely take care of this one edge case. 
 
-Instead, there's value to be gained in considering why this CRLF character is included and interpreted as it is. There can be other non-printed control characters encoded in this manner. A better solution would take into consideration why these control characters might be included in our strings and manipulate the string accordingly when these characters are encountered. If strings containing control characters were converted to raw strings before cleaning, unhandled control characters could be missed.
+Instead, there's value to be gained in considering why this CRLF character is included and interpreted as it is. There could be other non-printed control characters encountered in future datasets. A better solution would take into consideration why these control characters might be included in the data and manipulate the data accordingly when those characters are encountered. If strings containing control characters were converted to raw strings before cleaning, unhandled control characters could be missed. 
+
+For example, this unaltered data point. I'm guessing the CRLF character was included as part of a mailing address import. With mailing addresses, the house and street numbers are on one line with city, state, and zip code on the next. That's clearly what we have here. If we were to interpret this data point as a raw string, we would end up including city, state and zip code data in addr:housenumber or addr:street data. A better solution would be stripping out the extraneous data and encoding it to the proper tag types. 
 
 ## Conclusion/Additional Ideas
 
+Finally, we've reached the end of this case study. If there's one thing I would take away from this experience, it's the knowledge that even a simply constructed XML document can have many layers for data investigation. Even in this brief peak into OSM data uncovered a number of items that could be explored for cleaning and restructuring. Items like incorporating Tiger import data or better handling of relation "type" tags.
 
+Another area of this case study that could be improved upon are the tools developed for data transformation and cleaning. Care was taken to ensure some of these tools could be adapted to dissecting future XML datasets. In that vein, the queries for interpreting XML metadata could be better utilized in an automated fashion for generating reports on a variety of XML structures. As the base script structures were designed with this expansion in mind, I fully expect I will be performing such refinements in the future.
 
-* Update the loading scripts to enable writing to remote MongoDB engines.
-* Update the loading scripts to merge instead of append datasets.
-* Investigate the nested element "type" tags of relation elements for abstraction.
-* Valid name abbreviations could be mistaken as abbreviations for street directions by our regex. Additional logic may be necessary to prevent this in other use cases. An investigation of our current data set shows this logic is unnecessary for now.
-* Investigate how Tiger data is currently being cleaned and imported. 
-
-## Conclusion
-
-MongoDB is a powerful engine for manipulating and investigating structured data. Although it does have its limitations.
-Python and MongoDB are powerful tools for data manipulation.
+For final thoughts on utilizing MongoDB as a storage and query engine for data; it is different from traditional SQL engines. That isn't to say one type of engine is better than the other. I'm sure there are places where pipeline based queries would do better than set manipulation queries and vice versa. MongoDB will be a powerful tool for my tool chest going forward. This is only a start of what I will do.
