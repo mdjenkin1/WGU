@@ -59,3 +59,6 @@ Data Set
         * on analysis process
 1. Knit RMD
 1. Data Documentation
+
+* _knitr chunk_
+* _pandoc options_
