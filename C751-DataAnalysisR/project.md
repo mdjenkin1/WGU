@@ -43,7 +43,19 @@ Data Set
 1. Explore Data
 1. Document Analysis
     * analysis and exploration
+        * Univariate, Bivariate, Multivariate plots
+        * Question, code, answer. Follow Thought Process
+        * Plots and Visualizations 
+            * 20 minimum
+            * Varied type
+            * Aesthetics 
     * final plots and summary
+        * Three plots to reflect study
+        * Identify Trends
+        * Wide Audience
+        * perception vs reality
+        * Polished
     * reflection
+        * on analysis process
 1. Knit RMD
 1. Data Documentation
