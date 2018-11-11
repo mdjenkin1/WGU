@@ -38,7 +38,7 @@ Data Set
 
 ## How-To
 
-1. Choose Data Set: [List](https://docs.google.com/document/d/e/2PACX-1vRmVtjQrgEPfE3VoiOrdeZ7vLPO_p3KRdb_o-z6E_YJ65tDOiXkwsDpLFKI3lUxbD6UlYtQHXvwiZKx/pub?embedded=true)
+1. Choose Data Set: [List](https://docs.google.com/document/d/e/2PACX-1vRmVtjQrgEPfE3VoiOrdeZ7vLPO_p3KRdb_o-z6E_YJ65tDOiXkwsDpLFKI3lUxbD6UlYtQHXvwiZKx/pub?embedded=true) - Wine Data Set
 1. Organize 
 1. Explore Data
 1. Document Analysis
