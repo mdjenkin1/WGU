@@ -1,5 +1,7 @@
 # Project Notes
 
+# Getting Started
+
 ## Software To Install
 
 * [R-CRAN](http://cran.r-project.org/)
@@ -38,7 +40,7 @@ Data Set
 
 ## How-To
 
-1. Choose Data Set: [List](https://docs.google.com/document/d/e/2PACX-1vRmVtjQrgEPfE3VoiOrdeZ7vLPO_p3KRdb_o-z6E_YJ65tDOiXkwsDpLFKI3lUxbD6UlYtQHXvwiZKx/pub?embedded=true) - Wine Data Set
+1. Choose Data Set: [List](https://docs.google.com/document/d/e/2PACX-1vRmVtjQrgEPfE3VoiOrdeZ7vLPO_p3KRdb_o-z6E_YJ65tDOiXkwsDpLFKI3lUxbD6UlYtQHXvwiZKx/pub?embedded=true) - Red Wine Data Set
 1. Organize 
 1. Explore Data
 1. Document Analysis
@@ -62,3 +64,37 @@ Data Set
 
 * _knitr chunk_
 * _pandoc options_
+
+# Per Section Work
+
+## Section 1 - Loading and investigating data
+
+Loading a CSV file is as simple as calling the `read.csv` function and storing the output to a variable
+```{R}
+wines.red <- read.csv("wineQualityReds.csv")
+```
+After reading in a data set, it's a good idea to perform some initial investigation.  
+To obtain a list of just the column names we use the `names` function
+```{R}
+names(wines.red)
+```
+the function `str` will return a short report on the data structure.
+```{R}
+str(wines.red)
+```
+Combining these, we can generate a list of the variables tracked in our dataset. Using that as a checklist, we can look for gaps and generate knowledge about these variables.
+
+* X: This appears to be an untitled index field. We can probably exclude it as it is redundant to features included with R data types.
+* fixed.acidity - This appears to be a decimal value measured in an unknown unit.
+* volatile.acidity - This value appears to be measurements in hundredths of a unknown unit.
+* citric.acid - another unknown unit based value. also reported in hundredths
+* residual.sugar - decimal values of some unit with whole measurements of that unit
+* chlorides - unknown unit, now getting down to the thousandths
+* free.sulfur.dioxide - unknown unit, Whole values, could be integers
+* total.sulfur.dioxide - expected to be similar and greater than the free values for sulfur dioxide.
+* density - Are these metric?
+* pH - The variable is a unit of measure
+* sulphates - 
+* alcohol - 
+* quality - 
+
