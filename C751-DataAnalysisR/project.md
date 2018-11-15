@@ -84,7 +84,7 @@ str(wines.red)
 ```
 Combining these, we can generate a list of the variables tracked in our dataset. Using that as a checklist, we can look for gaps and generate knowledge about these variables.
 
-* X: This appears to be an untitled index field. We can probably exclude it as it is redundant to features included with R data types.
+* X: This appears to be an untitled index field. We can probably exclude it as it is redundant to features included with R.
 * fixed.acidity - This appears to be a decimal value measured in an unknown unit.
 * volatile.acidity - This value appears to be measurements in hundredths of a unknown unit.
 * citric.acid - another unknown unit based value. also reported in hundredths
@@ -94,7 +94,34 @@ Combining these, we can generate a list of the variables tracked in our dataset.
 * total.sulfur.dioxide - expected to be similar and greater than the free values for sulfur dioxide.
 * density - Are these metric?
 * pH - The variable is a unit of measure
-* sulphates - 
-* alcohol - 
-* quality - 
+* sulphates - Unknown unit of measure
+* alcohol - Unknown unit of measure
+* quality - Construct
 
+There's not enough information within the dataset to have a good understanding of the data it contains. There's just too many measured variables with unknown units of measure. A quick glance at the accompanying documentation provides this missing information.
+[https://s3.amazonaws.com/udacity-hosted-downloads/ud651/wineQualityInfo.txt](https://s3.amazonaws.com/udacity-hosted-downloads/ud651/wineQualityInfo.txt)
+
+I do notice this dataset contains construct describing the wine's quality. The value for this field is based on the opinion of experts. Whenever there's an numeric score assigned to opinion, there's a question of how harsh or lenient the opinions utilize the given range. In this case, the range is stated as 1-10. What is the utilization of the stated range? This is a question that can be answered with a simple histogram
+
+```{R}
+qplot(data = wines.red, x = quality, binwidth = 1)
+```
+
+This produced an normal distribution with a mode in the middle of our range. This suggests an evenly applied opinion scale. If the scale was shifted to the right, opinions would be too lenient. The idea, if everyone is exceptional then no one is exceptional. If such a shift existed, we should strongly consider correcting the scale.  
+
+When correlating variables there is an expectation of potential shift. Perhaps wine of better quality was produced in one year compared to another. These cases would have a shift in our scale.  
+
+As we investigate this dataset, we will look into the available variables for a shift in quality distribution. A measurable shift to the right or left would suggest that variable has an effect on wine quality.  
+
+To start that investigation, we'll take a quick look at a statistical summary of our dataset.
+
+```{R}
+summary(wines.red)
+```
+
+Two that stand out are the sulfur dioxide values. They both have a wide range with a mean above the median. Both their mean and median do not fall anywhere near the middle of their range. A quick look at the distribution shows that these are skewed for our samples.
+
+```{R}
+qplot(data = wines.red, x = free.sulfur.dioxide, binwidth=3)
+qplot(data = wines.red, x = total.sulfur.dioxide, binwidth=10)
+```
