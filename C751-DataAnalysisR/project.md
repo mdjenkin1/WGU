@@ -119,7 +119,7 @@ To start that investigation, we'll take a quick look at a statistical summary of
 summary(wines.red)
 ```
 
-Two that stand out are the sulfur dioxide values. They both have a wide range with a mean above the median. Both their mean and median do not fall anywhere near the middle of their range. A quick look at the distribution shows that these are skewed for our samples.
+Two that stand out are the sulfur dioxide values. They both have a wide range with a mean above the median. Both their mean and median do not fall anywhere near the middle of their range. A quick look at the distribution of sulfur content shows it is skewed.
 
 ```{R}
 qplot(data = wines.red, x = free.sulfur.dioxide, binwidth=3)
