@@ -107,7 +107,7 @@ I do notice this dataset contains construct describing the wine's quality. The v
 qplot(data = wines.red, x = quality, binwidth = 1)
 ```
 
-This produced an normal distribution with a mode in the middle of our range. This suggests an evenly applied opinion scale. If the scale was shifted to the right, opinions would be too lenient. The idea, if everyone is exceptional then no one is exceptional. If such a shift existed, we should strongly consider correcting the scale.  
+This produced an normal distribution with a mode in the middle of our range. This suggests an evenly applied opinion scale. If the scale was shifted to the right, opinions would be too lenient. The idea being, if everyone is exceptional then no one is exceptional. If such a shift existed, we should strongly consider correcting the scale.  
 
 When correlating variables there is an expectation of potential shift. Perhaps wine of better quality was produced in one year compared to another. These cases would have a shift in our scale.  
 
@@ -125,3 +125,13 @@ Two that stand out are the sulfur dioxide values. They both have a wide range wi
 qplot(data = wines.red, x = free.sulfur.dioxide, binwidth=3)
 qplot(data = wines.red, x = total.sulfur.dioxide, binwidth=10)
 ```
+
+## Section 2 - Exploring One Variable
+
+* Faceting
+* Skeptical of Outliers and Anomalies
+* Exploring with bin widths
+* Plot Labeling
+* Transforming/Scaling
+* Frequency Polygons
+* Box Plots
