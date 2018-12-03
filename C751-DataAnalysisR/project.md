@@ -101,13 +101,23 @@ Combining these, we can generate a list of the variables tracked in our dataset.
 There's not enough information within the dataset to have a good understanding of the data it contains. There's just too many measured variables with unknown units of measure. A quick glance at the accompanying documentation provides this missing information.
 [https://s3.amazonaws.com/udacity-hosted-downloads/ud651/wineQualityInfo.txt](https://s3.amazonaws.com/udacity-hosted-downloads/ud651/wineQualityInfo.txt)
 
-I do notice this dataset contains construct describing the wine's quality. The value for this field is based on the opinion of experts. Whenever there's an numeric score assigned to opinion, there's a question of how harsh or lenient the opinions utilize the given range. In this case, the range is stated as 1-10. What is the utilization of the stated range? This is a question that can be answered with a simple histogram
+I do notice this dataset contains construct describing the wine's quality. The value for this field is based on the opinion of experts. Whenever there's an numeric score assigned to opinion, there's a question of how harsh or lenient the opinions utilize the given range. In this case, the range is stated as 1-10. What is the utilization of the stated range? This is a question that can be answered with a simple histogram  
 
 ```{R}
 qplot(data = wines.red, x = quality, binwidth = 1)
 ```
 
 This produced an normal distribution with a mode in the middle of our range. This suggests an evenly applied opinion scale. If the scale was shifted to the right, opinions would be too lenient. The idea being, if everyone is exceptional then no one is exceptional. If such a shift existed, we should strongly consider correcting the scale.  
+
+One correction to make is to acknowledge the lack of quality values 1, 2, 9 and 10. Also, there's no reason to maintain the integer values. In fact, leaving them as integers would complicate R's interpretation. Instead, our quality values should be given descriptors that do not have numerical interpretations.  
+
+i.e.  
+* 3 = Worst
+* 4 = WorstThanAvg
+* 5 = LowerAvg
+* 6 = UpperAvg
+* 7 = BetterThanAvg
+* 8 = Best
 
 When correlating variables there is an expectation of potential shift. Perhaps wine of better quality was produced in one year compared to another. These cases would have a shift in our scale.  
 
@@ -119,19 +129,108 @@ To start that investigation, we'll take a quick look at a statistical summary of
 summary(wines.red)
 ```
 
-Two that stand out are the sulfur dioxide values. They both have a wide range with a mean above the median. Both their mean and median do not fall anywhere near the middle of their range. A quick look at the distribution of sulfur content shows it is skewed.
+Two that stand out are the sulfur dioxide values. They both have a wide range with a mean above the median. Both their mean and median do not fall anywhere near the middle of their range. A quick look at the distribution of sulfur content shows it is long fingered and long tailed.
 
 ```{R}
 qplot(data = wines.red, x = free.sulfur.dioxide, binwidth=3)
-qplot(data = wines.red, x = total.sulfur.dioxide, binwidth=10)
+qplot(data = wines.red, x = total.sulfur.dioxide, binwidth=6)
 ```
 
 ## Section 2 - Exploring One Variable
 
+* Transforming/Scaling
+
+Of similar interest are the residual sugar and chlorides.
+
+```{R}
+qplot(data = wines.red, x = residual.sugar, binwidth=.5)
+qplot(data = wines.red, x = chlorides, binwidth=.01)
+```
+
+To obtain a more normal distribution of these values, we can scale our x-axis to a log10 scale.
+
+```{R}
+qplot(data = wines.red, x = free.sulfur.dioxide, binwidth=.2) +
+  scale_x_log10()
+qplot(data = wines.red, x = total.sulfur.dioxide, binwidth=.15) +
+  scale_x_log10()
+qplot(data = wines.red, x = chlorides, binwidth=.02) +
+  scale_x_log10()
+qplot(data = wines.red, x = residual.sugar, binwidth=.05) +
+  scale_x_log10()
+```
+
 * Faceting
+
+At first glance it seems there is no good value to generate categorical data as all of our values are numerical. On closer inspection, wine quality is integer values with short range. Looking closer at the values within the quality field shows it may be a great candidate for splitting the values into categories. This belays a data set that has been cleaned to act as a guide for data analysis. Quality could easily have decimal values. This is worth noting as consideration for cleaning data in future analytics.
+
+```{R}
+unique(wines.red$quality)
+```
+
+The distribution of these wide ranging elements will give some insight into their effect on over all quality when broken out categorically.
+
+```{R}
+qplot(data = wines.red, x = free.sulfur.dioxide, binwidth=3) +
+  facet_wrap(~wines.red$quality, scale='free_y')
+qplot(data = wines.red, x = total.sulfur.dioxide, binwidth=6) +
+  facet_wrap(~wines.red$quality, scale='free_y')
+qplot(data = wines.red, x = residual.sugar, binwidth=.5) +
+  facet_wrap(~wines.red$quality, scale='free_y')
+qplot(data = wines.red, x = chlorides, binwidth=.01) +
+  facet_wrap(~wines.red$quality, scale='free_y')
+```
+
+* Box Plots
+
+Wines of quality 5 and 6 have the highest counts. That would be interesting if we ignore they comprise the bulk of our data set. 
+To see the impact of these values on quality, it would be better to visualize the distribution these values at each level of quality. This can be accomplished via Box Plots.  
+
+```{R}
+qplot( x = quality, y = total.sulfur.dioxide,
+       group = quality,
+       data = wines.red,
+       geom = 'boxplot') +
+  scale_y_log10()
+
+qplot( x = quality, y = residual.sugar,
+       group = quality,
+       data = wines.red,
+       geom = 'boxplot') +
+  scale_y_log10()
+
+qplot( x = quality, y = total.sulfur.dioxide,
+       group = quality,
+       data = wines.red,
+       geom = 'boxplot') +
+  scale_y_log10()
+
+qplot( x = quality, y = chlorides,
+       group = quality,
+       data = wines.red,
+       geom = 'boxplot') +
+  scale_y_log10()
+
+qplot( x = quality, y = total.sulfur.dioxide,
+       group = quality,
+       data = wines.red,
+       geom = 'boxplot') +
+  scale_y_log10()
+```
+
+Another value of interest is the citric acid content. It has a range of 0-1 and a third quartile below the median.
+
+```
+qplot( x = quality, y = citric.acid,
+       group = quality,
+       data = wines.red,
+       geom = 'boxplot')
+```
+
+Looking at the average distribution of citric acid content by quality; There appears to be a trend where a higher citric acid content correlates to a higher quality wine.
+
+* Frequency Polygons
 * Skeptical of Outliers and Anomalies
 * Exploring with bin widths
 * Plot Labeling
-* Transforming/Scaling
-* Frequency Polygons
-* Box Plots
+
