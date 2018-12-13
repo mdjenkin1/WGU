@@ -234,3 +234,11 @@ Looking at the average distribution of citric acid content by quality; There app
 * Exploring with bin widths
 * Plot Labeling
 
+# Section 3 - Exploring 2 variables
+
+* Scatterplots
+  * Dealing with overplotting
+  * Alpha and Jitter
+* Overlaying summaries with raw data
+* Correlation
+* Noise and Conditional means
