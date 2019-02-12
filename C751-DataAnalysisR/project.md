@@ -242,3 +242,7 @@ Looking at the average distribution of citric acid content by quality; There app
 * Overlaying summaries with raw data
 * Correlation
 * Noise and Conditional means
+
+
+# Section 4 - Exploring 3 variables
+
