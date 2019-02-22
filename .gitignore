@@ -4,3 +4,4 @@ map.snip
 *.pyc
 ~*.docx
 *.tmp
+.Rhistory
