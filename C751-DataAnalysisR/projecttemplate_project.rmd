@@ -264,8 +264,8 @@ millions have on visualations of the measurements?
 
 The percentage of a solute within a solution should cover both of these \
 concerns. A summation of solute percent can be used to determine the ratio of \
-solvent in each solution of wine. Percents provide a more reasonable scale. \
-Percents are commonly understood.
+solvent in each solution of wine. Percents provide a more reasonable scale, \
+and percents are commonly understood.
 
 Having weighed the unit options and outlined some initial questions we can \
 proceed with generating a working dataset. The following list should cover \
@@ -791,7 +791,7 @@ ggplot(data=wines, aes(x=alcohol, y=residual.sugar)) +
 There does appear to be outliers above 2.5% residual sugar
 
 ```{R}
-ggplot(data=subset(wines, residual.sugar <= 2.5), aes(x=alcohol, \
+ggplot(data=subset(wines, residual.sugar <= 2.5), aes(x=alcohol, 
                                                   y=residual.sugar)) + 
   scale_y_continuous() +
   geom_jitter(alpha=.4) +
@@ -817,7 +817,7 @@ across levels. Is there a similar phenomenon in salt content?
 ```{R}
 ggplot(data=subset(wines, chlorides < .03), aes(x=alcohol, y=chlorides)) +
   geom_jitter(alpha=.4) +
-  scale_y_continuous(limits = c(.002, .006)) +
+  scale_y_log10(limits = c(.002, .02)) +
   geom_smooth(aes(color=color))
 ```
 
@@ -881,29 +881,203 @@ occuring at the 1st and 3rd quartiles. This also supports our earlier \
 investigation showing that alcohol content is a good predictor of wine \
 quality.  
 
-One final graph I want to look at is a heat map of alcohol content at ratios \
-of sugar to alcohol. First I need to understand the melt function.
+One final graph I want to look at is alcohol content at ratios \
+of salts and sugar.
 
 ```{R}
-wine.select <- c("alcohol","residual.sugar","chlorides")
-wine.tastes <- wines[wine.select]
-head(wine.tates)
-
+wine.tastes <- data.frame("sugar" = round(wines$residual.sugar, 2), 
+                          "salt" = round(wines$chlorides, 4),
+                          "alcohol" = wines$alcohol,
+                          "type" = wines$color)
+head(wine.tastes)
 
 ```
 
 ```{R}
-melt(wine.ratios, id.vars = c("residual.sugar","chlorides"))
+wine.ratios <- melt(wine.tastes, id.vars = c("sugar", "salt", "type"))
+wine.ratios
 ```
 
 ```{R}
-ggplot(aes(y = residual.sugar, x = chlorides, fill = alcohol),
+ggplot(aes(y = sugar, x = salt, fill = value),
   data = wine.ratios) +
   geom_tile() +
-  scale_fill_gradientn(colours = colorRampPalette(c("blue", "red"))(100))
+  scale_fill_gradientn(colours = colorRampPalette(c("blue", "red"))(100)) +
+  scale_y_continuous(limits = c(0,2)) + 
+  scale_x_continuous(limits = c(0,0.02))
 ```
 
+What we see is a concentration of higher alcohol content at \
+lower salt and lower sugar content. Some of that could be attributed to the \
+intersection of red and white wines. 
+
+Red wine tends to have a much lower sugar content and higher salt content than \
+white wine. That does explain the lower leg of this graph.  
+
+Another thing to consider is the range of alcohol content as wine quality. \
+The spread of alcohol content across ratios of sugar to salt becomes more \
+apparent by introducing more colors to our graph.
+
+```{R}
+ggplot(aes(y = sugar, x = salt, fill = value),
+  data = wine.ratios) +
+  geom_tile() +
+  scale_fill_gradient2(low = "green", mid = "blue", high = "red", 
+                       midpoint = 12) +
+  scale_y_continuous(limits = c(0,2)) + 
+  scale_x_continuous(limits = c(0,0.02))
+```
+
+It becomes even more clear that lower alcohol content wines tend to \
+occur at extreme values of sugar and salt content.
+
+```{R}
+ggplot(aes(y = sugar, x = salt, fill = value),
+  data = wine.ratios) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(
+    c("orange","green","blue", "red"))(50)) +
+  scale_y_continuous(limits = c(0,2)) + 
+  scale_x_continuous(limits = c(0,0.02))
+```
+
+Introducing more colors doesn't provide any additional insight. It does help \
+solidify what we've already seen. It also helps futher illustrate at which \
+ratios of sugar to salt we're getting the highest alcohol content. There \
+seems to be the highest concentration of red dots near 0.0025% salt and \
+0.25% sugar.
+
+It's worth noting that what has been refered to this far as a ratio between \
+two compounds is a bit of a misnomer. It describes 100 grams of sugar for \
+every gram of salt. We just see a higher conncentration of the highest alcohol \
+content wines around 0.3% sugar and 0.003% salt. We're not seeing any examples \
+at 2% sugar and 0.02% salt. There is no diagonal line that would describe a \
+perfect ratio.
+
+To be more accurate, we should say that the highest alcohol content wines \
+occur between 0.003% and 0.004% salt content and 0.1 to 0.75% sugar content.
+
+```{R}
+ggplot(aes(y = sugar, x = salt, fill = value),
+  data = wine.ratios) +
+  geom_tile() +
+  scale_fill_gradientn(colours = colorRampPalette(c("green","blue", "red"))(50)) +
+  scale_y_continuous(limits = c(0,0.75)) + 
+  scale_x_continuous(limits = c(0,0.006))
+```
+
+Zooming in on this range we can see that it isn't a true ratio. It's more of a \
+happy spot where the balance between salt and sugar isn't too much in one \
+direction or the other.
+
+```{R}
+ggplot(aes(y = sugar, x = salt, fill = value),
+  data = wine.ratios) +
+  geom_tile() +
+  scale_fill_gradient2(low = "white", mid = "blue", high = "black", 
+                   midpoint = 11.5) +
+  scale_y_continuous(limits = c(0,0.75)) + 
+  scale_x_continuous(limits = c(0,0.006))
+```
+
+Focusing on one color centered close to the lower middle range of the highest \
+alcohol content and gradiated between white to black provides a good contrast \
+on what's happening in the happy spot. We can better see where there's \
+not enough sugar for the amount of salt in that bright blue. Just above that \
+spot, we see a higher distribution of higher alcohol content wines in the \
+darker colors. As sugar and salt gets a little too high, the alcohol content \
+starts to sharply drop. It happens more rapidly for salt concentration than \
+sugar concentration.
+
+```{R}
+ggplot(aes(y = sugar, x = salt, fill = value),
+  data = wine.ratios) +
+  geom_tile() +
+  scale_fill_gradient2(low = "white", mid = "blue", high = "black", 
+                   midpoint = 11.5) +
+  scale_y_continuous(limits = c(0,2)) + 
+  scale_x_continuous(limits = c(0,0.02))
+```
+
+Zooming back out with this color scale, it's easier to see the happy spot.  
+
+This leaves the question of reds vs whites.  
+
+```{R}
+ggplot(aes(y = sugar, x = salt, fill = value),
+  data = subset(wine.ratios, wine.ratios$type == "red")) +
+  geom_tile() +
+  scale_fill_gradient2(low = "white", mid = "blue", high = "black", 
+                   midpoint = 11.5) +
+  scale_y_continuous(limits = c(0,2)) + 
+  scale_x_continuous(limits = c(0,0.02))+
+  geom_smooth(aes(color=type))
+```
+
+Red wine's contribution to the happy spot is clear and not unexpected.
+
+```{R}
+ggplot(aes(y = sugar, x = salt, fill = value),
+  data = subset(wine.ratios, wine.ratios$type == "white")) +
+  geom_tile() +
+  scale_fill_gradient2(low = "white", mid = "blue", high = "black", 
+                   midpoint = 11.5) +
+  scale_y_continuous(limits = c(0,2)) + 
+  scale_x_continuous(limits = c(0,0.02))+
+  geom_smooth(aes(color=type))
+```
+
+White wine's contribution to the happy spot is also quite clear. Although, \
+white wine seems to be more forgiving on sugar content. Rather, white wines \
+with high sugar content are fine. After an amount of salt, sugar becomes less \
+acceptable.
+
+```{R}
+wine.quality <- data.frame("sugar" = round(wines$residual.sugar, 2), 
+                          "salt" = round(wines$chlorides, 4),
+                          "quality" = as.numeric(wines$quality),
+                          "type" = wines$color)
+head(wine.quality)
+```
+
+```{R}
+wine.qratio <- melt(wine.quality, id.vars = c("sugar", "salt", "type"))
+wine.qratio
+```
+
+```{R}
+ggplot(aes(y = sugar, x = salt, fill = value),
+  data = wine.qratio) +
+  geom_tile() +
+  scale_fill_gradient2(low = "white", mid = "blue", high = "black", 
+                       midpoint = 5) +
+  scale_y_continuous(limits = c(0,2)) + 
+  scale_x_continuous(limits = c(0,0.02))+
+  geom_smooth(aes(color=type))
+```  
+  
+  The relationship between salt, sugar and quality doesn't change much when \
+  reverting back from alcohol content to quality scores. Although, granularity \
+  is lost. This strengthens our assumption that alcohol content is a good \
+  measure of quality.
+  
 # Multivariate Analysis
+
+Based on what we've seen, salt content has more impact on wine \
+quality than sugar. Even with sugar rich white wines, salt content is the largest \
+determining factor. In white wines, you can have more sugar in a higher \
+quality wine as long as the salt content remains in a decreasing range.
+
+Between red and white wines, there is a convergence where wines of the highest \
+alcohol content occurs with a balance of sugar and salt. This sweet spot begs \
+a question of wine quality and how it relates to alcohol. Is alcohol content \
+just a by product of the process used to balance sugar with salt? 
+
+Alcohol content as a granular measure of quality is something that shouldn't \
+escape scrutiny. In this analysis, alcohol content was taken as a rough model \
+for quality. It offered a level of granularity not present in the quality \
+scale. One issue with this is it may hide the relationship of other solutes in \
+the solution and how the combination of those solutes relate to quality.
 
 ### Talk about some of the relationships you observed in this part of the \
 investigation. Were there features that strengthened each other in terms of \
@@ -928,16 +1102,66 @@ make sure you justify why you chose each plot by describing what it shows.
 
 ### Plot One
 ```{r echo=FALSE, Plot_One}
+wines %>% 
+  ggplot(aes(x=quality, y=alcohol)) +
+  geom_jitter(alpha=.4, shape = 21, fill = I('#2679af')) +
+  stat_summary(fun.y = mean, fun.ymin = function(z){quantile(z, 0.25)}, 
+               fun.ymax = function(z){quantile(z, 0.75)},
+                 geom = "crossbar", width = 1, fill = '#f70800', alpha = .3) +
+  scale_y_continuous(breaks = seq(8, 14.5, .5)) +
+  labs(title="Alcohol Content as Quality", y="Percent Alcohol Content",
+       x = "Average Quality Score") +
+  theme(plot.title = element_text(size = 16, face="bold"), 
+        axis.title.x = element_text(size = 10, face="bold"),
+        axis.title.y = element_text(size = 10, face="bold"),
+        panel.background = element_rect(fill = "lightgrey", color = "darkgrey"),
+        panel.grid.major = element_line(size = 1, linetype = "solid",
+                                        color = "grey"),
+        panel.grid.minor = element_line(size = .1, linetype = "solid"))
 
 ```
 
 ### Description One
 
+This data set has an issue of granularity within the quality scale. Without a \
+a greater level of granularity, the deliniation between good an bad quality \
+wines is lost. Alcohol content was identified as a surrogate to quality. It \
+offers a greater level of granularity.
+
+This granularity of quality found in alcohol content is illustrated here. The \
+exceptionally good and exceptionally bad wines have a lack of observation \
+density to produce consistency with this assumption. However, on the \
+observations we do have, we see the alcohol content means of lesser quality \
+wines are much lower than higher quality wines. Through the middling quality \
+wines, where the majority of our observations lie, this trend is more \
+pronounced.
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
+ggplot(data=subset(wines, chlorides < .03), aes(x=alcohol, y=(chlorides*100))) +
+  geom_jitter(alpha=.3, shape = 21, fill = I('#e2c55a')) +
+  scale_y_log10(limits=c(0.15, 1.75)) +
+  geom_smooth(aes(color=color)) +
+  labs(title="Quality and Salt Content Across Varitals", y="Milligrams of Salt",
+       x = "Percent Alcohol Content") +
+  theme(plot.title = element_text(size = 16, face="bold"), 
+        axis.title.x = element_text(size = 10, face="bold"),
+        axis.title.y = element_text(size = 10, face="bold"),
+        panel.background = element_rect(fill = "lightgrey", color = "darkgrey"),
+        panel.grid.major = element_line(size = 1, linetype = "solid",
+                                        color = "grey"),
+        panel.grid.minor = element_line(size = .1, linetype = "solid"))
 
 ```
+
+Using alcohol content as a direct measurement to quality revealed salt content \
+as a major factor for determing wine quality. Across both varities we see that \
+as alcohol content increases, salt content decreases. 
+
+The amount of salt in a sample of wine is miniscule compared to the amount of \
+alcohol. Where we see alcohol in measures of 8-14% by volume, we see salt in \
+measures of thousandths of a percent. It is interesting that such a small \
+variation in one compound can have such a dramatic effect on quality.
 
 ### Description Two
 
