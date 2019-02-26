@@ -1100,24 +1100,30 @@ that you have refined your selected plots for good titling, axis labels (with
 units), and good aesthetic choices (e.g. color, transparency). After each plot,
 make sure you justify why you chose each plot by describing what it shows.
 
+```{R}
+thm <- theme(plot.title = element_text(size = 16, face="bold"), 
+            axis.title.x = element_text(size = 10, face="bold"),
+            axis.title.y = element_text(size = 10, face="bold"),
+            panel.background = element_rect(fill = "#c9d5f2", color = "darkgrey"),
+            panel.grid.major = element_line(size = .5, linetype = "solid",
+                                            color = "grey"),
+            panel.grid.minor = element_line(size = .1, linetype = "dashed"),
+            plot.background = element_rect(fill = "#e1e6f4"))
+```
+
 ### Plot One
 ```{r echo=FALSE, Plot_One}
 wines %>% 
+  subset(alcohol <= 14.5) %>%
   ggplot(aes(x=quality, y=alcohol)) +
   geom_jitter(alpha=.4, shape = 21, fill = I('#2679af')) +
   stat_summary(fun.y = mean, fun.ymin = function(z){quantile(z, 0.25)}, 
                fun.ymax = function(z){quantile(z, 0.75)},
                  geom = "crossbar", width = 1, fill = '#f70800', alpha = .3) +
-  scale_y_continuous(breaks = seq(8, 14.5, .5)) +
+  scale_y_continuous(breaks = seq(8, 14, 1)) +
   labs(title="Alcohol Content as Quality", y="Percent Alcohol Content",
-       x = "Average Quality Score") +
-  theme(plot.title = element_text(size = 16, face="bold"), 
-        axis.title.x = element_text(size = 10, face="bold"),
-        axis.title.y = element_text(size = 10, face="bold"),
-        panel.background = element_rect(fill = "lightgrey", color = "darkgrey"),
-        panel.grid.major = element_line(size = 1, linetype = "solid",
-                                        color = "grey"),
-        panel.grid.minor = element_line(size = .1, linetype = "solid"))
+       x = "Average Quality Score") + thm
+
 
 ```
 
@@ -1138,37 +1144,57 @@ pronounced.
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
-ggplot(data=subset(wines, chlorides < .03), aes(x=alcohol, y=(chlorides*100))) +
-  geom_jitter(alpha=.3, shape = 21, fill = I('#e2c55a')) +
-  scale_y_log10(limits=c(0.15, 1.75)) +
-  geom_smooth(aes(color=color)) +
-  labs(title="Quality and Salt Content Across Varitals", y="Milligrams of Salt",
-       x = "Percent Alcohol Content") +
-  theme(plot.title = element_text(size = 16, face="bold"), 
-        axis.title.x = element_text(size = 10, face="bold"),
-        axis.title.y = element_text(size = 10, face="bold"),
-        panel.background = element_rect(fill = "lightgrey", color = "darkgrey"),
-        panel.grid.major = element_line(size = 1, linetype = "solid",
-                                        color = "grey"),
-        panel.grid.minor = element_line(size = .1, linetype = "solid"))
-
+ggplot(data=subset(wines, chlorides < .025), 
+       aes(x=alcohol, y=(chlorides*100))) +
+  geom_jitter(alpha=.3, shape = 21, fill = I('#605f5d')) +
+  scale_y_continuous(limits=c(0.2, 1.2),breaks = seq(0.2, 1.2, 0.2)) +
+  geom_smooth(data = subset(wines, color=="red"), aes(color = "Red")) +
+  geom_smooth(data = subset(wines, color=="white"), aes(color = "White")) + 
+  scale_colour_manual(name="Varietal", values=c("#540000", "#d2e8a9")) +
+  labs(title="Salt and Alcohol Content", 
+       y="Salt (ppm)", x = "Alcohol (ABV)") +
+  thm
 ```
 
-Using alcohol content as a direct measurement to quality revealed salt content \
-as a major factor for determing wine quality. Across both varities we see that \
-as alcohol content increases, salt content decreases. 
-
-The amount of salt in a sample of wine is miniscule compared to the amount of \
-alcohol. Where we see alcohol in measures of 8-14% by volume, we see salt in \
-measures of thousandths of a percent. It is interesting that such a small \
-variation in one compound can have such a dramatic effect on quality.
-
 ### Description Two
+
+Using alcohol as a granular measurement of quality revealed salt \
+content as a major factor for determing wine quality. Across both varities we \
+see that as alcohol content increases, salt content decreases. It becomes \
+apparent that better wines have less salt.
+
+The amount of salt in the wine samples is miniscule. Where alcohol can be \
+measured in full percents by volume, salt is best described in parts per \
+million. It is interesting that slight variation in a small amount can have \
+such a great effect on quality.
+
+We also start to see a divergence between the two main varietals of wine. Red \
+wines tend to have almost twice the amount of salt of white wines. This \
+suggests that quality is reliant on a combination of compounds.
 
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
+ggplot(aes(y = sugar, x = salt, fill = value),
+  data = wine.ratios) +
+  #geom_tile() +
+  geom_raster(aes(interpolate = TRUE))+
+  scale_alpha_identity() +
+  #scale_alpha_continuous() +
+  scale_y_continuous(limits = c(0,2)) + 
+  scale_x_continuous(limits = c(0,0.02))+
+  geom_smooth(data = subset(wine.ratios, type=="red"), aes(color = "Red")) +
+  geom_smooth(data = subset(wine.ratios, type=="white"), aes(color = "White")) + 
+  scale_colour_manual(name="Varietal", values=c("#540000", "#d2e8a9")) +
+  thm
 
+
+
+  scale_fill_gradient2(
+    low = "#2679af", mid = "#3f0103", high = "black",
+    #colours = colorRampPalette(c("#0176ba","#3f0103"))(3),
+    name = "ABV",
+    midpoint=12) +
 ```
 
 ### Description Three
