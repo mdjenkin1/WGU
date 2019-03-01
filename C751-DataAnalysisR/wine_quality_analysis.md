@@ -1,6 +1,6 @@
-# Chemical Composition to Predict Wine Quality
+# Chemical Composition as Predictor of Wine Quality
 
-by Michael Jenkins
+by Michael Jenkins  
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 library(ggplot2)
