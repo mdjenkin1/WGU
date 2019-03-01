@@ -35,6 +35,7 @@ library(data.table)
 library(GGally)
 library(gridExtra)
 library(reshape2)
+library(RColorBrewer)
 
 ```
 
@@ -1104,11 +1105,10 @@ make sure you justify why you chose each plot by describing what it shows.
 thm <- theme(plot.title = element_text(size = 16, face="bold"), 
             axis.title.x = element_text(size = 10, face="bold"),
             axis.title.y = element_text(size = 10, face="bold"),
-            panel.background = element_rect(fill = "#c9d5f2", color = "darkgrey"),
-            panel.grid.major = element_line(size = .5, linetype = "solid",
-                                            color = "grey"),
-            panel.grid.minor = element_line(size = .1, linetype = "dashed"),
-            plot.background = element_rect(fill = "#e1e6f4"))
+            panel.background = element_rect(fill = "seashell3", color = "darkgrey"),
+            panel.grid.major = element_line(size = .1, color = "seashell2", linetype = "dashed"),
+            panel.grid.minor = element_line(size = .1, color = "grey", linetype = "dashed"),
+            plot.background = element_rect(fill = "azure1"))
 ```
 
 ### Plot One
@@ -1175,33 +1175,64 @@ suggests that quality is reliant on a combination of compounds.
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
-ggplot(aes(y = sugar, x = salt, fill = value),
+library(scales)
+
+ggplot(aes(y = sugar*100, x = salt*100),
   data = wine.ratios) +
-  #geom_tile() +
-  geom_raster(aes(interpolate = TRUE))+
-  scale_alpha_identity() +
-  #scale_alpha_continuous() +
-  scale_y_continuous(limits = c(0,2)) + 
-  scale_x_continuous(limits = c(0,0.02))+
+  geom_raster(aes(fill=value),interpolate = TRUE) +
+#  scale_fill_gradientn(colors = rainbow(50)) + #, start = .4)) + #, s = 1, v = .7)) +
+#  scale_fill_gradientn(colors = colorRampPalette(c("lightgoldenrod", "red4","grey10"), bias = .9, alpha = TRUE)(200)) +
+  scale_fill_gradientn(colors = brewer.pal(n = 5,name = "Greys")) +
+  scale_y_continuous(limits = c(0,200)) + 
+  scale_x_continuous(limits = c(0,1.5)) +  
   geom_smooth(data = subset(wine.ratios, type=="red"), aes(color = "Red")) +
   geom_smooth(data = subset(wine.ratios, type=="white"), aes(color = "White")) + 
   scale_colour_manual(name="Varietal", values=c("#540000", "#d2e8a9")) +
+  labs(title="ABV Related to Salt and Sugar", y="Sugar (ppm)",
+       x = "Salt (ppm)", fill = "ABV") +
   thm
-
-
-
-  scale_fill_gradient2(
-    low = "#2679af", mid = "#3f0103", high = "black",
-    #colours = colorRampPalette(c("#0176ba","#3f0103"))(3),
-    name = "ABV",
-    midpoint=12) +
 ```
 
 ### Description Three
 
+We now start to see the relationship between combinations of compounds and \
+quality. Also apparent are the differences and simularities between red and \
+white wines. There's a convergence between both varietals for ratios of salt \
+and sugar where the highest alcohol content occurs. This sweet spot for salt \
+and sugar is represented in the darkened area of the graph.  
+
+There's a range of salt that is acceptable for reds and whites. There's a \
+similar range for sugar as well. The difference for varietals is which solute \
+is more forgiving in quality. More salt is acceptable in red wines as long as \
+it remains within a limitation of sugar. The inverse is true for white wines.  
+
 ------
 
 # Reflection
+
+One thing that strikes me about this data is how worthless the quality score \
+is. Asking someone to rate something on a scale of one to whatever does offer \
+some insight. The question here is, how many opinions using that scale is \
+needed to get a usable granularity? It's a great starting point with limited \
+use.  
+
+Despite the limitations of the quality score, the dataset does offer a depth \
+of posibilities. Differences of composition between variatals absent of \
+quality considerations is the top of my list. While alcohol content was \
+chosen as a surrogate to quality, it still is a measure of alcohol content. It \
+could be that alcohol is a good measure of quality. I would argue that the \
+polled experts have a bias for alcohol content. What makes them experts and \
+what criteria do they use in rating decisions?  
+
+One compound I didn't explore and would in a future analysis are the acids. \
+There's enough evidence to explore the relationship between citric acid, sugar \
+and salt. There's also an expectation that Ph is influenced by the acidic \
+compounds. Expectations should always be tested.  
+
+At the end of it, the insite gleaned is something I look forward to testing. \
+Next time I'm in the store for a bottle of wine, I'm going to use alcohol \
+content as my primary deciding factor. It will be interesting how many bottles \
+go through before it proves to be a bad metric.
 
 > **Tip**: Here's the final step! Reflect on the exploration you performed and
 the insights you found. What were some of the struggles that you went through?
