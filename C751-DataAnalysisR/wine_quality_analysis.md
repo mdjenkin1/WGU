@@ -176,9 +176,8 @@ The datasets contain thirteen variables for each observation. Ten of those \
 variables describe composition. Eight of the ten are measures of \
 concentration. Alcohol content is provided as a percent. Density provides a \
 measure of the entire solution. Some of the solute measures are the same. \
-Some are of differing units. These should be converted to equal measurement \
-units of measure. With equal units, we can make better compositional \
-comparisons.  
+Some are of different units. These should be converted to equal units of \
+measure. With equal units, we can make better compositional comparisons.  
 
 The remaining variables are not compositional measurements. X is an index that \
 is not linked to another dataset. It can be discarded. Quality is 
@@ -190,14 +189,12 @@ between total acidic composition and Ph.
 
 #### Points of Interest
 
-Of most interest are the measures of concentration. The weight per volume of \
+Of most interest are the measures of concentration. The mass per volume of \
 each solute is assumed to have a corelative relationship to the wine's \
 quality. Comparing the ratios of a wine's compostition correlated to the \
 wine's quality is the most interesting feature to investigate.  
 
-#### Additional Considerations
-
-Also of interest is the non-compositional value of Ph. There's a few questions \
+Another interest is the non-compositional value of Ph. There's a few questions \
 we can try to answer here. What commonality between Ph values exists at varied \
 concentrations of acidic solute? Is there a relationship between Ph and \
 quality?  
@@ -206,29 +203,33 @@ With both red and white datasets, we can also investigate differences between \
 the two types. How do their compositions differ? Do those compositional \
 differences affect the qualitative scale between whites and reds?  
 
-## Data Preparations
+## Data Preparation
 
 As previously noted, we will need to convert our compositional data to units \
-of equal measure. What options are there and which option best fits our \
-purpose? 
+of equal measure. First we should consider what options are available and \
+which best fits our purpose.  
 
-Our first option is weight per volume. The data is presented to us in this \
+The first option is mass per volume. The data is presented to us in this \
 format. This could be a good measure to perform investigation. Grams per \
 cubic meter may be a common measure to the drug markets. I'd like a unit of \
-measure that is more widely understood. 
+measure that is more widely understood.  
 
-Parts per million (PPM) is a commonly reported unit of concentration. \
-This would make for easily reported values. What effect would a scale in the \
-millions have on visualations of the measurements?
+Parts per million (ppm) is a commonly reported unit of concentration. This \
+would make for easily reported values. What effect would a scale in the \
+millions have on visualizations?
 
-The percentage of a solute within a solution should cover both of these \
-concerns. A summation of solute percent can be used to determine the ratio of \
-solvent in each solution of wine. Percents provide a more reasonable scale, \
-and percents are commonly understood.
+A solute's percentage of a solution should cover these concerns. A summation \
+of solute percent can be used to determine the ratio of solvent in each \
+solution of wine. Percents should provide a more manageable scale, and are \
+commonly understood.
 
-Having weighed the unit options and outlined some initial questions we can \
-proceed with generating a working dataset. The following list should cover \
-what has been considered so far.
+If any of these assumptions about percents proves false, it will be easy to \
+convert back to another better suited measure. 1% is equal to 10000 ppm and 1 \
+ppm is equal to 1 mg/L. We can also easily convert to grams per serving. \
+There's 33.8 ounces in a liter and 5 ounces in a serving.
+
+Having considered the options, we can generate a working dataset. The \
+following list should cover what has been decided on.
 
 1. Add a field to note the wine's color.
 1. Merge the two datasets into one.
@@ -241,25 +242,24 @@ cubic decimeter. (i.e. divide by 1000)
 by density and multiply by 100)
 1. Add fields for total solute and solvent percents.
 
-```{r echo=FALSE}
-
-#quality <- factor(c(1:10))
-wines.red <- read.csv("wineQualityReds.csv")
-wines.white <- read.csv("wineQualityWhites.csv")
-
+```{r echo=FALSE, Data_Conversion}
+# Add a color field
 wines.red$color = "red"
 wines.white$color = "white"
 
+# Merge the datasets into a temporary table
 winesTmp <- rbind(wines.red,wines.white)
 
+# Add a field to delineate average wines from others.
 winesTmp$quality.class = ifelse((winesTmp$quality == 5 | 
                                    winesTmp$quality == 6), 'ordinary', 
                                 'extreme')
 
+# Factor the quality values
 winesTmp$quality.class <- factor(winesTmp$quality.class)
 winesTmp$quality <- factor(winesTmp$quality)
 
-# Drop unused index
+# Drop the unused index
 winesTmp <- subset(winesTmp, select = -c(X))
 
 # Convert values to grams per cubic decimeter
@@ -267,61 +267,67 @@ winesTmp$density <- winesTmp$density * 1000
 winesTmp$free.sulfur.dioxide <- winesTmp$free.sulfur.dioxide / 1000
 winesTmp$total.sulfur.dioxide <- winesTmp$total.sulfur.dioxide / 1000
 
-# convert grams per cubic decimeter to percent solution
-# load to a final dataframe
+# Group columns that will be excluded in percent conversion
 notConcentrate <- names(winesTmp) %in% 
   c('pH', 'color', 'alcohol', 'quality', 'quality.class', 'density')
 
+# Convert grams per cubic decimeter to percent solution 
+# Store results in final table
 wines <- winesTmp[,!notConcentrate] / winesTmp[,"density"] * 100
 wines <- cbind(winesTmp[,notConcentrate],wines)
 
-# validate total solution
-solutes <- names(wines) %in% 
+# Prepare columns for solute to solvent calculations
+solutes <- names(winesTmp) %in% 
   c('alcohol', 'fixed.acidity', 'volatile.acidity', 'citric.acid', 
     'residual.sugar', 'chlorides', 'total.sulfur.dioxide', 'sulphates')
 
+# Calculate and add solute and solvent percents to table
 wines$total.solute <- rowSums(wines[,solutes])
 wines$total.solvent <- 100 - wines$total.solute
 
+# clean up after ourselves
 rm('notConcentrate')
 rm('winesTmp')
 rm('wines.red')
 rm('wines.white')
 
+# Inspect our final work
 head(wines)
-
 ```
 
-### Did you create any new variables from existing variables in the dataset?
+### Data Preparation Aftermath
 
-The sum of solute percentages does not equal 100%. There is no information on \
-the composition of the remaining solution. The information sheet claims there \
-are no missing attribute values. Therefore we must assume the unaccounted \
-solution is a tasteless solvent (e.g. water). Higher solvent content may be a \
-factor in determining quality. We could hypothesize Watered down wine is of \
-lower quality. Total percent solute and percent solvent were added for \
-comparing these values.  
+Having cleaned up the data, I'd like to take note of the variables added. It \
+is good to keep track of such things. Just in case we forget why they were \
+added.  
 
-Another variable was added to retain information on which dataset the \
-observation originated from. This will allow us to compare red wines to whites \
-on their compositional differences and quality similarities.  
+The sum of the percent solutes does not account for the total solution. With \
+no information on the composition of the remaining solution, and the claim \
+there are no missing attributes, we must assume the unaccounted solution is a \
+tasteless solvent (e.g. water). We're also making the assumption that alcohol \
+is not a solvent for this case. Higher solvent content may be a factor in \
+determining quality. We could hypothesize Watered down wine is of lower \
+quality. These values will allow us to test these hypotheses.  
 
-Including a boolean to say if a wine is average or exceptional was also added \
-to reduce calculation times. In this case, exceptional is defined as not \
-average. Exceptionally bad and exceptionally good wines have similar \
+Another variable we added retains information on which dataset the observation \
+originated from. This will allow us to compare the differences between red and \
+white wines. As someone with a preference for reds, I think this part is the \
+most important.  
+
+The added exceptional vs ordinary variable is intended to explore what is \
+common in wines of average quality. In this case, exceptional is defined as \
+not average. Exceptionally bad and exceptionally good wines have similar \
 numbers of observations. Comparing what makes for an average vs. non-average \
 wine and then comparing the extremes may give a more complete picture of wine \
 quality.  
 
-### Of the features you investigated, were there any unusual distributions? \
-Did you perform any operations on the data to tidy, adjust, or change the form \
-of the data? If so, why did you do this?
+Finally, the solute columns were changed from mass per volume to percents. \
+Density, by definition is 100% of the solution this is shown in our \
+calculation. We should also not forget the unit conversions we have. While 
+we are working with percents, it helps to be able to report whichever value is \
+most conducive to the listener.
 
-Finally, the solute columns were changed from mass per volume to percents were \
-renamed to better describe new unit of measure. Density was maintained in \
-units of cubic decimeters. Density, by definition is 100% of the solution.  
-
-# Bivariate Plots Section
+## Bivariate Plots
 
 > **Tip**: Based on what you saw in the univariate plots, what relationships
 between variables might be interesting to look at in this section? Don't limit
@@ -1173,20 +1179,23 @@ some insight. The question here is, how many opinions using that scale is \
 needed to get a usable granularity? It's a great starting point with limited \
 use.  
 
-Despite the limitations of the quality score, the dataset does offer a depth \
-of posibilities. Differences of composition between variatals absent of \
+Despite the limitations of quality score, the dataset does offer a depth of \
+possibilities. Differences of composition between varietals absent of \
 quality considerations is the top of my list. While alcohol content was \
 chosen as a surrogate to quality, it still is a measure of alcohol content. It \
 could be that alcohol is a good measure of quality. I would argue that the \
 polled experts have a bias for alcohol content. What makes them experts and \
 what criteria do they use in rating decisions?  
 
+There's also many items noted in the initial pass of the data that wasn't \
+explored further. These questions could be their
+
 One compound I didn't explore and would in a future analysis are the acids. \
 There's enough evidence to explore the relationship between citric acid, sugar \
 and salt. There's also an expectation that Ph is influenced by the acidic \
 compounds. Expectations should always be tested.  
 
-At the end of it, the insite gleaned is something I look forward to testing. \
+At the end of it, the insight gleaned is something I look forward to testing. \
 Next time I'm in the store for a bottle of wine, I'm going to use alcohol \
 content as my primary deciding factor. It will be interesting how many bottles \
 go through before it proves to be a bad metric.
