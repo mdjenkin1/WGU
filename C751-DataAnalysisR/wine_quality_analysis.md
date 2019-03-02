@@ -49,7 +49,7 @@ In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
 [Pre-press (pdf)] http://www3.dsi.uminho.pt/pcortez/winequality09.pdf  
 [bib] http://www3.dsi.uminho.pt/pcortez/dss09.bib  
 
-## Univariate Plots Section
+## Univariate Investigation
 
 First a quick look at the data structure.  
 
@@ -224,7 +224,7 @@ solution of wine. Percents should provide a more manageable scale, and are \
 commonly understood.
 
 If any of these assumptions about percents proves false, it will be easy to \
-convert back to another better suited measure. 1% is equal to 10000 ppm and 1 \
+convert back to another better suited measure. 1% is equal to 10,000 ppm and 1 \
 ppm is equal to 1 mg/L. We can also easily convert to grams per serving. \
 There's 33.8 ounces in a liter and 5 ounces in a serving.
 
@@ -314,74 +314,81 @@ originated from. This will allow us to compare the differences between red and \
 white wines. As someone with a preference for reds, I think this part is the \
 most important.  
 
-The added exceptional vs ordinary variable is intended to explore what is \
-common in wines of average quality. In this case, exceptional is defined as \
-not average. Exceptionally bad and exceptionally good wines have similar \
-numbers of observations. Comparing what makes for an average vs. non-average \
-wine and then comparing the extremes may give a more complete picture of wine \
-quality.  
+The exceptional vs ordinary variable is intended for exploring what is common \
+in wines of average quality. In this case, exceptional is defined as not \
+average. Exceptionally bad and exceptionally good wines have similar numbers \
+of observations. Comparing what makes for average vs. non-average wine and \
+then comparing both ends of the extremes may give a more complete picture of \
+wine quality.  
 
 Finally, the solute columns were changed from mass per volume to percents. \
 Density, by definition is 100% of the solution this is shown in our \
-calculation. We should also not forget the unit conversions we have. While 
-we are working with percents, it helps to be able to report whichever value is \
-most conducive to the listener.
+calculation. We should also not forget the unit conversions we have. While we \
+are working with percents, it helps to be able to report whichever value is \
+most conducive.
 
-## Bivariate Plots
+1% is equal to:  
 
-> **Tip**: Based on what you saw in the univariate plots, what relationships
-between variables might be interesting to look at in this section? Don't limit
-yourself to relationships between a main output feature and one of the
-supporting variables. Try to look at relationships between supporting variables
-as well.
+* 10,000 ppm
+* 10 g/L
+* 1.48 g per serving
+
+## Bivariate Investigation
 
 When cleaning up the dataset, a number of questions were raised on the \
-relationships between variables. As a starting point we'll take a matrix \
-synopsis between solutes and quality class
+relationships between variables. A matrix synopsis between the solutes should \
+give a good direction on where to go.  
 
-```{r echo=FALSE, Bivariate_Plots}
+### Universal Comparisons
 
-subjects <-   c('alcohol', 'fixed.acidity', 'volatile.acidity', 
+```{r echo=FALSE, The_Matrix}
+# Define items for the matrix
+subjects <- c('alcohol', 'fixed.acidity', 'volatile.acidity', 
     'citric.acid', 'residual.sugar', 'chlorides', 'total.sulfur.dioxide', 
     'sulphates', 'free.sulfur.dioxide', 'pH', 'quality.class', 'quality')
 
+# Create the matrix
 theme_set(theme_minimal(base_size=8))
-ggpairs(wines[,subjects], progress = FALSE, lower=list(combo=wrap("facethist",
-                                                                  binwidth=15)))
-
+ggpairs(wines[,subjects], progress = FALSE, 
+        lower=list(combo=wrap("facethist", binwidth=15)))
 ```
 
-From this initial comparison, it seems alcohol content is the greatest \
-predictor of wine quality. It also suggests the thought of average versus \
-other will not give the results hoped for. Based on the distribution of \
-alcohol content by quality, it makes more sense to bin quality as less than \
-average and better than average values. The grouping would be split between 5 \
-and 6.  
+From this initial comparison, it seems alcohol content is the best predictor \
+of wine quality. It also suggests the thought of average versus other may not \
+provide the results hoped for. Based on the distribution of alcohol content by \
+quality, there's more sense in breaking quality as less than average and better \
+than average values. This would regroup the observations with a split between \
+qualities 5 and 6.  
 
 The strongest solute correlation is between free sulfur dioxide and total \
 sulfur dioxide. This makes sense as one is a subset of the other. Sulfuric \
-content related to quality does have an interesting phenomina. It appears that \
+content related to quality does have an interesting phenomena. It appears that \
 lower quality wines have larger range of sulfur dioxide content.
 
 Acidic content also appears to have a slight impact on wine quality. The upper \
 and lower bounds of acidic solutes lessens as quality improves. Total acidic \
-content should be investigated further.
+content could be investigated further.
 
-Total solvent and color are missing from the comparisons. They should be \
-added in the next comparison set. Ordering of the variables should also \
-adjusted for in the next comparison set.
+Total solvent and color are missing from the comparisons. They should be added \
+in the next comparison set. Variable ordering should also be adjusted in the \
+next comparison set.
 
-```{r echo=FALSE}
+### Refined Comparisons
+
+```{r echo=FALSE, The_Matrix_Reloaded}
+# Add new values
 wines$quality.class = ifelse(as.numeric(wines$quality) <= 3, 'lesser', 'better')
 wines$quality.class = factor(wines$quality.class, levels=c('lesser', 'better'))
 wines$total.acid <- rowSums(wines[,c('fixed.acidity', 'volatile.acidity', 
                                      'citric.acid')])
 
+# Redefine values for the matrix
 subjects <- c('alcohol', 'total.solvent', 'pH', 'total.acid', 'fixed.acidity',
               'volatile.acidity','citric.acid', 'residual.sugar', 'chlorides', 
               'total.sulfur.dioxide', 'sulphates', 'free.sulfur.dioxide',
               'color', 'quality.class', 'quality')
 
+# Reload the matrix
 theme_set(theme_minimal(base_size=8))
 ggpairs(wines[,subjects], progress = FALSE, 
         lower=list(combo=wrap("facethist", binwidth=15)))
@@ -389,143 +396,145 @@ ggpairs(wines[,subjects], progress = FALSE,
 
 This new set has a higher number of correlated values. As alcohol content \
 increases, total solvent decreases. This suggests that alcohol is a greater \
-portion of the solution than other solutes. The opposite is true for \
+portion of the solution than the other solutes. The opposite is true for \
 total acid and fixed acidity. As one increases, so does the other. This \
-suggests that fixed acidity is a higher proportion of total acidity than the \
-other forms of acid in the solution.
+suggests that fixed acidity has a higher proportion of total acidity than the \
+other acidic forms.  
 
 Residual sugar appears to be consistent through all observations. This is \
 surprising due to the relationship between sugar as a fuel for yeast to turn \
-into alcohol.
+into alcohol.  
 
 Despite the low correlation between pH and total acidity, there does appear to \
-be a loose relationship there. As total acidity increases, the pH drops \
-(becomes more acidic). There's also appears to be a slight relationship \
-between acidity and quality. Fixed acidity, citric acid and pH seems to be \
-consistent through all quality grades. Volatile acidity has tends to have a \
-higher content in lesser quality wines.
+be a loose relationship. As total acidity increases, the pH drops (becomes \
+more acidic). There's also appears to be a slight relationship between acidity \
+and quality. Fixed acidity, citric acid and pH seems to be consistent through \
+all grade qualities. Volatile acidity seems to have a higher content in lesser \
+quality wines.  
 
-There's also greater variation in the chemical makeup between red and white \
-wines. White wines tend to have more residual sugar, more sulfur dioxides, and \
-a lower pH. The lower pH of white wines contrasts the lower acidic content of \
-white wine. Remember, the lower the pH, the more acidic the compound.
-
-From here, it would be good to compare red and white composition separately. \
-Some variable limitation can also be done. Specifically residual sugar, \
-chlorides, sulfur dioxides and sulfates can be discarded. Interest in those \
-variables is zmainly in the compositional differences of red and white wines.
+We start to see hints at the variation in chemical makeup between red and \
+white wines. White wines tend to have more residual sugar, more sulfur \
+dioxides, and lower pH. The lower pH of white wines contrasts with the lower \
+acidic content of white wine. Remember, lower pH means more acidic. The \
+expectation is higher acidic content would have lower pH. One possible \
+explanation is fixed vs. other forms of acid.  
 
 I did note earlier that the range of total sulfur dioxide is greater at lower \
 qualities. However, the mean of sulfur dioxide content does remain constant. \
-The difference in range could be attributed to white wine's tendancy to have a \
-higher concentration of sulfur dioxides than red wines. Saving these \
-values for a future analysis in the compositional differences between red \
-and white wines would make sense.
+The difference in range could be attributed to white wine's tendency to have a \
+higher concentration of sulfur dioxides than red wines. There's some logic to \
+save these values for a future analysis. One with greater focus on the \
+compositional differences of red and white wines.  
 
-The effect of acidic compounds and pH on quality also appears to have a \
-dependency on wine variety. There's a noticable variation in acidic measures \
-between red and white wines.
+The effect of acidic compounds and pH on quality also appears to be dependent \
+on wine variety. With all of these differences between red and white, It would \
+be good to compare red and white composition separately.  
 
-```{r echo=FALSE}
-subjects <- c('alcohol', 'total.solvent', 'pH', 'total.acid', 'fixed.acidity',
-              'volatile.acidity','citric.acid', 'residual.sugar', 'chlorides', 
-              'total.sulfur.dioxide', 'sulphates', 'free.sulfur.dioxide',
-              'color', 'quality.class', 'quality')
+### Comparisons of Varietals
 
+#### Red
+
+```{r echo=FALSE, The_Matrix_Red_Band}
 theme_set(theme_minimal(base_size=8))
 ggpairs(subset(wines[,subjects], color=="red"), progress = FALSE, 
         lower=list(combo=wrap("facethist", binwidth=15)))
 ```
 
-```{r echo=FALSE}
-subjects <- c('alcohol', 'total.solvent', 'pH', 'total.acid', 'fixed.acidity',
-              'volatile.acidity','citric.acid', 'residual.sugar', 'chlorides', 
-              'total.sulfur.dioxide', 'sulphates', 'free.sulfur.dioxide',
-              'color', 'quality.class', 'quality')
+#### White
 
+```{r echo=FALSE, The_Matrix_White_Band}
 theme_set(theme_minimal(base_size=8))
 ggpairs(subset(wines[,subjects], color=="white"), progress = FALSE, 
         lower=list(combo=wrap("facethist", binwidth=15)))
 ```
 
 When splitting out the comparisons by color. It's easier to see how \
-differences in composition can affect quality. Acidic and sulfuric compounds \
-are a greater predictor of wine quality in reds than whites. Across both \
-types, alcohol remains the greatest predictor of wine quality. Those compounds \
-will be reserved for a future study on compositional differences between red \
-and white wines.
+differences in composition affects quality. Acidic and sulfuric compounds are \
+a greater predictor of wine quality in reds than whites. Across both types, \
+alcohol remains the greatest predictor of wine quality. Acidic and sulfuric \
+compounds will be reserved for future analysis.  
 
 Is there something that indirectly influences quality? A relationship between \
 alcohol content and the remaining compounds? What are the ratios of other \
-compounds compared to alcohol content?
+compounds compared to alcohol content?  
 
-Distribution of chlorides across alcohol seems to match the curve of alcohol \
-content for all types. Less alcoholic wine tends to have more salt. Aside from \
-some outliers, the percent salt content in red and whites appears to be \
-similar.
+Distribution of chlorides (salt) across alcohol seems to match the curve of \
+alcohol content for all types. Less alcoholic wine tends to have more salt. \
+Aside from some outliers, the percent salt content in red and whites appears \
+to be similar.
 
-Residual sugars content also appears to have a trend with alcohol content \
-despite the low corelation. One factor that could account for this is starting \
-sugar. The conversion rate of sugar to alcohol and interuptions in the \
-fermentation process all contribute to the final alcohol and residual content.
+Despite the low correlation, residual sugar and alcohol content also appears \
+to have a universal trend across the varietals. We can only speculate on the \
+unknown factors that would produce such a result. One factor could be the \
+starting sugar. Another might be the yeast used to convert sugar to alcohol. \
+At what alcohol content does that yeast die? Was the fermentation process \
+interrupted at a certain point? These are questions we don't have the answers \
+too. We shouldn't ignore this apparent relationship due to unknown influences.  
 
-The plots between alcohol, salt and sugar are worth exploring a bit closer. \
-Before moving forward, it would help to take some steps back.
+From all of this, the plots between alcohol, salt and sugar should be the \
+center of our exploration. There appears to be some type of relationship \
+between alcohol and quality. There's also appears to be a relationship between \
+ratios of salt and sugar to alcohol. Before moving forward, it's only prudent \
+to take some steps back.  
 
-```{R alcohol counts} 
+### Alcohol and Quality
+
+```{r echo=FALSE, Alcohol_Content_Distribution} 
 ggplot(aes(x = alcohol), data = wines) +
   geom_histogram(binwidth = .4, color = 'black', fill = 'orange')
 ```
 
 Distribution of the alcohol content in our samples is right skewed. Are the \
 samples of higher content skewing the quality contents? So far, we've \
-been basing our thinking that alcohol content relates to wine quality by the \
-upward trend of box plots at various levels of quality. We should take another \
-view at the data to support this assumption.
+been directing our thinking on alcohol content and wine quality by the \
+tendency of higher average alcohol content at higher levels of quality. We \
+should take a closer view at the data to support this assumption.  
 
-```{R alcohol content for quality}
+```{r echo=FALSE, Alcohol_by_Quality}
 ggplot(data=wines, aes(x=quality, y=alcohol)) +
   geom_point()
 ```
 
-There's quite a bit of overplotting in this graph
+There's quite a bit of overplotting in that graph. Still, there is some \
+pattern in the extreme qualities.  
 
-```{R alcohol content for quality}
+```{r echo=FALSE, Alcohol_by_Quality_Better_Visibility}
 ggplot(data=wines, aes(x=quality, y=alcohol)) +
   geom_jitter()
 ```
 
 Wine samples graded as a 9 can be counted on one hand. There's still a bit of \
-overplotting. The clusters of samples do seem to rise as quality improve.
+overplotting. It is more clear to see the clusters of samples rise as quality \
+improves.  
 
-```{R alcohol content for quality}
+```{r echo=FALSE, Alcohol_by_Quality_Most_Visible}
 ggplot(data=wines, aes(x=quality, y=alcohol)) +
   geom_jitter(alpha=.4) 
 ```
 
-Reducing the alpha a bit and the clusters are more clear. It's also clear that \
-we can't say that wine quality will be higher just because the alcohol \
-content is higher. Higher quality wines do tend to have higher alcohol \
-content. We are not saying that lower quality wines will always be of lower \
-alcohol content.
+Reducing the alpha a bit and the change in the clusters become more clear. \
+It's also clear we can't say that wine quality will be better just because the \
+alcohol content is higher. This is different from saying higher quality wines \
+tend to have higher alcohol content. Do not confuse this with saying lower \
+quality wines will always have lower alcohol content.  
 
-```{R alcohol content for quality}
+```{r echo=FALSE, Alcohol_by_Quality_Categories}
 ggplot(data=wines, aes(x=quality.class, y=alcohol)) +
   geom_jitter(alpha=.4)
 ```
 
-Taking the bins we've defined for lesser quality and better quality wines \
-shows a clearer picture. Better quality wines are evenly dispersed across the \
-range of alcohol content. It looks that the cut off is just above 10% alcohol \
+Taking the bins we've defined for lesser and better quality shows a clearer \
+picture. Better quality wines seems evenly dispersed across the range of \
+alcohol content. It looks that the cut off is just above 10% alcohol \
 content. Wines with more than 10% alcohol content are more likely to be of \
-better quality.
+better quality.  
 
+Considering we would rather increase than give up resolution of quality, \
+it would be good take a look at the upper and lower quality wines bins from \
+another perspective. To facilitate this, let's recreate the smaller bins \
+without the added field.  
 
-Considering we might not want to completely give up the resolution on quality ,
-it would be good to have another method of defining our lesser and better \
-bins.
-
-```{R alcohol content for quality}
+```{r echo=FALSE, Alcohol_by_Binned_Quality}
 wines %>%
   subset(as.numeric(quality) < 7) %>%
   group_by(class=cut(as.numeric(quality), breaks=seq(0, 7, by = 3))) %>%
@@ -533,12 +542,16 @@ wines %>%
   geom_jitter(alpha=.4)
 ```
 
-We ended up needing to drop wines of quality 9, but this will be workable \
-to maintain quality granularity while talking about wines of better vs lesser \
-quality. I'm also regretting the decision to transform quality \
-into a factor.
+We ended up dropping wines of quality 9. As there are so few observations with \
+that rating, it could be considered outliers. Basically this is the same graph \
+as previously created. The benefit of this method is allowing us to maintain \
+quality granularity within wines of better of lesser quality.  
 
-```{R alcohol content for quality}
+I'm also having some regret in the decision to transform quality into a \
+factor. That does give more control over the scale. That additional control is \
+under utilized when quality is on an integer scale.  
+
+```{r echo=FALSE, Alcohol_at_Higher_Quality}
 wines %>% 
   subset(as.numeric(quality) > 3) %>%
   ggplot(aes(x=quality, y=alcohol)) +
@@ -546,41 +559,41 @@ wines %>%
 ```
 
 Taking a closer look at the breakdown of the better quality wines, We see that \
-wines of quality 6 runs a full spectrum of alcohol content. Disregarding \
-wines of quality 6, the alcohol content of better wines start to occur more \
-frequently around 10-11%. Wines of even higher quality have even fewer \eoccurances of alcohol content under ~10.5%
+wines of quality 6 runs the full spectrum of alcohol content. Disregarding \
+wines of quality 6, better wines start to occur more frequently at alcohol \
+content near 10-11%. Wines of the highest quality have even fewer occurrences \
+with alcohol content under ~9.5%.
 
-```{R alcohol content for quality}
+```{r echo=FALSE, Alcohol_at_Middle_Quality}
 wines %>% 
   subset(as.numeric(quality) >= 3 & as.numeric(quality) <= 5) %>%
   ggplot(aes(x=quality, y=alcohol)) +
   geom_jitter(alpha=.4)
 ```
 
-This shift for wines of greater vs lesser quality around 10% is more apparent \
-if we limit our views to the quality scores surrounding where the limit should \
-occur. Wines of quality 6 does appear to be a merge between wines of quality 5 \
-and 7. The greatest concentration of quality 5 wines occurs under 10% alcohol \
-content. The number of low quality wines is even more concentrated around \
-~9.5% and lower.
+The shift for wines of greater vs lesser quality around 10% is more apparent \
+by limiting the view to the middle quality scores. Wines of quality 6 appear \
+to be a merge between wines of quality 5 and 7.  
 
-```{R alcohol content for quality}
+```{r echo=FALSE, Alcohol_at_Lowest_Quality}
 wines %>% 
   subset(as.numeric(quality) <= 3) %>%
   ggplot(aes(x=quality, y=alcohol)) +
   geom_jitter(alpha=.4)
 ```
 
-Breaking out the lesser quality wines by score shows there's an even \
-dispersion under 11% alcohol content for wines of quality 3. For wines of \
-quality 4, the dispersion is even upto about 11.5% quality.
+Breaking out the least quality wines shows a dispersion that rarely breaks \
+11.5% alcohol. If the least quality wines rarely rise above 11.5% alcohol and \
+the highest quality wines rarely have less than 9.5% alcohol, then the \
+average quality wines must fall within that range.  
 
-If we were to eliminate wines with alcohol content between 9.5 and 11.5, what
-would that do to our graphs? The greatest portion of our samples appear to \
-fall in that range. Wines in that alcohol content range also appear to be \
-make up the population of middling quality. 
+What would happen to our graphs if we eliminated the ordinary wines defined as \
+having alcohol content between 9.5% and 11.5%? This also revisits the idea of \
+average versus non-average wines. We have a definition of what makes for an \
+ordinary wine. Eliminating those from our views, it should become easier to \
+see the differences at the extremes.  
 
-```{R alcohol content for quality}
+```{r echo=FALSE, Alcohol_and_Quality_missing_middles}
 wines %>% 
   subset(alcohol <= 9.5 | alcohol >= 11.5) %>%
   ggplot(aes(x=quality, y=alcohol)) +
@@ -590,14 +603,14 @@ wines %>%
 ```
 
 The cut off between better and lesser quality wines is even easier to see when \
-we remove the middle range of alcohol content. It does appear to occur at some \
-granularity of a quality of 6.
+we remove the middle range of alcohol content. This split more clearly occurs \
+at some granularity of quality rated 6.  
 
-As a quality 6 is ambiquous for determing lesser and better quality wines, \
-we should look back to our lesser vs better quality graph and eliminate the \
-ambiguous value.
+It's now clear that quality 6 wines are ambiguous in quality. We should look \
+back at the lesser vs better quality graph while eliminating the ambiguous \
+value.  
 
-```{R alcohol content for quality}
+```{r echo=FALSE, Quality_Minus_Ambiguity}
 wines %>%
   subset(as.numeric(quality) < 7 & as.numeric(quality) !=4) %>%
   group_by(class=cut(as.numeric(quality), breaks=seq(0, 7, by = 3))) %>%
@@ -607,59 +620,47 @@ wines %>%
                  geom = "crossbar", width = 1, color = 'red')
 ```
 
-We should remember the quality scale is subjective based on the opinion of \
+It is now a quite clear relationship between quality and alcohol content. We \
+should remember the quality scale is subjective and based on the opinion of \
 experts. It's possible those experts have a preference for higher alcohol \
 content in their wines. On the observations made this far, I would suggest \
-that preference is likely.
+that preference is likely.  
 
-We should now take a look at actual values for the correlation between quality \
-and alcohol.
+As part of due diligence, we should a look at actual value correlation between \
+quality and alcohol.  
 
-```{R correlation}
+```{r echo=FALSE, Quality_Alcohol_Correlation}
 cor.test(wines$alcohol, as.numeric(wines$quality))
 ```
 
-Across all samples, there does seem to be a moderate correlation between \
-quality and alcohol content. This is including a single value of wines quality \
-that appears to contain both lesser and greater quality wines. An ambiguous \
-measurement of quality. A value that fits the model but skews the data because \
-of an apparent lack of resolution in the quality scale. What happens to \
-correlation if we omit this ambiguous score?
+Across all samples, there is a moderate correlation between quality and \
+alcohol content. This correlation includes the ambiguous quality rating. This \
+is a central value that fits the model but skews the data. This skew appears \
+to be because of a lack of resolution in the quality scale. What happens to \
+correlation if we omit this ambiguous score?  
 
-```{R adjusted correlation}
+```{r echo-FALSE, Quality_Alcohol_Adjusted_Correlation}
 wines.noMiddle <- subset(wines, as.numeric(quality) != 4)
 cor.test(wines.noMiddle$alcohol, as.numeric(wines.noMiddle$quality))
 rm(wines.noMiddle)
 ```
 
 By omitting the ambiguous quality value on our scale, the correlation \
-became strong. I would hypothesize, if we had a more granular and less \
-subjective quality scale the correlation between would be even stronger.
+becomes strong. I would hypothesize, if we had a more granular and less \
+subjective quality scale the correlation between would be even stronger. For \
+now, I will state that alcohol is an acceptable measure of quality. It lends \
+greater granularity than the current quality scale.  
 
-What does this mean for the relationship between the objective alcohol content \
-and the subjective quality scale? I would suggest that this supports the \
-assumption that alcohol is fair objective measurement of quality. 
-
-```{R alcohol summary}
+```{r echo-FALSE, Alcohol_Summary}
 summary(wines$alcohol)
 ```
 
-Our earlier observations on the upper limit of alcohol content for lower \
-quality wines and lower limit for higher quality wines are almost exactly the \
-1st and 3rd quartiles of alcohol content ranges. This gives me more confidence \
-in the assumption.
+The earlier observations on the upper limit of alcohol content for lower \
+quality wines and lower limit for higher quality wines fall almost exactly on \
+the 1st and 3rd quartiles of the alcohol content range. This gives even more \
+confidence in the assertion that alcohol is the measure of quality.  
 
-```{R adjusted correlation}
-wines.noMiddle <- subset(wines, as.numeric(quality) != 4 & (alcohol >= 11.3 |
-                                                              alcohol <= 9.5))
-cor.test(wines.noMiddle$alcohol, as.numeric(wines.noMiddle$quality))
-rm(wines.noMiddle)
-```
-
-Cutting out this additional measure of average wine produces an even stronger \
-correlation between quality and alcohol content. 
-
-# Bivariate Analysis
+## Bivariate Analysis
 
 > **Tip**: As before, summarize what you found in your bivariate explorations
 here. Use the questions below to guide your discussion.
