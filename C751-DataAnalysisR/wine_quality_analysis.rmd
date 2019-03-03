@@ -1092,8 +1092,8 @@ ggplot(aes(y = sugar*1.48, x = salt*1480),
   geom_smooth(data = subset(wine.ratios, type=="red"), aes(color = "Red")) +
   geom_smooth(data = subset(wine.ratios, type=="white"), aes(color = "White")) + 
   scale_colour_manual(name="Varietal", values=c("#540000", "#d2e8a9")) +
-  labs(title="ABV Related to Salt and Sugar", y="Sugar (g)",
-       x = "Salt (mg)", fill = "ABV") +
+  labs(title="ABV Related to Salt and Sugar", y="Sugar per Serving (g)",
+       x = "Salt per Serving (mg)", fill = "ABV") +
   thm
 ```
 
