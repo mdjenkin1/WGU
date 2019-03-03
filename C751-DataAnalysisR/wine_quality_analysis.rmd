@@ -14,7 +14,7 @@ library(RColorBrewer)
 library(scales)
 ```
 
-```{r echo=FALSE, Load_the_Data}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
 wines.red <- read.csv("wineQualityReds.csv")
 wines.white <- read.csv("wineQualityWhites.csv")
 ```
@@ -49,11 +49,11 @@ In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
 [Pre-press (pdf)] http://www3.dsi.uminho.pt/pcortez/winequality09.pdf  
 [bib] http://www3.dsi.uminho.pt/pcortez/dss09.bib  
 
-## Univariate Investigation
+## Initial Investigation
 
 First a quick look at the data structure.  
 
-```{r echo=FALSE, Initial_Data_Structure}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Initial_Data_Structure}
 str(wines.red)
 ```
 
@@ -67,7 +67,7 @@ This investigation is primarily concerned with predicting wine quality from \
 wine composition. It only makes sense to start with an investigation of the \
 quality score. How utilized is the 0-10 quality scale?  
 
-```{r echo=FALSE, Quality_Scale_Validation}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Quality_Scale_Validation}
 summary(wines.red$quality)
 ```
 
@@ -77,7 +77,7 @@ skew. What does give me pause is the 1st and 3rd quartiles are separated by 1. \
 This would suggest an inordinate occurrences of middling quality range. \
 Histograms are cheap and will give a quick visualization to confirm.  
 
-```{r echo=FALSE, Red_Quality_Distribution}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Red_Quality_Distribution}
 ggplot(data=wines.red, aes(x=quality)) +
   geom_histogram(binwidth = 1)
 ```
@@ -86,7 +86,7 @@ It appears the dataset does primarily consist of wines of average quality. \
 A pie-chart would provide an understanding of how homogenous the population \
 quality is.  
 
-```{r echo=FALSE, Univariate_Plots}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots}
 red_quality_counts <- wines.red %>%
   group_by(quality) %>%
   summarise(no_obs = length(quality))
@@ -104,7 +104,7 @@ are of average quality.
 It might be valuable to include the sample of white wines to increase the \
 sample size.  
 
-```{r echo=FALSE, White_Wine_Structure}
+```{r echo=FALSE, message=FALSE, warning=FALSE, White_Wine_Structure}
 str(wines.white)
 ```
 
@@ -116,7 +116,7 @@ Remember, the primary purpose of adding the white wine dataset to the \
 investigation is to increase the granularity of quality ratings. There is the \
 possibility that including white wine will skew our data.  
 
-```{r echo=FALSE, White_Wine_Quality_Scale}
+```{r echo=FALSE, message=FALSE, warning=FALSE, White_Wine_Quality_Scale}
 summary(wines.white$quality)
 ```
 
@@ -126,7 +126,7 @@ population of wines rated as nine.
 
 Perhaps the distribution of quality for white wines has greater utilization.  
 
-```{r echo=FALSE, White_Wine_Quality_Distribution}
+```{r echo=FALSE, message=FALSE, warning=FALSE, White_Wine_Quality_Distribution}
 ggplot(data=wines.white, aes(x=quality)) +
   geom_histogram(binwidth = 1)
 ```
@@ -134,7 +134,7 @@ ggplot(data=wines.white, aes(x=quality)) +
 That's diappointing. There is still a disproportionate number of average \
 quality wines in the white sample.  
 
-```{r echo=FALSE, White_Wine_Quality_Proportions}
+```{r echo=FALSE, message=FALSE, warning=FALSE, White_Wine_Quality_Proportions}
 white_quality_counts <- wines.white %>%
   group_by(quality) %>%
   summarise(no_obs = length(quality))
@@ -150,7 +150,7 @@ of white wines are considered average quality. It seems approximately 75% of \
 the sample is rated at five and six compared to the 80% of reds. So there \
 was some success in our attempt at gaining granularity.  
 
-### Univariate Analysis
+### What Next
 
 There may not be enough of a sample size to predict if a wine is of \
 exceptionally good or poor quality based on its composition alone. There does \
@@ -162,7 +162,7 @@ doesn't, then it's either very bad or very good. With this thinking, analysis \
 on average vs. not-average may provide the best insight this data-set can \
 provide. We might be able to say what makes a wine average.  
 
-#### Dataset Description
+#### Delving into the Dataset
 
 Some rudimentary research on wine research turned up \
 [Wine Chemistry on Wikipedia](https://en.wikipedia.org/wiki/Wine_chemistry). \
@@ -242,7 +242,7 @@ cubic decimeter. (i.e. divide by 1000)
 by density and multiply by 100)
 1. Add fields for total solute and solvent percents.
 
-```{r echo=FALSE, Data_Conversion}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Data_Conversion}
 # Add a color field
 wines.red$color = "red"
 wines.white$color = "white"
@@ -282,7 +282,7 @@ solutes <- names(winesTmp) %in%
     'residual.sugar', 'chlorides', 'total.sulfur.dioxide', 'sulphates')
 
 # Calculate and add solute and solvent percents to table
-wines$total.solute <- rowSums(wines[,solutes])
+wines$total.solute <- rowSums(wines[,as.numeric(solutes)])
 wines$total.solvent <- 100 - wines$total.solute
 
 # clean up after ourselves
@@ -290,9 +290,6 @@ rm('notConcentrate')
 rm('winesTmp')
 rm('wines.red')
 rm('wines.white')
-
-# Inspect our final work
-head(wines)
 ```
 
 ### Data Preparation Aftermath
@@ -333,7 +330,7 @@ most conducive.
 * 10 g/L
 * 1.48 g per serving
 
-## Bivariate Investigation
+## Deeper Investigation
 
 When cleaning up the dataset, a number of questions were raised on the \
 relationships between variables. A matrix synopsis between the solutes should \
@@ -341,7 +338,7 @@ give a good direction on where to go.
 
 ### Universal Comparisons
 
-```{r echo=FALSE, The_Matrix}
+```{r echo=FALSE,  message=FALSE, warning=FALSE,The_Matrix}
 # Define items for the matrix
 subjects <- c('alcohol', 'fixed.acidity', 'volatile.acidity', 
     'citric.acid', 'residual.sugar', 'chlorides', 'total.sulfur.dioxide', 
@@ -356,9 +353,9 @@ ggpairs(wines[,subjects], progress = FALSE,
 From this initial comparison, it seems alcohol content is the best predictor \
 of wine quality. It also suggests the thought of average versus other may not \
 provide the results hoped for. Based on the distribution of alcohol content by \
-quality, there's more sense in breaking quality as less than average and better \
-than average values. This would regroup the observations with a split between \
-qualities 5 and 6.  
+quality, there's more sense in breaking quality as less than average and \
+better than average values. This would regroup the observations with a split \
+between qualities 5 and 6.  
 
 The strongest solute correlation is between free sulfur dioxide and total \
 sulfur dioxide. This makes sense as one is a subset of the other. Sulfuric \
@@ -375,7 +372,7 @@ next comparison set.
 
 ### Refined Comparisons
 
-```{r echo=FALSE, The_Matrix_Reloaded}
+```{r echo=FALSE, message=FALSE, warning=FALSE, The_Matrix_Reloaded}
 # Add new values
 wines$quality.class = ifelse(as.numeric(wines$quality) <= 3, 'lesser', 'better')
 wines$quality.class = factor(wines$quality.class, levels=c('lesser', 'better'))
@@ -434,7 +431,7 @@ be good to compare red and white composition separately.
 
 #### Red
 
-```{r echo=FALSE, The_Matrix_Red_Band}
+```{r echo=FALSE, message=FALSE, warning=FALSE, The_Matrix_Red_Band}
 theme_set(theme_minimal(base_size=8))
 ggpairs(subset(wines[,subjects], color=="red"), progress = FALSE, 
         lower=list(combo=wrap("facethist", binwidth=15)))
@@ -442,7 +439,7 @@ ggpairs(subset(wines[,subjects], color=="red"), progress = FALSE,
 
 #### White
 
-```{r echo=FALSE, The_Matrix_White_Band}
+```{r echo=FALSE, message=FALSE, warning=FALSE, The_Matrix_White_Band}
 theme_set(theme_minimal(base_size=8))
 ggpairs(subset(wines[,subjects], color=="white"), progress = FALSE, 
         lower=list(combo=wrap("facethist", binwidth=15)))
@@ -479,7 +476,7 @@ to take some steps back.
 
 ### Alcohol and Quality
 
-```{r echo=FALSE, Alcohol_Content_Distribution} 
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_Content_Distribution} 
 ggplot(aes(x = alcohol), data = wines) +
   geom_histogram(binwidth = .4, color = 'black', fill = 'orange')
 ```
@@ -490,7 +487,7 @@ been directing our thinking on alcohol content and wine quality by the \
 tendency of higher average alcohol content at higher levels of quality. We \
 should take a closer view at the data to support this assumption.  
 
-```{r echo=FALSE, Alcohol_by_Quality}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_by_Quality}
 ggplot(data=wines, aes(x=quality, y=alcohol)) +
   geom_point()
 ```
@@ -498,7 +495,7 @@ ggplot(data=wines, aes(x=quality, y=alcohol)) +
 There's quite a bit of overplotting in that graph. Still, there is some \
 pattern in the extreme qualities.  
 
-```{r echo=FALSE, Alcohol_by_Quality_Better_Visibility}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_by_Quality_Visibility}
 ggplot(data=wines, aes(x=quality, y=alcohol)) +
   geom_jitter()
 ```
@@ -507,7 +504,7 @@ Wine samples graded as a 9 can be counted on one hand. There's still a bit of \
 overplotting. It is more clear to see the clusters of samples rise as quality \
 improves.  
 
-```{r echo=FALSE, Alcohol_by_Quality_Most_Visible}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_by_Quality_Most_Visible}
 ggplot(data=wines, aes(x=quality, y=alcohol)) +
   geom_jitter(alpha=.4) 
 ```
@@ -518,7 +515,7 @@ alcohol content is higher. This is different from saying higher quality wines \
 tend to have higher alcohol content. Do not confuse this with saying lower \
 quality wines will always have lower alcohol content.  
 
-```{r echo=FALSE, Alcohol_by_Quality_Categories}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_by_Quality_Categories}
 ggplot(data=wines, aes(x=quality.class, y=alcohol)) +
   geom_jitter(alpha=.4)
 ```
@@ -534,7 +531,7 @@ it would be good take a look at the upper and lower quality wines bins from \
 another perspective. To facilitate this, let's recreate the smaller bins \
 without the added field.  
 
-```{r echo=FALSE, Alcohol_by_Binned_Quality}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_by_Binned_Quality}
 wines %>%
   subset(as.numeric(quality) < 7) %>%
   group_by(class=cut(as.numeric(quality), breaks=seq(0, 7, by = 3))) %>%
@@ -551,7 +548,7 @@ I'm also having some regret in the decision to transform quality into a \
 factor. That does give more control over the scale. That additional control is \
 under utilized when quality is on an integer scale.  
 
-```{r echo=FALSE, Alcohol_at_Higher_Quality}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_at_Higher_Quality}
 wines %>% 
   subset(as.numeric(quality) > 3) %>%
   ggplot(aes(x=quality, y=alcohol)) +
@@ -564,7 +561,7 @@ wines of quality 6, better wines start to occur more frequently at alcohol \
 content near 10-11%. Wines of the highest quality have even fewer occurrences \
 with alcohol content under ~9.5%.
 
-```{r echo=FALSE, Alcohol_at_Middle_Quality}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_at_Middle_Quality}
 wines %>% 
   subset(as.numeric(quality) >= 3 & as.numeric(quality) <= 5) %>%
   ggplot(aes(x=quality, y=alcohol)) +
@@ -575,7 +572,7 @@ The shift for wines of greater vs lesser quality around 10% is more apparent \
 by limiting the view to the middle quality scores. Wines of quality 6 appear \
 to be a merge between wines of quality 5 and 7.  
 
-```{r echo=FALSE, Alcohol_at_Lowest_Quality}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_at_Lowest_Quality}
 wines %>% 
   subset(as.numeric(quality) <= 3) %>%
   ggplot(aes(x=quality, y=alcohol)) +
@@ -593,7 +590,7 @@ average versus non-average wines. We have a definition of what makes for an \
 ordinary wine. Eliminating those from our views, it should become easier to \
 see the differences at the extremes.  
 
-```{r echo=FALSE, Alcohol_and_Quality_missing_middles}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_and_Quality_san-middles}
 wines %>% 
   subset(alcohol <= 9.5 | alcohol >= 11.5) %>%
   ggplot(aes(x=quality, y=alcohol)) +
@@ -610,7 +607,7 @@ It's now clear that quality 6 wines are ambiguous in quality. We should look \
 back at the lesser vs better quality graph while eliminating the ambiguous \
 value.  
 
-```{r echo=FALSE, Quality_Minus_Ambiguity}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Quality_Minus_Ambiguity}
 wines %>%
   subset(as.numeric(quality) < 7 & as.numeric(quality) !=4) %>%
   group_by(class=cut(as.numeric(quality), breaks=seq(0, 7, by = 3))) %>%
@@ -629,7 +626,7 @@ that preference is likely.
 As part of due diligence, we should a look at actual value correlation between \
 quality and alcohol.  
 
-```{r echo=FALSE, Quality_Alcohol_Correlation}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Quality_Alcohol_Correlation}
 cor.test(wines$alcohol, as.numeric(wines$quality))
 ```
 
@@ -639,7 +636,7 @@ is a central value that fits the model but skews the data. This skew appears \
 to be because of a lack of resolution in the quality scale. What happens to \
 correlation if we omit this ambiguous score?  
 
-```{r echo-FALSE, Quality_Alcohol_Adjusted_Correlation}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Quality_to_Alcohol_Adjusted}
 wines.noMiddle <- subset(wines, as.numeric(quality) != 4)
 cor.test(wines.noMiddle$alcohol, as.numeric(wines.noMiddle$quality))
 rm(wines.noMiddle)
@@ -651,7 +648,7 @@ subjective quality scale the correlation between would be even stronger. For \
 now, I will state that alcohol is an acceptable measure of quality. It lends \
 greater granularity than the current quality scale.  
 
-```{r echo-FALSE, Alcohol_Summary}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_Summary}
 summary(wines$alcohol)
 ```
 
@@ -660,7 +657,7 @@ quality wines and lower limit for higher quality wines fall almost exactly on \
 the 1st and 3rd quartiles of the alcohol content range. This gives even more \
 confidence in the assertion that alcohol is the measure of quality.  
 
-### Bivariate Analysis
+### Intermediate Analysis
 
 The quality score provided by the experts lacks in granularity. Luckily, the \
 experts tend to rate wines of higher alcohol content more favorably. By \
@@ -676,14 +673,14 @@ Moving forward in our exploration, we'll focus on alcohol, salt, sugar, and \
 wine variety. The other interesting variables will be saved for future \
 analysis.  
 
-## Multivariate Plots Section
+## Deeper Look
 
 To complete our investigation, we'll start by investigating how salt \
 concentration compares at various alcohol levels.  
 
 ### Salt
 
-```{r echo=FALSE, Salt_and_Alcohol}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Salt_and_Alcohol}
 ggplot(data=wines, aes(x=alcohol, y=chlorides)) +
   geom_jitter(alpha=.4)
 ```
@@ -692,7 +689,7 @@ The majority of wines have less than a hundredth of a percent of salt. There's \
 a jump in salt content around 9.5 percent alcohol. Most of them appear to be \
 outliers. Some scaling and subsetting should produce a better picture.  
 
-```{r echo=FALSE, Salt_and_Alcohol_Refined}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Salt_and_Alcohol_Refined}
 ggplot(data=subset(wines, chlorides < .03), aes(x=alcohol, y=chlorides)) +
   geom_jitter(alpha=.4) +
   scale_y_continuous(limits = c(.002, .006)) +
@@ -708,7 +705,7 @@ What about sugar content?
 
 ### Sugar
 
-```{r echo=FALSE, Sugar_and_Alcohol}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Sugar_and_Alcohol}
 ggplot(data=wines, aes(x=alcohol, y=residual.sugar)) + 
   scale_y_continuous() +
   geom_jitter(alpha=.5) +
@@ -718,7 +715,7 @@ ggplot(data=wines, aes(x=alcohol, y=residual.sugar)) +
 Again, the data is condensed on itself. Some adjustment on perspective can \
 only help.  
 
-```{r echo=FALSE, Sugar_and_Alcohol_Refined}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Sugar_and_Alcohol_Refined}
 ggplot(data=subset(wines, residual.sugar <= 2.5), 
        aes(x=alcohol, y=residual.sugar)) + 
   scale_y_continuous() +
@@ -734,8 +731,9 @@ There appears to be an interesting bump in sugar content near the delineation \
 of average and better than average wines. Of all the possibilities that could \
 explain that bump, the one we have is variety.  
 
-```{r echo=FALSE, Sugar_and_Alcohol_by_Varietal}
-ggplot(data=subset(wines, residual.sugar <= 2.5), aes(x=alcohol, y=residual.sugar)) + 
+```{r echo=FALSE, message=FALSE, warning=FALSE, Sugar_and_Alcohol_by_Varietal}
+ggplot(data=subset(wines, residual.sugar <= 2.5), 
+       aes(x=alcohol, y=residual.sugar)) + 
   scale_y_continuous() +
   geom_jitter(alpha=.4) +
   geom_smooth(aes(color=color))
@@ -755,7 +753,7 @@ the highest levels.
 
 Is there a similar phenomenon in salt content?  
 
-```{r echo=FALSE, Salt_and_Alcohol_by_Varietal}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Salt_and_Alcohol_by_Varietal}
 ggplot(data=subset(wines, chlorides < .03), aes(x=alcohol, y=chlorides)) +
   geom_jitter(alpha=.4) +
   scale_y_continuous(limits = c(.002, .02)) +
@@ -771,7 +769,7 @@ phenomenon except red wines tend to have more salt than white wines.
 Returning to sugar content, It might be helpful to break reds and whites to \
 their individual scales.  
 
-```{r echo=FALSE, Sugar_and_Alcohol_in_Reds}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Sugar_and_Alcohol_in_Reds}
 ggplot(data=subset(wines, residual.sugar <= 0.7 & color == "red"), 
        aes(x=alcohol, y=residual.sugar)) + 
   scale_y_continuous() +
@@ -788,7 +786,7 @@ information to say sugar content is a contributing factor in red wine quality.
 
 To be sure, we should check against the original quality scale.  
 
-```{r echo=FALSE, Sugar_Quality_Reds}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Sugar_Quality_Reds}
 ggplot(data=subset(wines, residual.sugar <= 0.7 & color == "red"), 
        aes(x=quality, y=residual.sugar)) + 
   scale_y_continuous() +
@@ -801,7 +799,7 @@ might yield a better image. Before making this adjustment, it's worth noting \
 the 1st quartile and mean is fairly consistent across quality range. There is \
 some variation in the 3rd quartile, but no consistent pattern.  
 
-```{r echo=FALSE, Red_Sugar_Quality_vs_Alcohol}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Red_Sugar_Quality_vs_Alcohol}
 p1 <- ggplot(data=subset(wines, residual.sugar <= 0.4 & color == "red"),
              aes(x=alcohol, y=residual.sugar)) + 
   scale_y_continuous() +
@@ -833,18 +831,18 @@ to alcohol has a consistent relationship across varietals.
 One final graph I want to develop is alcohol content at ratios of salts and \
 sugar.
 
-```{r echo=FALSE, Data_Selection}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Data_Selection}
 wine.tastes <- data.frame("sugar" = round(wines$residual.sugar, 2), 
                           "salt" = round(wines$chlorides, 4),
                           "alcohol" = wines$alcohol,
                           "type" = wines$color)
 ```
 
-```{r echo=FALSE, Data_Melt}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Data_Melt}
 wine.ratios <- melt(wine.tastes, id.vars = c("sugar", "salt", "type"))
 ```
 
-```{r echo=FALSE, Beginning_of_the_End}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Beginning_of_the_End}
 ggplot(aes(y = sugar, x = salt, fill = value),
   data = wine.ratios) +
   geom_tile() +
@@ -864,7 +862,7 @@ Another thing to consider is the range of granularity alcohol content \
 provides. This spread of alcohol content across the ratios of sugar to salt \
 could become more apparent by introducing more colors to our graph.  
 
-```{r echo=FALSE, Three_Colors}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Three_Colors}
 ggplot(aes(y = sugar, x = salt, fill = value),
   data = wine.ratios) +
   geom_tile() +
@@ -877,7 +875,7 @@ ggplot(aes(y = sugar, x = salt, fill = value),
 At three colors, it seems more clear that lower alcohol content wines tend to \
 occur at the extreme values of sugar and salt content.  
 
-```{r echo=FALSE, Four_Colors}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Four_Colors}
 ggplot(aes(y = sugar, x = salt, fill = value),
   data = wine.ratios) +
   geom_tile() +
@@ -904,11 +902,12 @@ Looking closer at this range could provide additional value.
 
 ### The Happy Spot
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, The_Happy_Spot}
 ggplot(aes(y = sugar, x = salt, fill = value),
   data = wine.ratios) +
   geom_tile() +
-  scale_fill_gradientn(colours = colorRampPalette(c("green","blue", "red"))(50)) +
+  scale_fill_gradientn(colours = 
+                         colorRampPalette(c("green","blue", "red"))(50)) +
   scale_y_continuous(limits = c(0,0.75)) + 
   scale_x_continuous(limits = c(0,0.006))
 ```
@@ -917,7 +916,7 @@ Zooming in on this range we can see that it isn't a true ratio. It's more of a \
 happy spot where the balance between salt and sugar isn't too much in one \
 direction or the other. There's a bit of noise at this scale with 3 colors.  
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Happy_Blue}
 ggplot(aes(y = sugar, x = salt, fill = value),
   data = wine.ratios) +
   geom_tile() +
@@ -928,11 +927,11 @@ ggplot(aes(y = sugar, x = salt, fill = value),
 ```
 
 Gradation of one color from black to white provides a good contrast. We can \
-better see where there's not enough sugar for the amount of salt in that bright \
-blue. Just above the bright blue, we see a distribution of higher alcohol \
-content wines extending into higher sugar content.  
+better see where there's not enough sugar for the amount of salt in that \
+bright blue. Just above the bright blue, we see a distribution of higher \
+alcohol content wines extending into higher sugar content.  
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE,}
 ggplot(aes(y = sugar, x = salt, fill = value),
   data = wine.ratios) +
   geom_tile() +
@@ -950,7 +949,7 @@ The trade off is a loss of pronouncement in the extreme values.
 One thing that we've touched on previously are the composition of varietals \
 and how they differ even where there's similarities.  
 
-```{r echo=FALSE, Reds_Salt_and_Sugar}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Reds_Salt_and_Sugar}
 ggplot(aes(y = sugar, x = salt, fill = value),
   data = subset(wine.ratios, wine.ratios$type == "red")) +
   geom_tile() +
@@ -965,7 +964,7 @@ Red wine's contribution to the happy spot is clear and not unexpected. Red \
 wines have a consistent sugar content and typically have move salt. As such \
 they make up the lower leg of the salt to sugar distribution.  
 
-```{r echo=FALSE, Whites_Salt_and_Sugar}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Whites_Salt_and_Sugar}
 ggplot(aes(y = sugar, x = salt, fill = value),
   data = subset(wine.ratios, wine.ratios$type == "white")) +
   geom_tile() +
@@ -983,7 +982,7 @@ higher levels of salt need lower sugar content to remain at high quality.
   
 ### Multivariate Analysis
 
-Based on what we've seen, salt content has more impact on wine \quality than \
+Based on what we've seen, salt content has more impact on wine quality than \
 sugar. Even with sugar rich white wines, salt content is the largest factor \
 for determining quality. In white wines, you can have more sugar in a higher \
 quality wine as long as the salt content remains in a minimal range.  
@@ -1003,7 +1002,7 @@ the solution and how the combination of those solutes relate to quality.
 
 ## Final Plots and Summary
 
-```{r echo=FALSE, Building_the_Final_Plot_Theme}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Building_the_Final_Plot_Theme}
 thm <- theme(plot.title = element_text(size = 16, face="bold"), 
             axis.title.x = element_text(size = 10, face="bold"),
             axis.title.y = element_text(size = 10, face="bold"),
@@ -1020,7 +1019,7 @@ thm <- theme(plot.title = element_text(size = 16, face="bold"),
 
 ### Quality
 
-```{r echo=FALSE, Alcohol_As_Quality}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Alcohol_As_Quality}
 wines %>% 
   subset(alcohol <= 14.5) %>%
   ggplot(aes(x=quality, y=alcohol)) +
@@ -1050,7 +1049,7 @@ wines are much lower than higher quality wines.
 
 ### Salt Content of Varietals
 
-```{r echo=FALSE, Salt_in_Wine}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Salt_in_Wine}
 ggplot(data=subset(wines, chlorides < .025), 
        aes(x=alcohol, y=(chlorides*10000))) +
   geom_jitter(alpha=.3, shape = 21, fill = I('#605f5d')) +
@@ -1083,7 +1082,7 @@ suggests that quality is reliant on a combination of compounds.
 
 ### Alcohol, Salt and Sugar Content
 
-```{r echo=FALSE, Plot_Three}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Plot_Three}
 ggplot(aes(y = sugar*1.48, x = salt*1480),
   data = wine.ratios) +
   geom_raster(aes(fill=value),interpolate = TRUE) +
