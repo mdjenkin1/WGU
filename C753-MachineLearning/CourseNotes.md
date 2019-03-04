@@ -56,4 +56,25 @@ Build an algorithm to identify Enron employees that may have committed fraud.
 | from_this_person_to_poi | |
 | shared_receipt_with_poi | |
 
-## Free-Response Questions
+### Free-Response Questions
+
+1. Summarize project goal
+   1. Provide dataset background
+   1. Were there any outliers?
+1. What features of the dataset did you use?
+   1. How were they chosen?
+   1. Why/Why did you use scaling?
+   1. What feature did you create and why?
+1. What algorithm did you use in the end?
+   1. How did that algorithm perform differently from the others?
+   1. Which algorithms did you try?
+1. Describe algorithm parameter tuning
+   1. How did you do it?
+   1. Why do you need to get it right?
+   1. Which parameters did you tune?
+1. What is Validation?
+   1. What is the classic mistake?
+   1. How was your analysis validated?
+1. Provide at least 2 evaluation metrics.
+   1. What were the average performance for each?
+   1. Explain the interpretation in human-understandable terms.
