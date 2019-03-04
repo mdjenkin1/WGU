@@ -1,6 +1,10 @@
 # C753 - Introduction to Machine Learning 
 
-## Project Goals (From Project Overview)
+## Project - Enron Emails
+
+Build an algorithm to identify Enron employees that may have committed fraud.  
+
+### Project Goals (From Project Overview)
 
 * Deal with an imperfect, real-world dataset
 * Validate a machine learning result using test data
@@ -10,7 +14,7 @@
 * Tune machine learning algorithms for maximum performance
 * Communicate your machine learning algorithm results clearly
 
-## Resources
+### Resources
 
 * Python 2.7 
   * Note: Scikit is dropping support for Python 2.7 and Python 3.4
@@ -20,7 +24,7 @@
 * final_project_dataset.pkl: project dataset
 * tester.py: code used by the evaluator to test results
 
-## Structure of Provided Data
+### Structure of Provided Data
 
 * Dictionary of people by name
 * Each person has a dictionary of features
@@ -48,7 +52,7 @@
 | to_messages             | |
 | email_address           | |
 | from_poi_to_this_person | |
-| | from_messages         | |
+| from_messages           | |
 | from_this_person_to_poi | |
 | shared_receipt_with_poi | |
 
