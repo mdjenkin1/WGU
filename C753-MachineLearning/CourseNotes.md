@@ -32,49 +32,49 @@ Build an algorithm to identify Enron employees that may have committed fraud.
 
 | Financial Field (US Dollars)  | Description |
 |-------------------------------|--------------
-| salary                        | |
-| deferral_payments             | |
-| total_payments                | |
-| loan_advances                 | |
-| bonus                         | |
-| restricted_stock_deferred     | |
-| deferred_income               | |
-| total_stock_value             | |
-| expenses                      | |
-| exercised_stock_options       | |
-| other                         | |
-| long_term_incentive           | |
-| restricted_stock              | |
-| director_fees                 | |
+| salary                        |  |
+| deferral_payments             |  |
+| total_payments                |  |
+| loan_advances                 |  |
+| bonus                         |  |
+| restricted_stock_deferred     |  |
+| deferred_income               |  |
+| total_stock_value             |  |
+| expenses                      |  |
+| exercised_stock_options       |  |
+| other                         |  |
+| long_term_incentive           |  |
+| restricted_stock              |  |
+| director_fees                 |  |
 
 | Email Field             | Description |
 |-------------------------|-------------|
-| to_messages             | |
-| email_address           | |
-| from_poi_to_this_person | |
-| from_messages           | |
-| from_this_person_to_poi | |
-| shared_receipt_with_poi | |
+| to_messages             |  |
+| email_address           |  |
+| from_poi_to_this_person |  |
+| from_messages           |  |
+| from_this_person_to_poi |  |
+| shared_receipt_with_poi |  |
 
 ### Free-Response Questions
 
-1. Summarize project goal
+1. Summarize project goal [“data exploration”, “outlier investigation”]
    1. Provide dataset background
    1. Were there any outliers?
-1. What features of the dataset did you use?
-   1. How were they chosen?
+1. What features of the dataset did you use? [“create new features”, “intelligently select features”, “properly scale features”]
+   1. How were they chosen? 
    1. Why/Why did you use scaling?
    1. What feature did you create and why?
 1. What algorithm did you use in the end?
-   1. How did that algorithm perform differently from the others?
+   1. How did that algorithm perform differently from the others? [“pick an algorithm”]
    1. Which algorithms did you try?
-1. Describe algorithm parameter tuning
+1. Describe algorithm parameter tuning [“discuss parameter tuning”, “tune the algorithm”]
    1. How did you do it?
    1. Why do you need to get it right?
    1. Which parameters did you tune?
-1. What is Validation?
+1. What is Validation? [“discuss validation”, “validation strategy”]
    1. What is the classic mistake?
    1. How was your analysis validated?
-1. Provide at least 2 evaluation metrics.
+1. Provide at least 2 evaluation metrics.  [“usage of evaluation metrics”]
    1. What were the average performance for each?
    1. Explain the interpretation in human-understandable terms.
