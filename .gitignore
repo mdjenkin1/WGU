@@ -6,3 +6,5 @@ map.snip
 *.tmp
 .Rhistory
 C751-DataAnalysisR/README.md
+maildir/**/*
+enron_mail*
