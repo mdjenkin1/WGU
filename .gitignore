@@ -1,0 +1,10 @@
+map
+map.small.snip
+map.snip
+*.pyc
+~*.docx
+*.tmp
+.Rhistory
+C751-DataAnalysisR/README.md
+maildir/**/*
+enron_mail*
