@@ -38,5 +38,6 @@ for person in persons:
                     open_mail = open(os.path.join(root, name))
                     parsed_mail = [person, parseOutText(open_mail)]
                     data.append(parsed_mail)
+                    open_mail.close()
 
 pprint.pprint(data[:2])
