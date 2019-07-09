@@ -16,7 +16,6 @@ def parseOutText(f):
         
         """
 
-
     f.seek(0)  ### go back to beginning of file (annoying)
     all_text = f.read()
 
@@ -39,11 +38,9 @@ def parseOutText(f):
         for stem in stems:
             words += "{} ".format(stem)
 
-
-
     return words
 
-    
+
 
 def main():
     ff = open("../text_learning/test_email.txt", "r")
