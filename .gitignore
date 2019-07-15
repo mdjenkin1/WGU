@@ -8,3 +8,4 @@ map.snip
 C751-DataAnalysisR/README.md
 **/maildir/**/*
 enron_mail*
+*.pkl

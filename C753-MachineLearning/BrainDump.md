@@ -17,7 +17,10 @@ We're seeking to split the corpus into two dialects. One used by POI and the oth
 
 With the data set split into training, validation, and identification sets, it's time to determine which algorithm to use to train our learner. One option is to use the TextBlob module for each email sender. For each sender, create a wordblob comprised of all emails they composed. Remove the stop words and generate a frequency count for each sender's word blob. Using the average frequency values for POI, we can use Naive Bayes to generate a probability for email matches the vocabularies of POI and test against the unknown POI dataset. Further direction is contingent on the outcome of this test.  
 
-"""
+For determining dialect, it may be necessary to parse emails based on party of origin.  
+Duplication of email is a concern for dialect determination.  
+
+"""{Python}
     getPersonsEmails.py: generate pickle dumps of a of person's emails
     Loosely based on the vectorize_text.py and parse_out_email_text.py scripts of the udacity text_learning project
     
