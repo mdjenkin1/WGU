@@ -8,10 +8,11 @@
     For each person get a list of the words within all emails in their email box.
     Full data presented as a hash where the person is the key and the words are the value
     This hash is then pickled to a file.
+
+    To support Tf ldf, document parses were changed to individual list entries
 """
 import os
 import pickle
-import re
 import sys
 
 import pprint
@@ -35,7 +36,7 @@ limit_people = 0
 
 for person in persons:
     #print(person)
-    persons_words[person] = " "
+    persons_words[person] = []
     #limit_people += 1
     if limit_people < 2:
         for root, dir, files in os.walk("{}\\{}".format(maildir, person)):
@@ -45,7 +46,7 @@ for person in persons:
                     #print(os.path.join(root, name))
                     open_mail = open(os.path.join(root, name))
                     parsed_mail = [person, parseOutText(open_mail)]
-                    persons_words[person] += "{} ".format(parsed_mail[1])
+                    persons_words[person].append(parsed_mail[1])
                     open_mail.close()
 
 pickle.dump(persons_words, open("email_body_dump.pkl","w"))
