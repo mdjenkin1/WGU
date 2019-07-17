@@ -18,9 +18,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 import pprint
 
-persons_emails = pickle.load(open("email_body_dump.pkl","rb"))
-persons_vocab = {}
+inFile = open("email_body_dump.pkl")
+persons_emails = pickle.load("rb")
+inFile.close()
 
+persons_vocab = {}
 limit_persons = 0
 
 for person in persons_emails:
