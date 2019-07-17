@@ -49,7 +49,9 @@ for person in persons:
                     persons_words[person].append(parsed_mail[1])
                     open_mail.close()
 
-pickle.dump(persons_words, open("email_body_dump.pkl","w"))
+out = open("email_body_dump.pkl","w")
+pickle.dump(persons_words, out)
+out.close()
 
 #pprint.pprint(persons_words)
 #print(type(data[0][0]))

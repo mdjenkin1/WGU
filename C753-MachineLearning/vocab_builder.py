@@ -14,11 +14,11 @@ import os
 import sys
 import pickle
 
-from sklearn import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 import pprint
 
-persons_emails = pickle.load("email_body_dump.pkl")
+persons_emails = pickle.load(open("email_body_dump.pkl","rb"))
 persons_vocab = {}
 
 limit_persons = 0
@@ -31,5 +31,5 @@ for person in persons_emails:
         persons_vocab[person] = vectorizer
     pprint.pprint(persons_vocab[person].get_feature_names)
 
-pickle.dump(persons_words, open("vocab_for_persons.pkl", "w"))
-
+out = open("vocab_for_persons.pkl", "w")
+pickle.dump(persons_words, out)
