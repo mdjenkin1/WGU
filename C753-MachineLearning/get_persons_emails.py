@@ -49,7 +49,7 @@ for person in persons:
                     persons_words[person].append(parsed_mail[1])
                     open_mail.close()
 
-out = open("email_body_dump.pkl","w")
+out = open("email_body_dump.pkl","wb")
 pickle.dump(persons_words, out)
 out.close()
 

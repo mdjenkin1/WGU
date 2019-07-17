@@ -33,5 +33,5 @@ for person in persons_emails:
         persons_vocab[person] = vectorizer
     pprint.pprint(persons_vocab[person].get_feature_names)
 
-out = open("vocab_for_persons.pkl", "w")
+out = open("vocab_for_persons.pkl", "wb")
 pickle.dump(persons_words, out)
