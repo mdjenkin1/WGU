@@ -19,19 +19,22 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import pprint
 
 inFile = open("email_body_dump.pkl")
-persons_emails = pickle.load("rb")
+persons_emails = pickle.load(inFile)
 inFile.close()
 
 persons_vocab = {}
 limit_persons = 0
 
-for person in persons_emails:
-    if limit_persons < 2:
-        limit_persons += 1
-        vectorizer = TfidfVectorizer(stop_words='english')
+vectorizer = TfidfVectorizer(stop_words='english')
+
+for person, emails in persons_emails.items():
+    if limit_persons < 3:
+        #limit_persons += 1
         vectorizer.fit_transform(persons_emails[person])
         persons_vocab[person] = vectorizer
-    pprint.pprint(persons_vocab[person].get_feature_names)
+        #pprint.pprint("{} has {} emails".format(person, len(persons_emails[person])))
+        #pprint.pprint("{} has {} words".format(person,len(persons_vocab[person].get_feature_names())))
 
-out = open("vocab_for_persons.pkl", "wb")
-pickle.dump(persons_words, out)
+out = open("tf-idf_weighted_persons_vocab.pkl", "wb")
+pickle.dump(persons_vocab, out)
+out.close()
