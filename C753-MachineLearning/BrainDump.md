@@ -20,7 +20,8 @@ With the data set split into training, validation, and identification sets, it's
 For determining dialect, it may be necessary to parse emails based on party of origin.  
 Duplication of email is a concern for dialect determination.  
 
-"""{Python}
+```{Python}
+"""
     getPersonsEmails.py: generate pickle dumps of a of person's emails
     Loosely based on the vectorize_text.py and parse_out_email_text.py scripts of the udacity text_learning project
     
@@ -47,3 +48,32 @@ Duplication of email is a concern for dialect determination.
         λ  gci -recur |? {$_.PSIsContainer -eq $False} | sls -pattern 'X-FileName:' |measure-object
         Count    : 517401
 """
+```
+
+The smallest identifiable clique consists of an individual.
+An individual's clique is defined by the vocabulary of those around the individual
+Shared clique vocabulary between individuals identifies members of the same clique
+Expectation has POI within the same clique.
+
+For each person  <!-- TOC -->autoauto- [Brain Dump and Development Documentation](#brain-dump-and-development-documentation)autoauto<!-- /TOC -->
+
+1. Generate a corpus of the person's email dump
+    * Dictionary where each person is the key and a list of emails are the values
+1. Preprocess each corpus
+    * Tokenize
+    * Stemming and lemmatization
+    * Weigh
+    * Normalize
+1. Identify features from the corpus to describe a clique
+    * Principal Component Analysis
+        * Word by word
+        * ~~Person by person~~
+1. Group individuals with similar cliques
+    * K-means clustering
+1. Determine accuracy by comparing identified cliques to the list of known POI
+    * How many known POI are grouped with the 
+
+The words used most by an individual 
+Reducing the
+
+Latent Semantic Analysis
