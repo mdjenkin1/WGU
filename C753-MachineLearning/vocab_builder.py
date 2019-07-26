@@ -19,7 +19,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import pprint
 
 inFile = open("email_body_dump.pkl")
-persons_emails = pickle.load(inFile)
+persons_emails = pickle.load(inFile) 
 inFile.close()
 
 persons_vocab = {}

@@ -37,23 +37,24 @@ limit_people = 0
 for person in persons:
     #print(person)
     persons_words[person] = []
-    #limit_people += 1
+    limit_people += 1
     if limit_people < 2:
         for root, dir, files in os.walk("{}\\{}".format(maildir, person)):
             for name in files:
-                #limit_mails += 1
+                limit_mails += 1
                 if limit_mails < 6:
                     #print(os.path.join(root, name))
                     open_mail = open(os.path.join(root, name))
-                    parsed_mail = [person, parseOutText(open_mail)]
-                    persons_words[person].append(parsed_mail[1])
+                    #parsed_mail = [person, parseOutText(open_mail)]
+                    parsed_mail = [parseOutText(open_mail)]
+                    persons_words[person].append(parsed_mail[0])
                     open_mail.close()
 
-out = open("email_body_dump.pkl","wb")
-pickle.dump(persons_words, out)
-out.close()
+#out = open("email_body_dump.pkl","wb")
+#pickle.dump(persons_words, out)
+#out.close()
 
-#pprint.pprint(persons_words)
+pprint.pprint(persons_words['allen-p'])
 #print(type(data[0][0]))
 #print(data[0][0])
 #for name in data[:2]:
