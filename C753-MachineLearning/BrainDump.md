@@ -57,13 +57,19 @@ Expectation has POI within the same clique.
 
 For each person  <!-- TOC -->autoauto- [Brain Dump and Development Documentation](#brain-dump-and-development-documentation)autoauto<!-- /TOC -->
 
-1. Generate a corpus of the person's email dump
-    * Dictionary where each person is the key and a list of emails are the values
+1. Generate a corpus from each person's email dump
+    * dump_emails.py: Master script for email processing. Generates a dictionary of persons and a corpus of their emails.
 1. Preprocess each corpus
-    * Tokenize
-    * Stemming and lemmatization
-    * Weigh
-    * Normalize
+    * parse_out_email_text.py: performs the following preprocessing of each email
+        * Strip email header
+        * Tokenize the email into words
+        * Stem the words
+    * Lemmatization was considered over stemming. Stemming was selected as word use is of more interest than meaning. It may be of interest to instead ignore this step and process raw words.
+    * Weigh: Word weights performed by TfIdf.
+        * TfIdf was selected for weights as it values frequent and distinctive words.
+        * Frequent words are considered the foundation of a clique's vocabulary
+        * Distinctive words are markers of dialect. Each clique will have its own dialext of the company's vocabulary.
+    * Normalize - is this necessary?
 1. Identify features from the corpus to describe a clique
     * Principal Component Analysis
         * Word by word
