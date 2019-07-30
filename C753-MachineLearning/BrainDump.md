@@ -73,6 +73,7 @@ For each person  <!-- TOC -->autoauto- [Brain Dump and Development Documentation
 1. Identify features from the corpus to describe a clique
     * Principal Component Analysis
         * Word by word
+            * A country of people will use the same word base. Only when you get to various regions would you expect sparse words.
         * ~~Person by person~~
 1. Group individuals with similar cliques
     * K-means clustering
