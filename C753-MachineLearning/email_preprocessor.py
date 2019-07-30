@@ -36,8 +36,8 @@ limit_people = 0
 
 # pre-process email by person
 for person in persons:
-    #zlimit_people += 1
-    if limit_people < 2:
+    limit_people += 1
+    if limit_people < 9:
         corpus = []
         for root, dir, files in os.walk("{}\\{}".format(maildir, person)):
             # build the corpus, one email at a time
@@ -53,6 +53,6 @@ for person in persons:
         vectorizer.fit_transform(corpus)
         persons_vocab[person] = vectorizer
 
-out = open("preprocessed_email_dump.pkl","wb")
+out = open("preprocessed_email_dump_funsize.pkl","wb")
 pickle.dump(persons_vocab, out)
 out.close()
