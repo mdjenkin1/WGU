@@ -53,6 +53,7 @@ for person in persons:
         vectorizer.fit_transform(corpus)
         persons_vocab[person] = vectorizer
 
+#out = open("preprocessed_email_dump.pkl","wb")
 out = open("preprocessed_email_dump_funsize.pkl","wb")
 pickle.dump(persons_vocab, out)
 out.close()
