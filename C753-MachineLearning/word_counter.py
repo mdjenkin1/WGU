@@ -31,3 +31,6 @@ print("{} words in total".format(len(word_counts)))
 
 for count in sorted(count_of_counts):
     print("{} words appear in {} corpora".format(count_of_counts[count], count))
+
+for person in persons_vocabs:
+    print("{} has weights of max: {} and min: {}".format(person, max(persons_vocabs[person].idf_), min(persons_vocabs[person].idf_)))
