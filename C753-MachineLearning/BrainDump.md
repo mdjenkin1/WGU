@@ -74,10 +74,11 @@ For each person  <!-- TOC -->autoauto- [Brain Dump and Development Documentation
     * Principal Component Analysis
         * Word by word
             * A country of people will use the same word base. Only when you get to various regions would you expect sparse words.
-        * PCA is not a replacement for feature selection
+        * ~~PCA is not a replacement for feature selection.~~ PCA is a technique for feature extraction [https://towardsdatascience.com/a-one-stop-shop-for-principal-component-analysis-5582fb7e0a9c](https://towardsdatascience.com/a-one-stop-shop-for-principal-component-analysis-5582fb7e0a9c)
+        * Dimensionality Reduction
     * Feature Selection
         * There's a large number of variant features that need to be balanced against a large number of homogenous features. A technique needs to be found for reducing the number of homogenous features and the number of variant features. Based on assumptions of what model this data should fit there is extra concern of overfitting.
-
+1. What other methods are there
 1. Group individuals with similar cliques
     * K-means clustering
 1. Determine accuracy by comparing identified cliques to the list of known POI
