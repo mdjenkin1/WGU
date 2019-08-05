@@ -51,7 +51,7 @@ for person in persons:
         # Weigh words within the person's corpus to generate a vocabulary
         vectorizer = TfidfVectorizer(stop_words='english')
         term_matrix = vectorizer.fit_transform(corpus)
-        persons_vocab[person] = {"term_matrix": term_matrix, "tdidfvec": vectorizer}
+        persons_vocab[person] = {"term_matrix": term_matrix, "tfidfvec": vectorizer}
         
 #out = open("preprocessed_email_dump.pkl","wb")
 out = open("preprocessed_email_dump_funsize.pkl","wb")
