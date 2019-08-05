@@ -50,9 +50,9 @@ for person in persons:
                     open_mail.close()
         # Weigh words within the person's corpus to generate a vocabulary
         vectorizer = TfidfVectorizer(stop_words='english')
-        vectorizer.fit_transform(corpus)
-        persons_vocab[person] = vectorizer
-
+        term_matrix = vectorizer.fit_transform(corpus)
+        persons_vocab[person] = {"term_matrix": term_matrix, "tdidfvec": vectorizer}
+        
 #out = open("preprocessed_email_dump.pkl","wb")
 out = open("preprocessed_email_dump_funsize.pkl","wb")
 pickle.dump(persons_vocab, out)
