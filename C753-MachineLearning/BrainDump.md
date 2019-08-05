@@ -78,6 +78,28 @@ For each person  <!-- TOC -->autoauto- [Brain Dump and Development Documentation
         * Dimensionality Reduction
     * Feature Selection
         * There's a large number of variant features that need to be balanced against a large number of homogenous features. A technique needs to be found for reducing the number of homogenous features and the number of variant features. Based on assumptions of what model this data should fit there is extra concern of overfitting.
+    * Data Shaping
+        * From each persons corpus we have
+            * A collection of scipy.sparse.csr_matrix
+                * Each 
+            * A tfidfvectorizer
+                * tfidfvec.get_feature_names() returns (feature : index)
+
+```{python}
+vec = vocab[dude]['tdidfvec']
+vec
+len(vec.get_feature_names())
+doc = 0
+feature_index = tmx[doc,:].nonzero()[1]
+tfidf_scores = zip(feature_index, [tmx[doc, x] for x in feature_index])
+feature_names = vec.get_feature_names()
+for w,s in [(feature_names[i], s) for (i, s) in ftidf_scores]:
+    print w,s
+for w,s in [(feature_names[i], s) for (i, s) in tfidf_scores]:
+    print w,s
+```
+
+
 1. What other methods are there
 1. Group individuals with similar cliques
     * K-means clustering
