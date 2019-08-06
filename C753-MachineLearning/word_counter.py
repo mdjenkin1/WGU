@@ -18,7 +18,7 @@ infile.close()
 
 word_counts = collections.Counter()
 for person in persons_vocabs:
-    word_counts.update(persons_vocabs[person].get_feature_names())
+    word_counts.update(persons_vocabs[person]['tfidfvec'].get_feature_names())
 
 # For each word we have a count of how many corpora it appears in
 # Now, let's get a count of how many words appear in the same number of corpora.
