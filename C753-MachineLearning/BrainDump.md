@@ -89,12 +89,12 @@ For each person  <!-- TOC -->autoauto- [Brain Dump and Development Documentation
 vec = vocab[dude]['tdidfvec']
 vec
 len(vec.get_feature_names())
+
+
 doc = 0
 feature_index = tmx[doc,:].nonzero()[1]
 tfidf_scores = zip(feature_index, [tmx[doc, x] for x in feature_index])
 feature_names = vec.get_feature_names()
-for w,s in [(feature_names[i], s) for (i, s) in ftidf_scores]:
-    print w,s
 for w,s in [(feature_names[i], s) for (i, s) in tfidf_scores]:
     print w,s
 ```
