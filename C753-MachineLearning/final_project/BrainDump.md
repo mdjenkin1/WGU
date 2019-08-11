@@ -94,12 +94,12 @@ Review of Python scripts updated as part of the course.
 
 ### Unchanged
 
-class_vis.py same  
-prep_terrain_data.py same  
-your_algorithm.py same  
-evaluate_poi_identifier.py same  
-poi_email_addresses.py same  
-startup.py same  
+* class_vis.py (./choose_your_own)
+* prep_terrain_data.py (./choose_your_own)
+* your_algorithm.py (./choose_your_own)
+* evaluate_poi_identifier.py (./evaluation)
+* poi_email_addresses.py (./final_project)
+* startup.py (./tools) environment setup and email dump retrieval
 
 ### Updated
 
@@ -120,3 +120,22 @@ startup.py same
 * feature_format.py UPDATED: (./tools)
 * parse_out_email_text.py UPDATED: (./tools)
 * validate_poi.py UPDATED: (./validation)
+
+### Lessons
+
+| Section | Synopsis |
+|--|--|
+| Naive Bayes | Determine who said/wrote what |
+| SVM | Identify email authors : svm_author_id.py</br> |
+| Decision Trees |  |
+| Choose Your Own |  |
+| Datasets and Questions |  |
+| Regressions |  |
+| Outliers |  |
+| Clustering |  |
+| Feature Scaling |  |
+| Text Learning |  |
+| Feature Selection |  |
+| PCA |  |
+| Validation |  |
+| Evaluation |  |
