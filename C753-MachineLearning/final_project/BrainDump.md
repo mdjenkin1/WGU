@@ -126,7 +126,7 @@ Review of Python scripts updated as part of the course.
 | Section | Synopsis |
 |--|--|
 | Naive Bayes | Determine who said/wrote what |
-| SVM | Identify email authors : svm_author_id.py</br> |
+| SVM | Identify email authors : svm_author_id.py </br> |
 | Decision Trees |  |
 | Choose Your Own |  |
 | Datasets and Questions |  |
