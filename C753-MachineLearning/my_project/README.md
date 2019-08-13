@@ -27,3 +27,16 @@ Primarily Udacity provided scripts with helper functions for the provided data s
     * return target, features
     * target = data[item][0]
     * features = data[item][1:]
+
+### ./datasets_questions
+
+Initial investigations into the provided dataset
+
+* explore_enron_data.py: initial data exploration, counts and such.
+
+### ./pickle_jar
+
+Pickled data structures ready for deserialization.
+
+* final_project_dataset.pkl: Initial dataset as provided for project completion.
+* poi_names.txt: manual data scrape from usatoday identifying persons of interest.
