@@ -38,8 +38,8 @@ nan_count={}                                                                    
 quant_count={}                                                                              # Running count of features with value
 poi_names_ds = set()                                                                        # Data structure for originally flagged poi
 
-## Prepared data
-cleaned_ds = {}
+cleaned_ds = {}                                                                             # Prepared data ready for deeper learning
+no_nan = {}                                                                                 # Special version of dataset with no 'NaN' values
 
 ######
 # Manually wrangled data
@@ -62,30 +62,33 @@ for line in name_file:
 #    return running_count
 
 ######
-# Initial Exploration and Name Cleaning
+# Initial Exploration and Scrubbing
 ######
 
-for key in enron_data:
-    # normalize the key (LASTNAME FIRSTNAME).
-    norm_key = re.sub(r'\s\b\w\b| JR','',key).upper()
-    enron_data[norm_key] = enron_data.pop(key)
-    
-    # Feature counts
-    for k in enron_data[norm_key]:
-        features_count[k] = features_count.get(k, 0) + 1                                    # Running count of feature occurrence
-        if enron_data[norm_key][k] == 'NaN':
-            nan_count[k] = nan_count.get(k, 0) + 1                                          # Running count of feature with NaN value
-        else:
-            quant_count[k] = quant_count.get(k, 0) + 1                                      # Running count of feature with value
-    
-    if (enron_data[norm_key]["poi"]):
-        poi_names_ds.add(norm_key)                                                          # populate set of poi in original dataset
-        #ds_enron_poi.update({norm_key : enron_data[norm_key]})
+for person in enron_data:
+    # normalize the entry key (LASTNAME FIRSTNAME).
+    norm_person = re.sub(r'\s\b\w\b| JR|\.','',person).upper()
+    enron_data[norm_person] = enron_data.pop(person)
 
-persons_ds = set(enron_data.keys())                                                         # All people in dataset
-all_poi = poi_names_ds | poi_names_file                                                     # All identified poi
-poi_not_in_ds = poi_names_file - persons_ds                                                 # Identified poi not in dataset
-not_labeled_poi = (poi_names_file - poi_not_in_ds) - poi_names_ds                           # Identified poi in dataset but not labelled
+    # Feature counts and new dataset no_nan
+    person_features = {}
+    for feature in enron_data[norm_person]:
+        features_count[feature] = features_count.get(feature, 0) + 1        # Running count of feature occurrence
+        if enron_data[norm_person][feature] == 'NaN':
+            nan_count[feature] = nan_count.get(feature, 0) + 1              # Running count of feature with NaN value
+        else:
+            quant_count[feature] = quant_count.get(feature, 0) + 1          # Running count of feature with value
+            person_features[feature] = enron_data[norm_person][feature]     # Add {feature : value} to individual person's no_nan dataset
+    no_nan[norm_person] = person_features                                   # Add person_features to no_nan dataset
+
+    if (enron_data[norm_person]["poi"]):
+        poi_names_ds.add(norm_person)                                       # populate set of poi in original dataset
+        #ds_enron_poi.update({norm_person : enron_data[norm_person]})
+
+persons_ds = set(enron_data.keys())                                         # All people in dataset
+all_poi = poi_names_ds | poi_names_file                                     # All identified poi
+poi_not_in_ds = poi_names_file - persons_ds                                 # Identified poi not in dataset
+not_labeled_poi = (poi_names_file - poi_not_in_ds) - poi_names_ds           # Identified poi in dataset but not labelled
 
 # Are there any features with counts less than the number of people?
 shorted_features = set()
@@ -94,9 +97,11 @@ for feature in features_count:
         shorted_features.add(feature)
 
 ######
-# Initial Counts
+# Initial Count Report
 ######
 
+print("***Initial Findings***")
+#pprint.pprint(persons_ds)
 print("Count of entries in dataset: {}".format(len(enron_data)))
 print("Count of features in dataset: {}".format(len(features_count)))
 print("Number of features not assigned to everyone: {}".format(len(shorted_features)))
@@ -105,6 +110,113 @@ print("Number of POI identified in manual scrape: {}".format(len(poi_names_file)
 print("Number of POI from all sources: {}".format(len(all_poi)))
 print("Number of POI not in dataset: {}".format(len(poi_not_in_ds)))
 print("Number of POI in dataset and not labeled: {}".format(len(not_labeled_poi)))
+print("\r")
+
+######
+# Is every entry a person
+######
+
+print("***Entries With More Than Two Names***")
+for person in no_nan:
+    if len(person.split()) > 2: 
+        print(person)
+        pprint.pprint(no_nan[person])
+print("\r")
+
+print("***Entries With Two or Fewer Features***")
+for person in no_nan:
+    if len(no_nan[person].keys())-1 <= 2:
+        print("\r")
+        print(person)
+        pprint.pprint(no_nan[person])
+print("\r")
+
+######
+# Dropping Entries
+######
+
+pop_person = ['THE TRAVEL AGENCY IN THE PARK']      # Build a list of entries to drop.
+                                                    # Explicitly drop "The Travel Agency in the Park"
+
+for person in enron_data:                           # Identify non-NaN features for each entry in our dataset
+    if len(no_nan[person].keys()) <= 1:             # If the entry has no features, add it to the list to be dropped
+        pop_person.append(person)
+
+print("***These entries will be dropped***")
+pprint.pprint(pop_person)
+print("\r")
+
+
+######
+# Features, closer look
+######
+
+feature_types = {}                                                              # List the types used for each feature
+no_nan_features_count = {}                                                      # Running count of no_nan feature occurrence
+persons_with_loan_advances = set()
+for person in no_nan:
+    for feature in no_nan[person]:
+        if feature == 'loan_advances': persons_with_loan_advances.add(person)
+        no_nan_features_count[feature] = no_nan_features_count.get(feature, 0) + 1     # Running count of no_nan feature occurrence
+        f_type = type(no_nan[person][feature]).__name__
+        feature_types[feature] = feature_types.get(feature, set([f_type]))
+
+pop_person.append("TOTAL")     
+
+print("***Types in use for features***")
+pprint.pprint(feature_types)
+print("\r")
+
+print("***Number of entries with valued feature***")
+pprint.pprint(no_nan_features_count)
+print("\r")
+
+print("***Entries with loan_advances***")
+pprint.pprint(persons_with_loan_advances)
+print("\r")
+
+### Remove loan_advances
+
+
+
+
+
+
+
+
+
+
+
+        #if feature_types.has_key(feature):
+            #feature_types[feature].update(type(no_nan[person][feature]))
+        #    print(type(no_nan[person][feature]))
+        #else:
+        #    tmp = type(no_nan[person][feature])
+        #    print(tmp)
+            #feature_types[feature] = set(tmp)
+
+
+
+# Feature counts
+#    for k in enron_data[norm_person]:
+#        features_count[k] = features_count.get(k, 0) + 1                                    # Running count of feature occurrence
+#        if enron_data[norm_person][k] == 'NaN':
+#            nan_count[k] = nan_count.get(k, 0) + 1                                          # Running count of feature with NaN value
+#        else:
+#            quant_count[k] = quant_count.get(k, 0) + 1                                      # Running count of feature with value
+    
+#    if (enron_data[norm_person]["poi"]):
+#        poi_names_ds.add(norm_person)                                                          # populate set of poi in original dataset
+        #ds_enron_poi.update({norm_person : enron_data[norm_person]})
+
+
+
+######
+# Second Counts
+######
+
+
+
 
 #        poi_not_in_ds = poi_names_file - set(enron_data.keys())
 #        print(len(poi_not_in_ds))

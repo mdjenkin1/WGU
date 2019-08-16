@@ -40,3 +40,4 @@ Pickled data structures ready for deserialization.
 
 * final_project_dataset.pkl: Initial dataset as provided for project completion.
 * poi_names.txt: manual data scrape from UsaToday identifying persons of interest.
+* enron61702insiderpay.pdf: financial data source and financial term definitions.
