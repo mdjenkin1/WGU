@@ -33,10 +33,12 @@ Primarily Udacity provided scripts with helper functions for the provided data s
 Initial investigations into the provided dataset
 
 * explore_enron_data.py: initial data exploration, counts and such.
+* data_prep.py: Clean the provided dataset based on findings made in explore_enron_data.py
+* explore_feature_detail.py: in depth feature exploration following data_prep.py
 
 ### ./pickle_jar
 
-Pickled data structures ready for deserialization.
+Pickled and raw data sources
 
 * final_project_dataset.pkl: Initial dataset as provided for project completion.
 * poi_names.txt: manual data scrape from UsaToday identifying persons of interest.
