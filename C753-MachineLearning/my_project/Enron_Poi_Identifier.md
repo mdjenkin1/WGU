@@ -126,18 +126,52 @@ At the least, the dataset is consistent in its use of stored data. Aside from th
  'total_stock_value': 126}
 ```
 
-The inclusion of loan_advances is questionable. With only 4 data points, there's a good chance this data would only skew results. Looking at the financial data source, Kenneth Lay utilized these loan advances to dump his stock holdings back on the company. It also explains why his total payment is astronomical compared to everyone else. The other entries with loan advances are Mark Frevert and Mark Pickering. Between the three of them, Frevert and Lay are known POI. The loan_advances feature just doesn't provide enough information. On its own, it is biased towards classifying a person as of interest and with this data set, it would do so at 66.7% accuracy. Also consider, there's 18 flagged poi in the dataset. At least 15 poi do not have a value for loan_advancement to flag them as a poi. The field "loan_advances" will be removed due to this extreme bias and total_payments field adjusted.  
+The inclusion of loan_advances is questionable. With only 4 data points, there's a good chance this data would only skew results. Looking at the financial data source, Kenneth Lay utilized these loan advances to dump his stock holdings back on the company. It also explains why his total payment is astronomical compared to everyone else. The other entries with loan advances are Mark Frevert and Mark Pickering. Between the three of them, Frevert and Lay are known POI. This suggests loan_advances is a feature that will introduce a non-insignificant amount of bias to our model.  
 
-What about the fourth entry with loan_advances?  
+To deal with this biased feature, my first thought is to completely remove loan_advances from the data set and adjust the total_payments feature accordingly. This would effectively remove any bias it introduces. I'm not comfortable with this idea of ignoring a feature due to introduction of implicit bias. Ignoring a feature due to implicit bias may have an effect of shifting the bias to other features where it is less apparent. A better method would have the machine determine how much bias exists within this feature and weigh it accordingly. Such a technique would allow us to include a strong identifier of people of interest.
+
+Despite my concerns over removing the loan_advances feature, I have to admit that its data population is sparse. The majority of persons of interest do not have this field populated. Comparing classifiers trained with and without this field would be a matter of academic curiosity. Academic curiosity is tangential to this project. To maintain the scope of this project, I will be removing the feature and adjusting the total payments accordingly.  
+
+Before moving on to the rest of the features, we cannot ignore the discrepancy in counts. We found only three persons in the data source with loan_advances. Our dataset claims to have four. Who is the fourth?  
 
 ```{python}
 ***Entries with loan_advances***
 set(['FREVERT MARK', 'LAY KENNETH', 'PICKERING MARK', 'TOTAL'])
 ```
 
-Seems there's an additional entry that needs to be dropped. More than two names and 2 or less features would not catch someone with one name and all financial features. The "TOTAL" entry will also be added to the entries that need to be dropped.  
+Seems there's an additional entry that needs to be dropped. More than two names and two or less features would not catch someone with one name and all financial features. The "TOTAL" entry will be added to the entries that need to be scrubbed from the dataset.  
 
-Finally, there's the question of feature classification. Of those we have two; financial data and email data.  
+### Feature Details
+
+To finish the data exploration, we'll look at general feature details. The features fit into two categories defined by their source. The financial information comes from the spreadsheet showing who was paid what and how. The features scraped from the email dump are raw counts of email interactions with persons of interest. The inclusion and value of these counts are questionable to me.
+
+At this point, data_prep.py has been ran and the resulting dataset is being investigated.
+
+#### Financial Features
+
+* Salary
+* Deferral_payments
+* Total_payments
+* loan_advances
+* Bonus
+* Restricted_stock_deferred
+* Deferred_income
+* Total_stock_value
+* Expenses
+* Exercised_stock_options
+* Other
+* Long_term_incentive
+* Restricted_stock
+* Director_fees
+
+#### Communicative Features
+
+* To_messages
+* Email_address
+* From_poi_to_this_person
+* From_messages
+* From_this_person_to_poi
+* Shared_receipt_with_poi
 
 ### Articles on 409A and Deferred Payments
 
@@ -148,6 +182,11 @@ Finally, there's the question of feature classification. Of those we have two; f
 
 [https://money.cnn.com/2000/05/16/technology/enron/](https://money.cnn.com/2000/05/16/technology/enron/)  
 [https://www.wsj.com/articles/SB1017015132933556040](https://www.wsj.com/articles/SB1017015132933556040)  
+
+### Preventing Bias
+
+[https://towardsdatascience.com/preventing-machine-learning-bias-d01adfe9f1fa](https://towardsdatascience.com/preventing-machine-learning-bias-d01adfe9f1fa)  
+[https://qz.com/1585645/color-blindness-is-a-bad-approach-to-solving-bias-in-algorithms/](https://qz.com/1585645/color-blindness-is-a-bad-approach-to-solving-bias-in-algorithms/)  
 
 ## Questions
 
