@@ -17,7 +17,8 @@ from feature_format import featureFormat, targetFeatureSplit
 
 cleaned_data = pickle.load(open("../pickle_jar/final_project_dataset_cleaned.pkl"))
 
-#pprint.pprint(cleaned_data)
+### 
+### Basic statistics
 
 fin_features = ['poi','salary', 'deferral_payments', 'total_payments', 'bonus', 
     'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses', 
@@ -26,25 +27,23 @@ fin_features = ['poi','salary', 'deferral_payments', 'total_payments', 'bonus',
 email_features = ['poi', 'to_messages', 'from_poi_to_this_person', 'from_messages', 
     'from_this_person_to_poi', 'shared_receipt_with_poi'] 
 
-fin_data = featureFormat(cleaned_data, fin_features)
+#fin_data = featureFormat(cleaned_data, fin_features)
+fin_data = featureFormat(cleaned_data, fin_features, remove_NaN=False)
 _, fin_data_np_arrays = targetFeatureSplit( fin_data )
 fin_data_df = pd.DataFrame(fin_data_np_arrays, columns = fin_features[1:])
 
-email_data = featureFormat(cleaned_data, email_features)
+#email_data = featureFormat(cleaned_data, email_features)
+email_data = featureFormat(cleaned_data, email_features, remove_NaN=False)
 _, email_data_np_arrays = targetFeatureSplit( email_data )
 email_data_df = pd.DataFrame(email_data_np_arrays, columns = email_features[1:])
 
-#pprint.pprint(type(fin_data))
-#pprint.pprint(type(fin_data_np_arrays))
-#pprint.pprint(fin_data_np_arrays)
-#pprint.pprint(fin_data_np_arrays)
-#pprint.pprint(fin_data_df)
-#pprint.pprint(email_data_df)
-
-#print(type(fin_data_df))
-#print(type(email_data_df))
-
 pd.set_option('precision',2)
+pd.set_option('display.float_format', '{:.2f}'.format)
 
 pprint.pprint(fin_data_df.describe())
 pprint.pprint(email_data_df.describe())
+
+###
+### email addresses
+
+# How many data points have an email address and no email statistics?
