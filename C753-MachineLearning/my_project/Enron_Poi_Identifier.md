@@ -68,7 +68,7 @@ THE TRAVEL AGENCY IN THE PARK
 {'other': 362096, 'poi': False, 'total_payments': 362096}
 ```
 
-Of those with 2 or fewer features, only Eugene Lockhart stands out as an oddity. There doesn't appear to be an email dump associated with him. He doesn't appear in the financial spreadsheet. There's no apparent reason for him to exist in this dataset. Some research into who is Eugene Lockhart suggests he's the CEO of a failed energy startup in the energy supply market; "New Power Company". That seems more plausible than a former Dallas Cowboy linebacker. "The New Power Company" may have some involvement in the Enron scandal, but that data doesn't seem to be included in our dataset.  
+Of those with 2 or fewer features, only Eugene Lockhart stands out as an oddity. There doesn't appear to be an email dump associated with him. He doesn't appear in the financial spreadsheet. There's no apparent reason for him to exist in this dataset. Some research into who is Eugene Lockhart suggests he's the CEO of a failed energy startup in the energy supply market; "New Power Company". That seems more plausible than the former Dallas Cowboy linebacker. "The New Power Company" may have some involvement in the Enron scandal, but data from that company doesn't seem to be included in our dataset. With the information available, the Eugene Lockhart in the dataset could be the former footballer.  
 
 Based on these findings, there's two entries that can be completely dropped from dataset. "The Travel Agency in the Park" by name and "Eugene Lockhart" by lacking features. For the remaining data points, their features could use a bit more scrutiny.  
 
@@ -219,7 +219,250 @@ min          57.00                     0.00          12.00                     0
 max       15149.00                   528.00       14368.00                   609.00                  5521.00
 ```
 
-Changing this behavior of the feature selector script has a great effect on the statistics of the financial data and no effect on the email data. This is due to the feature selector's default behavior of removing all data points with all zeros. This is strange because our previous counts show there's 111 data points with email addresses and there's only 86 with email statistics. What are these 25 other email addresses?
+Changing this behavior of the feature selector script has a great effect on the statistics of the financial data and no effect on the email data. This is due to the feature selector's default behavior of removing all data points with all zeros. This is strange because our previous counts show there's 111 data points with email addresses and there's only 86 with email statistics. What's the story for these 25 other email addresses?
+
+```{Python}
+111 email addresses counted
+***Number of email stats for persons with email addresses***
+{'ALLEN PHILLIP': 5,
+ 'BANNANTINE JAMES': 5,
+ 'BAY FRANKLIN': 0,
+ 'BECK SALLY': 5,
+ 'BELDEN TIMOTHY': 5,
+ 'BERBERIAN DAVID': 0,
+ 'BERGSIEKER RICHARD': 5,
+ 'BHATNAGAR SANJAY': 5,
+ 'BIBI PHILIPPE': 5,
+ 'BLACHMAN JEREMY': 5,
+ 'BOWEN RAYMOND': 5,
+ 'BROWN MICHAEL': 5,
+ 'BUCHANAN HAROLD': 5,
+ 'BUTTS ROBERT': 0,
+ 'BUY RICHARD': 5,
+ 'CALGER CHRISTOPHER': 5,
+ 'CARTER REBECCA': 5,
+ 'CAUSEY RICHARD': 5,
+ 'CHRISTODOULOU DIOMEDES': 0,
+ 'COLWELL WESLEY': 5,
+ 'CORDES WILLIAM': 5,
+ 'COX DAVID': 5,
+ 'DEFFNER JOSEPH': 5,
+ 'DELAINEY DAVID': 5,
+ 'DERRICK JAMES': 5,
+ 'DETMERING TIMOTHY': 0,
+ 'DIETRICH JANET': 5,
+ 'DIMICHELE RICHARD': 0,
+ 'DODSON KEITH': 5,
+ 'DONAHUE JEFFREY': 5,
+ 'DURAN WILLIAM': 5,
+ 'ECHOLS JOHN': 0,
+ 'ELLIOTT STEVEN': 0,
+ 'FALLON JAMES': 5,
+ 'FASTOW ANDREW': 0,
+ 'FITZGERALD JAY': 5,
+ 'FOWLER PEGGY': 5,
+ 'FOY JOE': 5,
+ 'FREVERT MARK': 5,
+ 'GARLAND KEVIN': 5,
+ 'GIBBS DANA': 5,
+ 'GLISAN BEN': 5,
+ 'GOLD JOSEPH': 0,
+ 'HAEDICKE MARK': 5,
+ 'HANNON KEVIN': 5,
+ 'HAUG DAVID': 5,
+ 'HAYES ROBERT': 5,
+ 'HAYSLETT RODERICK': 5,
+ 'HERMANN ROBERT': 0,
+ 'HICKERSON GARY': 5,
+ 'HIRKO JOSEPH': 0,
+ 'HORTON STANLEY': 5,
+ 'HUGHES JAMES': 5,
+ 'HUMPHREY GENE': 5,
+ 'IZZO LAWRENCE': 5,
+ 'JACKSON CHARLENE': 5,
+ 'KAMINSKI WINCENTY': 5,
+ 'KEAN STEVEN': 5,
+ 'KISHKILL JOSEPH': 0,
+ 'KITCHEN LOUISE': 5,
+ 'KOENIG MARK': 5,
+ 'KOPPER MICHAEL': 0,
+ 'LAVORATO JOHN': 5,
+ 'LAY KENNETH': 5,
+ 'LEFF DANIEL': 5,
+ 'LEWIS RICHARD': 5,
+ 'LINDHOLM TOD': 0,
+ 'MARTIN AMANDA': 5,
+ 'MCCARTY DANNY': 5,
+ 'MCCLELLAN GEORGE': 5,
+ 'MCCONNELL MICHAEL': 5,
+ 'MCDONALD REBECCA': 5,
+ 'MCMAHON JEFFREY': 5,
+ 'METTS MARK': 5,
+ 'MEYER ROCKFORD': 5,
+ 'MORAN MICHAEL': 5,
+ 'MORDAUNT KRISTINA': 0,
+ 'MULLER MARK': 5,
+ 'MURRAY JULIA': 5,
+ 'OLSON CINDY': 5,
+ 'OVERDYKE JERE': 0,
+ 'SKILLING JEFFREY': 5,
+ 'STABLER FRANK': 0,
+ 'SUNDE MARTIN': 5,
+ 'TAYLOR MITCHELL': 5,
+ 'THORN TERENCE': 5,
+ 'TILNEY ELIZABETH': 5,
+ 'UMANOFF ADAM': 5,
+ 'WALLS ROBERT': 5,
+ 'WASAFF GEORGE': 5,
+ 'WESTFAHL RICHARD': 0,
+ 'WHALLEY LAWRENCE': 5,
+ 'WHITE THOMAS': 0,
+ 'WODRASKA JOHN': 0,
+ 'YEAGER SCOTT': 0}
+```
+
+It seems those with email statistics have all 5 email statistics. So what about these that have none? From a quick manual scan of the email dump, there isn't any overt correlation between the email dump and the persons that make up our data points. The best theory I have is some email header parser was used to create these counts. So it remains a mystery how this data was obtained. Recreating such a parser is out of scope for this project. Tt would just be best to either take these values at face value or outright reject them. So far I have no reason to reject these counts.
+
+One insight into what email data was chosen to be included is by investigating the intersection between financial and email data. On each data point ask if it has email statistics, financial data or both. The one data point with no financial and no email data (Eugene Lockhart) has already been scrubbed from the dataset.
+
+I've added a set of booleans to the dataset to provide a handle on this intersection.  
+
+```{Python}
+***Persons with both Financial and Email data***
+set(['ALLEN PHILLIP',
+     'BANNANTINE JAMES',
+     'BECK SALLY',
+     'BELDEN TIMOTHY',
+     'BERGSIEKER RICHARD',
+     'BHATNAGAR SANJAY',
+     'BIBI PHILIPPE',
+     'BLACHMAN JEREMY',
+     'BOWEN RAYMOND',
+     'BROWN MICHAEL',
+     'BUCHANAN HAROLD',
+     'BUY RICHARD',
+     'CALGER CHRISTOPHER',
+     'CARTER REBECCA',
+     'CAUSEY RICHARD',
+     'COLWELL WESLEY',
+     'CORDES WILLIAM',
+     'COX DAVID',
+     'DEFFNER JOSEPH',
+     'DELAINEY DAVID',
+     'DERRICK JAMES',
+     'DIETRICH JANET',
+     'DODSON KEITH',
+     'DONAHUE JEFFREY',
+     'DURAN WILLIAM',
+     'FALLON JAMES',
+     'FITZGERALD JAY',
+     'FOWLER PEGGY',
+     'FOY JOE',
+     'FREVERT MARK',
+     'GARLAND KEVIN',
+     'GIBBS DANA',
+     'GLISAN BEN',
+     'HAEDICKE MARK',
+     'HANNON KEVIN',
+     'HAUG DAVID',
+     'HAYES ROBERT',
+     'HAYSLETT RODERICK',
+     'HICKERSON GARY',
+     'HORTON STANLEY',
+     'HUGHES JAMES',
+     'HUMPHREY GENE',
+     'IZZO LAWRENCE',
+     'JACKSON CHARLENE',
+     'KAMINSKI WINCENTY',
+     'KEAN STEVEN',
+     'KITCHEN LOUISE',
+     'KOENIG MARK',
+     'LAVORATO JOHN',
+     'LAY KENNETH',
+     'LEFF DANIEL',
+     'LEWIS RICHARD',
+     'MARTIN AMANDA',
+     'MCCARTY DANNY',
+     'MCCLELLAN GEORGE',
+     'MCCONNELL MICHAEL',
+     'MCDONALD REBECCA',
+     'MCMAHON JEFFREY',
+     'METTS MARK',
+     'MEYER ROCKFORD',
+     'MORAN MICHAEL',
+     'MULLER MARK',
+     'MURRAY JULIA',
+     'OLSON CINDY',
+     'PICKERING MARK',
+     'PIPER GREGORY',
+     'PIRO JIM',
+     'POWERS WILLIAM',
+     'REDMOND BRIAN',
+     'RICE KENNETH',
+     'RIEKER PAULA',
+     'SHANKMAN JEFFREY',
+     'SHAPIRO RICHARD',
+     'SHARP VICTORIA',
+     'SHELBY REX',
+     'SHERRICK JEFFREY',
+     'SHERRIFF JOHN',
+     'SKILLING JEFFREY',
+     'SUNDE MARTIN',
+     'TAYLOR MITCHELL',
+     'THORN TERENCE',
+     'TILNEY ELIZABETH',
+     'UMANOFF ADAM',
+     'WALLS ROBERT',
+     'WASAFF GEORGE',
+     'WHALLEY LAWRENCE'])
+
+***Persons with only Email data***
+set([])
+
+***Persons with only Financial data***
+set(['BADUM JAMES',
+     'BAXTER JOHN',
+     'BAY FRANKLIN',
+     'BAZELIDES PHILIP',
+     'BELFER ROBERT',
+     'BERBERIAN DAVID',
+     'BLAKE NORMAN',
+     'BUTTS ROBERT',
+     'CHAN RONNIE',
+     'CHRISTODOULOU DIOMEDES',
+     'CLINE KENNETH',
+     'CUMBERLAND MICHAEL',
+     'DETMERING TIMOTHY',
+     'DIMICHELE RICHARD',
+     'DUNCAN JOHN',
+     'ECHOLS JOHN',
+     'ELLIOTT STEVEN',
+     'FASTOW ANDREW',
+     'FUGH JOHN',
+     'GAHN ROBERT',
+     'REYNOLDS LAWRENCE',
+     'SAVAGE FRANK',
+     'SCRIMSHAW MATTHEW',
+     'STABLER FRANK',
+     'SULLIVAN-SHAKLOVITZ COLLEEN',
+     'URQUHART JOHN',
+     'WAKEHAM JOHN',
+     'WALTERS GARETH',
+     'WESTFAHL RICHARD',
+     'WHALEY DAVID',
+     'WHITE THOMAS',
+     'WINOKUR HERBERT',
+     'WODRASKA JOHN',
+     'WROBEL BRUCE',
+     'YEAGER SCOTT',
+     'YEAP SOON'])
+
+***No elephants should be in cairo***
+***Elephants have no values***
+set([])
+```
+
+All of our data points have some form of financial information but only some have email statistics. This presents an interesting consideration of how to handle null values with no form of null flavor. One consideration is an application of probablistic principle component analysis.
 
 ### Articles on 409A and Deferred Payments
 
@@ -235,6 +478,11 @@ Changing this behavior of the feature selector script has a great effect on the 
 
 [https://towardsdatascience.com/preventing-machine-learning-bias-d01adfe9f1fa](https://towardsdatascience.com/preventing-machine-learning-bias-d01adfe9f1fa)  
 [https://qz.com/1585645/color-blindness-is-a-bad-approach-to-solving-bias-in-algorithms/](https://qz.com/1585645/color-blindness-is-a-bad-approach-to-solving-bias-in-algorithms/)  
+
+### PPCA
+
+[http://edwardlib.org/tutorials/probabilistic-pca](http://edwardlib.org/tutorials/probabilistic-pca)  
+[http://www.miketipping.com/papers/met-mppca.pdf](http://www.miketipping.com/papers/met-mppca.pdf)
 
 ## Questions
 
