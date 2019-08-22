@@ -28,10 +28,14 @@ fin_features = ['poi','salary', 'deferral_payments', 'total_payments', 'bonus',
 email_features = ['poi', 'to_messages', 'from_poi_to_this_person', 'from_messages', 
     'from_this_person_to_poi', 'shared_receipt_with_poi'] 
 
-#fin_data = featureFormat(cleaned_data, fin_features)
-fin_data = featureFormat(cleaned_data, fin_features, remove_NaN=False)
+fin_data = featureFormat(cleaned_data, fin_features)
 _, fin_data_np_arrays = targetFeatureSplit( fin_data )
 fin_data_df = pd.DataFrame(fin_data_np_arrays, columns = fin_features[1:])
+
+
+fin_data_nulls = featureFormat(cleaned_data, fin_features, remove_NaN=False)
+_, fin_data_nulls_np_arrays = targetFeatureSplit( fin_data_nulls )
+fin_data_nulls_df = pd.DataFrame(fin_data_nulls_np_arrays, columns = fin_features[1:])
 
 #email_data = featureFormat(cleaned_data, email_features)
 email_data = featureFormat(cleaned_data, email_features, remove_NaN=False)
@@ -41,7 +45,13 @@ email_data_df = pd.DataFrame(email_data_np_arrays, columns = email_features[1:])
 pd.set_option('precision',2)
 pd.set_option('display.float_format', '{:.2f}'.format)
 
+print("***Financial Data Summary, including null as zeros***")
 pprint.pprint(fin_data_df.describe())
+print("\r")
+print("***Financial Data Summary, excluding nulls***")
+pprint.pprint(fin_data_nulls_df.describe())
+print("\r")
+print("***Email Statistics***")
 pprint.pprint(email_data_df.describe())
 print('\r')
 
@@ -111,4 +121,33 @@ print("***Elephants have no values***")
 pprint.pprint(elephant_in_cairo)
 print("\r")
 
+###
+### Financial Data scaling
+ 
+print("***Financial Data Summary, including null as zeros***")
+pprint.pprint(fin_data_df.describe())
+print("\r")
+print("***Financial Data Summary, excluding nulls***")
+pprint.pprint(fin_data_nulls_df.describe())
+print("\r")
 
+#print(fin_data_nulls_df.describe().index)
+#print(fin_data_nulls_df.describe().loc['count'])
+
+bool_fin = fin_data_nulls_df.describe().loc['count'] / fin_data_df.describe().loc['count']
+
+print("*** Observations % Populated : {}***".format(bool_fin.size))
+pprint.pprint(bool_fin)
+print("\r")
+
+print("*** Observations > 50% Populated : {}***".format(bool_fin[bool_fin >= 0.50].size))
+pprint.pprint(bool_fin[bool_fin >= 0.5])
+print("\r")
+
+print("*** Observations > 66% Populated : {}***".format(bool_fin[bool_fin >= 0.66].size))
+pprint.pprint(bool_fin[bool_fin >= 0.66])
+print("\r")
+
+print("*** Observations > 75% Populated : {}***".format(bool_fin[bool_fin >= 0.75].size))
+pprint.pprint(bool_fin[bool_fin >= 0.75])
+print("\r")

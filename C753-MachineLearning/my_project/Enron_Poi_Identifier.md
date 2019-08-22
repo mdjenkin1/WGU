@@ -1,4 +1,4 @@
-# Person of Interest Identification Through Machine Learning
+# Person of Interest Identification as an Introduction to Machine Learning
 
 The dataset resulting from the bankruptcy of Enron presents an opportunity for supervised machine learning. We know who the persons of interest are in this dataset. Having labels for the feature sets allows us to gauge the accuracy of any classifier we train. By comparing the number of accurately identified feature sets between classifier configurations we can determine techniques for classifier creation. These techniques can then be adapted to scenarios where we are less lucky and do not have labels for our feature sets. That is the goal of this project, building some technique for accurate classifier training through supervised machine learning.  
 
@@ -173,7 +173,7 @@ At this point, data_prep.py has been ran and the cleaned dataset is being invest
 * From_this_person_to_poi
 * Shared_receipt_with_poi
 
-I've taken the cleaned dataset and loaded into dataframes to get some basic statistics on them.
+I've taken the cleaned dataset and loaded it into dataframes for some basic statistics.
 
 ```{Python}
          salary  deferral_payments  total_payments      bonus  restricted_stock_deferred  deferred_income  total_stock_value  expenses  exercised_stock_options       other  long_term_incentive  restricted_stock  director_fees
@@ -196,7 +196,7 @@ min          57.00                     0.00          12.00                     0
 max       15149.00                   528.00       14368.00                   609.00                  5521.00
 ```
 
-The first thing to jump out at me are all the zeros in the financial dataset. The financial datasource has a lot of 'NaN' values. The default behavior of the feature selector is to change 'NaN' values to 0. This introduction of zeros is probably skewing the data.  
+The first thing to jump out at me are all the zeros in the financial dataset. The financial datasource has a lot of 'NaN' values. The default behavior of the feature selector is to change 'NaN' values to 0. This introduction of zeros could skew the data. Handling of null data needs to be weighed.
 
 ```{Python}
           salary  deferral_payments  total_payments      bonus  restricted_stock_deferred  deferred_income  total_stock_value  expenses  exercised_stock_options       other  long_term_incentive  restricted_stock  director_fees
@@ -462,7 +462,86 @@ set(['BADUM JAMES',
 set([])
 ```
 
-All of our data points have some form of financial information but only some have email statistics. This presents an interesting consideration of how to handle null values with no form of null flavor. One consideration is an application of probablistic principle component analysis.
+All of our data points have some form of financial information but only some have email statistics. The email statistics are more complete than the financial data but the financial data has more observations. "Follow the money" is the saying.  
+
+I am concerned about the null values in the financial data set. A non-zero amount of consideration has been given on how to best handle these. Given the scope of this project, the decision is imputation to zero. Under the assumption that a null value represents money not paid, zero is the only value that could be used. The convience of the provided feature selector code defaulting to imputation as way of handling zeros is also not lost on me.  
+
+Working with the assumptions that finacial data nulls are zeros requires we verify the scaling of the financial data. To review, here again is the statistical summary of the financial data with and without imputation.
+
+```{python}
+***Financial Data Summary, including null as zeros***
+          salary  deferral_payments  total_payments      bonus  restricted_stock_deferred  deferred_income  ...  expenses  exercised_stock_options       other  long_term_incentive  restricted_stock  director_fees  
+count     143.00             143.00          143.00     143.00                     143.00           143.00  ...    143.00                   143.00      143.00               143.00            143.00         143.00  
+mean   186742.86          223642.63      1685434.48  680724.61                   73931.31       -195037.70  ...  35622.72               2090318.08   296806.69            339314.18         874609.97       10050.11  
+std    197117.07          756520.79      2925088.47 1236179.69                 1306545.17        607922.47  ...  45370.87               4809193.25  1135030.65            689013.93        2022338.37       31399.35  
+min         0.00         -102500.00            0.00       0.00                -1787380.00      -3504386.00  ...      0.00                     0.00        0.00                 0.00       -2604490.00           0.00  
+25%         0.00               0.00        96796.50       0.00                       0.00        -37506.00  ...      0.00                     0.00        0.00                 0.00          38276.50           0.00  
+50%    210692.00               0.00       966522.00  300000.00                       0.00             0.00  ...  21530.00                608750.00      947.00                 0.00         360528.00           0.00  
+75%    270259.00            9110.00      1956977.50  800000.00                       0.00             0.00  ...  53534.50               1698900.50   149204.00            374825.50         775992.00           0.00  
+max   1111258.00         6426990.00     22034793.00 8000000.00                15456290.00             0.00  ... 228763.00              34348384.00 10359729.00           5145434.00       14761694.00      137864.00  
+
+[8 rows x 13 columns]
+
+***Financial Data Summary, excluding nulls***
+          salary  deferral_payments  total_payments      bonus  restricted_stock_deferred  deferred_income  ...  expenses  exercised_stock_options       other  long_term_incentive  restricted_stock  director_fees  
+count      94.00              38.00          123.00      81.00                      17.00            48.00  ...     94.00                   101.00       91.00                65.00            109.00          16.00  
+mean   284087.54          841602.53      1959488.86 1201773.07                  621892.82       -581049.81  ...  54192.01               2959559.26   466410.52            746491.20        1147424.09       89822.88  
+std    177131.12         1289322.63      3068775.11 1441679.44                 3845528.35        942076.40  ...  46108.38               5499449.60  1397375.61            862917.42        2249770.36       41112.70  
+min       477.00         -102500.00          148.00   70000.00                -1787380.00      -3504386.00  ...    148.00                  3285.00        2.00             69223.00       -2604490.00        3285.00  
+25%    211802.00           79644.50       396934.00  425000.00                 -329825.00       -611209.25  ...  22479.00                506765.00     1203.00            275000.00         252055.00       83674.50  
+50%    258741.00          221063.50      1099100.00  750000.00                 -140264.00       -151927.00  ...  46547.50               1297049.00    51587.00            422158.00         441096.00      106164.50  
+75%    308606.50          867211.25      2087529.50 1200000.00                  -72419.00        -37926.00  ...  78408.50               2542813.00   331983.00            831809.00         985032.00      112815.00  
+max   1111258.00         6426990.00     22034793.00 8000000.00                15456290.00          -833.00  ... 228763.00              34348384.00 10359729.00           5145434.00       14761694.00      137864.00  
+
+[8 rows x 13 columns]
+```
+
+The first thing I note are the difference in counts. Some fields have a wide drop in observations. "Restricted Stock Deferred" drops from 143 observations to 17. "Director Fees" drops to only 16 observations. Some of these features are so sparsely populated that they could easily be considered boolean.  
+
+```{Python}
+*** Observations % Populated : 13***
+salary                      0.66
+deferral_payments           0.27
+total_payments              0.86
+bonus                       0.57
+restricted_stock_deferred   0.12
+deferred_income             0.34
+total_stock_value           0.87
+expenses                    0.66
+exercised_stock_options     0.71
+other                       0.64
+long_term_incentive         0.45
+restricted_stock            0.76
+director_fees               0.11
+Name: count, dtype: float64
+
+*** Observations > 50% Populated : 8***
+salary                    0.66
+total_payments            0.86
+bonus                     0.57
+total_stock_value         0.87
+expenses                  0.66
+exercised_stock_options   0.71
+other                     0.64
+restricted_stock          0.76
+Name: count, dtype: float64
+
+*** Observations > 66% Populated : 4***
+total_payments            0.86
+total_stock_value         0.87
+exercised_stock_options   0.71
+restricted_stock          0.76
+Name: count, dtype: float64
+
+```
+
+Aside from total payments, the most populated features pertain to stocks. Instinctually this should make sense. The scandal was inflating the apparent value of the company through questionable accounting practices (fraud) and cashing in on that appearance. What doesn't make sense are the null total payments. Looking at the spreadsheet, this is quickly cleared up. Stocks are considered part of the financial data but they are not included in the payment calculations. There's people with stocks and no payment data. There's also people with payments that were deferred. That is, money paid on the books but deferred to a later time.
+
+This suggests at least three games being played in the financial dataset; stocks, deferred payments and the previously scrubbed loans. Knowledge or involvement in the fraud would affect how you played each of those games. Participation in each game and the weight of each game towards classification would be the most comprehensive model we could build. The scope of that is greater than what this project demands.
+
+To remain in scope, the over all financial game would best be explored via a model that can handle imputed zeros as booleans for sparsely populated features while not sacrificing the nuance of non-zero values. It would also need to handle features individually so the weight of each feature towards classification could be determined. Adaboost seems to fit this criteria most exactly. As repayment of loans with overvalued stocks is one of the identified games, the previously scrubed loan data should be returned to the dataset. It may be of academic interest to compare the performance of an Adaboost classifier with and without this datapoint.
+
+Another classifier that could be tried could be based entirely on the stock game. Consideration of the needs of modeling the stock game will be tabled for now.
 
 ### Articles on 409A and Deferred Payments
 
