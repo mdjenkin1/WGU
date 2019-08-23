@@ -19,6 +19,6 @@ enron_mail*
 **/my_dataset.pkl
 **/my_feature_list.pkl
 **/ud120/**/*pkl
-**/final_project_dataset_cleaned.pkl
+**/final_project_dataset_cleaned*.pkl
 
 trash

@@ -31,7 +31,7 @@ cleaned_ef_data = {}
 # Decision helpers
 has_email_and_stats = set()                                     # persons with email addresses and email statistics
 drop_person = set(['THE TRAVEL AGENCY IN THE PARK', 'TOTAL'])   # Entries to be dropped with static values
-drop_loan_advances = False
+drop_loan_advances = True
 
 ######
 # Data Preparation
@@ -95,4 +95,3 @@ else:
     out = open("../pickle_jar/final_project_dataset_cleaned.pkl","wb")
 pickle.dump(cleaned_ef_data, out)
 out.close()
-
