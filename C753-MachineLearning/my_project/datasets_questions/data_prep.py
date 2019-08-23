@@ -31,6 +31,7 @@ cleaned_ef_data = {}
 # Decision helpers
 has_email_and_stats = set()                                     # persons with email addresses and email statistics
 drop_person = set(['THE TRAVEL AGENCY IN THE PARK', 'TOTAL'])   # Entries to be dropped with static values
+drop_loan_advances = False
 
 ######
 # Data Preparation
@@ -65,11 +66,11 @@ for person in original_ef_data:
 #print(drop_person)
 
 ##
-# Second pass: Data Copy, clean and expansion
+# Data copy, clean and expand
 for person in original_ef_data:
     if person not in drop_person:
         cleaned_ef_data[person] = {feat:original_ef_data[person][feat] for feat in original_ef_data[person] if feat!='loan_advances'}
-        if original_ef_data[person]['loan_advances'] != 'NaN':
+        if original_ef_data[person]['loan_advances'] != 'NaN' and drop_loan_advances:
             cleaned_ef_data[person]['total_payments'] = cleaned_ef_data[person]['total_payments'] - original_ef_data[person]['loan_advances']
         
         ##
@@ -88,6 +89,10 @@ for person in original_ef_data:
                 cleaned_ef_data[person]["has_financial"] = True
                 break
 
-out = open("../pickle_jar/final_project_dataset_cleaned.pkl","wb")
+if drop_loan_advances:
+    out = open("../pickle_jar/final_project_dataset_cleaned_no_loan.pkl","wb")
+else:
+    out = open("../pickle_jar/final_project_dataset_cleaned.pkl","wb")
 pickle.dump(cleaned_ef_data, out)
 out.close()
+
