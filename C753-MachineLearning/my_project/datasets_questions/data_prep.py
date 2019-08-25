@@ -16,7 +16,7 @@ import re
 ##
 # Feature grouping
 fin_features = ['poi','salary', 'deferral_payments', 'total_payments', 'bonus', 
-    'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses', 
+    'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses', 'loan_advances'
     'exercised_stock_options', 'other', 'long_term_incentive', 'restricted_stock', 'director_fees']
 
 email_features = ['poi', 'to_messages', 'from_poi_to_this_person', 'from_messages', 
@@ -25,13 +25,14 @@ email_features = ['poi', 'to_messages', 'from_poi_to_this_person', 'from_message
 ##
 # Datasets 
 original_ef_data = pickle.load(open("../pickle_jar/final_project_dataset.pkl"))
+#original_ef_data = pickle.load(open("./pickle_jar/final_project_dataset.pkl"))
 cleaned_ef_data = {}
 
 ##
 # Decision helpers
 has_email_and_stats = set()                                     # persons with email addresses and email statistics
 drop_person = set(['THE TRAVEL AGENCY IN THE PARK', 'TOTAL'])   # Entries to be dropped with static values
-drop_loan_advances = True
+drop_loan_advances = False
 
 ######
 # Data Preparation
@@ -69,9 +70,12 @@ for person in original_ef_data:
 # Data copy, clean and expand
 for person in original_ef_data:
     if person not in drop_person:
-        cleaned_ef_data[person] = {feat:original_ef_data[person][feat] for feat in original_ef_data[person] if feat!='loan_advances'}
-        if original_ef_data[person]['loan_advances'] != 'NaN' and drop_loan_advances:
-            cleaned_ef_data[person]['total_payments'] = cleaned_ef_data[person]['total_payments'] - original_ef_data[person]['loan_advances']
+        if drop_loan_advances:
+            cleaned_ef_data[person] = {feat:original_ef_data[person][feat] for feat in original_ef_data[person] if feat!='loan_advances'}
+            if original_ef_data[person]['loan_advances'] != 'NaN' and drop_loan_advances:
+                cleaned_ef_data[person]['total_payments'] = cleaned_ef_data[person]['total_payments'] - original_ef_data[person]['loan_advances']
+        else:
+            cleaned_ef_data[person] = {feat:original_ef_data[person][feat] for feat in original_ef_data[person]}
         
         ##
         # Delineate the intersection of financial and email data
@@ -92,6 +96,8 @@ for person in original_ef_data:
 if drop_loan_advances:
     out = open("../pickle_jar/final_project_dataset_cleaned_no_loan.pkl","wb")
 else:
+    #out = open("./pickle_jar/final_project_dataset_cleaned.pkl","wb")
     out = open("../pickle_jar/final_project_dataset_cleaned.pkl","wb")
 pickle.dump(cleaned_ef_data, out)
 out.close()
+
