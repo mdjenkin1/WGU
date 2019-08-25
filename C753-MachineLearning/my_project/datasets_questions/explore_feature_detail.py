@@ -4,6 +4,7 @@ import pprint
 import sys
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
@@ -28,7 +29,7 @@ fin_features_no_loan = ['poi','salary', 'deferral_payments', 'total_payments', '
     'exercised_stock_options', 'other', 'long_term_incentive', 'restricted_stock', 'director_fees']
 
 fin_features = ['poi','salary', 'deferral_payments', 'total_payments', 'bonus', 
-    'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses', 'loan_advance'
+    'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses', 'loan_advances',
     'exercised_stock_options', 'other', 'long_term_incentive', 'restricted_stock', 'director_fees']
 
 email_features = ['poi', 'to_messages', 'from_poi_to_this_person', 'from_messages', 
@@ -38,20 +39,26 @@ fin_data_no_loan = featureFormat(cleaned_data_no_loan, fin_features_no_loan)
 _, fin_data_no_loan_np_arrays = targetFeatureSplit( fin_data_no_loan )
 fin_data_no_loan_df = pd.DataFrame(fin_data_no_loan_np_arrays, columns = fin_features_no_loan[1:])
 
-
 fin_data_no_loan_nulls = featureFormat(cleaned_data_no_loan, fin_features_no_loan, remove_NaN=False)
 _, fin_data_no_loan_nulls_np_arrays = targetFeatureSplit( fin_data_no_loan_nulls )
 fin_data_no_loan_nulls_df = pd.DataFrame(fin_data_no_loan_nulls_np_arrays, columns = fin_features_no_loan[1:])
 
-
-fin_data = featureFormat(cleaned_data, fin_features)
-_, fin_data_np_arrays = targetFeatureSplit( fin_data )
-fin_data_df = pd.DataFrame(fin_data_np_arrays, columns = fin_features[1:])
+#fin_data = featureFormat(cleaned_data, fin_features)
+#_, fin_data_np_arrays = targetFeatureSplit( fin_data )
+#fin_data_df = pd.DataFrame(fin_data_np_arrays, columns = fin_features[1:])
 
 #email_data = featureFormat(cleaned_data, email_features)
 email_data = featureFormat(cleaned_data, email_features, remove_NaN=False)
 _, email_data_np_arrays = targetFeatureSplit( email_data )
 email_data_df = pd.DataFrame(email_data_np_arrays, columns = email_features[1:])
+
+
+stock_features = ['poi', 'restricted_stock_deferred', 'total_stock_value', 'exercised_stock_options', 'restricted_stock']
+
+stock_data = featureFormat(cleaned_data, stock_features)
+_, stock_data_np_arrays = targetFeatureSplit(stock_data)
+stock_data_df = pd.DataFrame(stock_data_np_arrays, columns = stock_features[1:])
+
 
 pd.set_option('precision',2)
 pd.set_option('display.float_format', '{:.2f}'.format)
@@ -163,4 +170,14 @@ print("*** Observations > 75% Populated : {}***".format(bool_fin[bool_fin >= 0.7
 pprint.pprint(bool_fin[bool_fin >= 0.75])
 print("\r")
 
+###
+### Stock Data
 
+#plt.style.use('ggplot')
+#stock_matrix = pd.plotting.scatter_matrix(stock_data_df)
+#stock_matrix.show()
+
+#stock_matrix = sns.pairplot(stock_data_df)
+#plt.show()
+
+#pprint.pprint(stock_data_df)
