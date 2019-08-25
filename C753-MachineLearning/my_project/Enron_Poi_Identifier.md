@@ -541,7 +541,19 @@ This suggests at least three games being played in the financial dataset; stocks
 
 To remain in scope, the over all financial game would best be explored via a model that can handle imputed zeros as booleans for sparsely populated features while not sacrificing the nuance of non-zero values. It would also need to handle features individually so the weight of each feature towards classification could be determined. Adaboost seems to fit this criteria most exactly. As repayment of loans with overvalued stocks is one of the identified games, the previously scrubed loan data should be returned to the dataset. It may be of academic interest to compare the performance of an Adaboost classifier with and without this datapoint.
 
-Another classifier that could be tried could be based entirely on the stock game. Consideration of the needs of modeling the stock game will be tabled for now.
+Another classifier based entirely on the stock game could also be ran. Consideration of the needs of modeling the stock game will be tabled for now.
+
+## Adaboosting financial data
+
+Out of the box, with no adjustments, the sklearn adaboost module provides 93.3% classification accuracy when trained on a 90% sampling of the financial features. For adjustment, the module gives us these parameters.
+
+* base_estimator: (default: DecisionTreeClassifier(max_depth=1)) The type of estimator (weak classifiers) to boost. e.g. random forest of stumps
+* n_estimators: (default: 50) number of estimators (weak classifiers) to create. Puts a limit on execution by implementing termination
+* learning_rate: (default: 1) shrink contribution of subsequent classifiers by this amount.
+* algorithm: (default: 'SAMME.R') Two available algorithms for boosting: Real SAMME (SAMME.R) and Discrete SAMME
+* random_state: (default: None) Random number generator configuration. None uses what np.random uses.
+
+Of these options, learning_rate and n_estimators seem to be the most pertinent options for accuracy adjustments. As we're dealing with a two class problem, the mulitple class design of descrete SAMME is a waste. The default SAMME.R should offer better accuracy. Random forest of stumps is exactly what's wanted for this model. It handles each feature as a nuanced boolean that can be weighted into the classification calculation. Random state will need more consideration, bias introduced through training/testing split is a concern.  
 
 ### Articles on 409A and Deferred Payments
 
@@ -562,6 +574,10 @@ Another classifier that could be tried could be based entirely on the stock game
 
 [http://edwardlib.org/tutorials/probabilistic-pca](http://edwardlib.org/tutorials/probabilistic-pca)  
 [http://www.miketipping.com/papers/met-mppca.pdf](http://www.miketipping.com/papers/met-mppca.pdf)
+
+### Adaboost
+
+[https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html)
 
 ## Questions
 
