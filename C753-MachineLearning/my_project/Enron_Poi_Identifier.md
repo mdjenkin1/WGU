@@ -555,6 +555,19 @@ Out of the box, with no adjustments, the sklearn adaboost module provides 93.3% 
 
 Of these options, learning_rate and n_estimators seem to be the most pertinent options for accuracy adjustments. As we're dealing with a two class problem, the mulitple class design of descrete SAMME is a waste. The default SAMME.R should offer better accuracy. Random forest of stumps is exactly what's wanted for this model. It handles each feature as a nuanced boolean that can be weighted into the classification calculation. Random state will need more consideration, bias introduced through training/testing split is a concern.  
 
+### Test/Train Split
+
+Before digging too far into tuning the classifier, we should take a look at how well the data has been split.
+
+```{Python}
+*** Observations < 30% Populated : 11***
+deferral_payments           0.27
+restricted_stock_deferred   0.12
+loan_advances               0.02
+director_fees               0.11
+Name: count, dtype: float64
+```
+
 ### Articles on 409A and Deferred Payments
 
 [https://executivebenefitsolutions.com/lessons-learned-from-enron-and-chrysler-how-to-secure-nonqualified-deferred-compensation-plans/](https://executivebenefitsolutions.com/lessons-learned-from-enron-and-chrysler-how-to-secure-nonqualified-deferred-compensation-plans/)  

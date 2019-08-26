@@ -35,12 +35,39 @@ fin_data = pd.DataFrame(data_split, columns = fin_features[1:])
 
 features_train, features_test, labels_train, labels_test = model_selection.train_test_split(fin_data, poi, test_size=0.1, random_state=42)
 
-poi_clf_adb_stock = AdaBoostClassifier()
-poi_clf_adb_stock.fit(features_train, labels_train)
+###
+### train and test split bias?
 
-print("***Accuracy (stock): {}***".format(poi_clf_adb_stock.score(features_test,labels_test)))
+## poi distribution
+print("Total number of poi: {}".format(poi.count(1)))
+print("Number of poi in train set: {}".format(labels_train.count(1)))
+print("Number of poi in test set: {}".format(labels_test.count(1)))
+
+## distribution of sparse features
+#deferral_payments           0.27
+#restricted_stock_deferred   0.12
+#loan_advances               0.02
+#director_fees               0.11
+
+isPop = lambda x: False if x == 0 else True
+print(features_train['deferral_payments'].apply(isPop).count())
+print(features_train['restricted_stock_deferred'].apply(isPop).count())
+print(features_train['loan_advances'].apply(isPop).count())
+
+#print("Total number of actual deferral_payments: {}".format())
+#print("Number of actual deferral_payments in train set: {}".format(features_train['deferral_payments'].count(isPop)))
+#print("Number of actual deferral_payments in test set: {}".format(features_test['deferral_payments'].count(isPop)))
+
+
+
 
 ###
+### stock algorithm
+#poi_clf_adb_stock = AdaBoostClassifier()
+#poi_clf_adb_stock.fit(features_train, labels_train)
+
+#print("***Accuracy (stock): {}***".format(poi_clf_adb_stock.score(features_test,labels_test)))
+
 
 
 ###
