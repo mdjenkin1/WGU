@@ -43,9 +43,14 @@ fin_data_no_loan_nulls = featureFormat(cleaned_data_no_loan, fin_features_no_loa
 _, fin_data_no_loan_nulls_np_arrays = targetFeatureSplit( fin_data_no_loan_nulls )
 fin_data_no_loan_nulls_df = pd.DataFrame(fin_data_no_loan_nulls_np_arrays, columns = fin_features_no_loan[1:])
 
-#fin_data = featureFormat(cleaned_data, fin_features)
-#_, fin_data_np_arrays = targetFeatureSplit( fin_data )
-#fin_data_df = pd.DataFrame(fin_data_np_arrays, columns = fin_features[1:])
+fin_data = featureFormat(cleaned_data, fin_features)
+_, fin_data_np_arrays = targetFeatureSplit( fin_data )
+fin_data_df = pd.DataFrame(fin_data_np_arrays, columns = fin_features[1:])
+
+fin_data_nulls = featureFormat(cleaned_data, fin_features, remove_NaN=False)
+_, fin_data_np_arrays_nulls = targetFeatureSplit( fin_data_nulls )
+fin_data_nulls_df = pd.DataFrame(fin_data_np_arrays_nulls, columns = fin_features[1:])
+
 
 #email_data = featureFormat(cleaned_data, email_features)
 email_data = featureFormat(cleaned_data, email_features, remove_NaN=False)
@@ -152,7 +157,36 @@ print("\r")
 #print(fin_data_no_loan_nulls_df.describe().index)
 #print(fin_data_no_loan_nulls_df.describe().loc['count'])
 
-bool_fin = fin_data_no_loan_nulls_df.describe().loc['count'] / fin_data_no_loan_df.describe().loc['count']
+bool_fin_no_loan = fin_data_no_loan_nulls_df.describe().loc['count'] / fin_data_no_loan_df.describe().loc['count']
+
+print("*** Observations % Populated : {}***".format(bool_fin_no_loan.size))
+pprint.pprint(bool_fin_no_loan)
+print("\r")
+
+print("*** Observations > 50% Populated : {}***".format(bool_fin_no_loan[bool_fin_no_loan >= 0.50].size))
+pprint.pprint(bool_fin_no_loan[bool_fin_no_loan >= 0.5])
+print("\r")
+
+print("*** Observations > 66% Populated : {}***".format(bool_fin_no_loan[bool_fin_no_loan >= 0.66].size))
+pprint.pprint(bool_fin_no_loan[bool_fin_no_loan >= 0.66])
+print("\r")
+
+print("*** Observations > 75% Populated : {}***".format(bool_fin_no_loan[bool_fin_no_loan >= 0.75].size))
+pprint.pprint(bool_fin_no_loan[bool_fin_no_loan >= 0.75])
+print("\r")
+
+print("*** Observations < 30% Populated : {}***".format(bool_fin_no_loan[bool_fin_no_loan >= 0.25].size))
+pprint.pprint(bool_fin_no_loan[bool_fin_no_loan <= 0.30])
+print("\r")
+
+###
+### Replaced loan_advance
+bool_fin = fin_data_nulls_df.describe().loc['count'] / fin_data_df.describe().loc['count']
+
+print("*************************")
+print("***Feature Populations***")
+print("****With Loan Advance****")
+print("*************************")
 
 print("*** Observations % Populated : {}***".format(bool_fin.size))
 pprint.pprint(bool_fin)
@@ -169,6 +203,11 @@ print("\r")
 print("*** Observations > 75% Populated : {}***".format(bool_fin[bool_fin >= 0.75].size))
 pprint.pprint(bool_fin[bool_fin >= 0.75])
 print("\r")
+
+print("*** Observations < 30% Populated : {}***".format(bool_fin[bool_fin >= 0.25].size))
+pprint.pprint(bool_fin[bool_fin <= 0.30])
+print("\r")
+
 
 ###
 ### Stock Data
