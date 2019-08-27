@@ -1,7 +1,7 @@
 # Udacity C753 Machine Learning Project
 
 The majority of this project is based on starter code provided by Udacity: [https://github.com/udacity/ud120-projects.git](https://github.com/udacity/ud120-projects.git)  
-Only files that are necessary to the project submission are included here.  
+Files that are unnecessary to the project submission are included here.  
 
 ## Project Goal
 
