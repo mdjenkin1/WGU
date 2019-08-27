@@ -13,7 +13,7 @@ from sklearn import model_selection
 #from sklearn.cross_validation import KFold
 from scipy import stats
 
-sys.path.append("./tools/")
+sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 
 """
@@ -30,7 +30,7 @@ from feature_format import featureFormat, targetFeatureSplit
 # Full Finance Dataset Load
 #
 
-infile = open("./pickle_jar/final_project_dataset_cleaned.pkl", "rb")
+infile = open("../pickle_jar/final_project_dataset_cleaned.pkl", "rb")
 prepd_data = pickle.load(infile)
 infile.close()
 
@@ -46,7 +46,7 @@ fin_data = pd.DataFrame(data_split, columns = fin_features[1:])
 # No Loan Dataset 
 #
 
-infile = open("./pickle_jar/final_project_dataset_cleaned_no_loan.pkl", "rb")
+infile = open("../pickle_jar/final_project_dataset_cleaned_no_loan.pkl", "rb")
 prepd_no_loan = pickle.load(infile)
 infile.close()
 

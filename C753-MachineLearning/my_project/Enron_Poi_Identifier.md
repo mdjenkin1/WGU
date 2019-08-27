@@ -671,7 +671,76 @@ Seems Sanjay isn't the only person with poorly parsed stock data. While it would
 
 ![stock_pairplot_cleaned](./pickle_jar/stock_pairplot_cleaned.png)
 
-Now the data is seeming sane. Deferred restricted stock is on a negative scale, and there's no negative values for restricted stock. Exercised stock options and total stock appear highly correlated. That makes sense as total stock value is a calculated value and exercised stock is only additive. 
+Now the data is seeming sane. Deferred restricted stock is on a negative scale, and there's no negative values for restricted stock. Exercised stock options and total stock appear highly correlated. That makes sense as total stock value is a calculated value and exercised stock is only additive. That leaves the stock dataset as observations of 3 features.  
+
+![stock_pairplot_sans_redundant](./pickle_jar/stock_pairplot_sans_redundant.png)
+
+This is a much more managable set of features. However, I do have some consern of how narrow it is. Looking back at investigation of the full financial data, there's one feature that should be re-included. Specifically the total payments field from the other part of the financial data set. Like the stock data, it has an acceptable level of observations and was consistently weighed highly with the adaboost classifiers. It offers information at the low cost of a single dimension. Checking for the sanity of the total payment field returns only those two people we've already flagged for removal for non-sane total stock values.
+
+```{Python}
+BELFER ROBERT does not have sane payment totals.
+poi = False
+salary = NaN
+deferral_payments = -102500
+total_payments = 102500
+bonus = NaN
+deferred_income = NaN
+expenses = NaN
+loan_advances = NaN
+other = NaN
+long_term_incentive = NaN
+director_fees = 3285
+
+BHATNAGAR SANJAY does not have sane payment totals.
+poi = False
+salary = NaN
+deferral_payments = NaN
+total_payments = 15456290
+bonus = NaN
+deferred_income = NaN
+expenses = NaN
+loan_advances = NaN
+other = 137864
+long_term_incentive = NaN
+director_fees = 137864
+```
+
+If we are re-introducing total_payments as the informational portion of the payment data, we would be remiss if we did not also include the deferred income component. Much like restricted_stock_deferred is the negative to total stocks, it is the negative component to total pay.
+
+![./pickle_jar/fin_data_pairplot.png](./pickle_jar/fin_data_pairplot.png)
+
+## Feature Selection Validation
+
+To this point, feature selection has been a manual process resulting from a familirization with the data due to data investigation. As much as I'd like to believe my instincts and eyeballs are good, I do not believe that's good enough for data science. So I'd like to take a small detour and validate my unorthodox use of adaboost to identify features by a more accepted means of feature selection.
+
+```{Python}
+[('deferred_income', -1.3650468360827975e-07),
+ ('deferral_payments', -8.141966143698239e-08),
+ ('other', -6.108570287861131e-08),
+ ('director_fees', -5.794583665478616e-08),
+ ('long_term_incentive', -1.1534852970185745e-08),
+ ('loan_advances', -5.4387922244909575e-09),
+ ('restricted_stock_deferred', -4.407784434320726e-09),
+ ('restricted_stock', -2.997067712758703e-09),
+ ('total_stock_value', 6.456635773571899e-09),
+ ('total_payments', 7.046569603493372e-09),
+ ('exercised_stock_options', 7.610473458563938e-09),
+ ('bonus', 2.8047104220078648e-08),
+ ('expenses', 3.9816279164494394e-07),
+ ('salary', 4.077777256337691e-07)]
+```
+
+Performing a rough Lasso regression to determine the most impactful financial features mostly agrees with my estimates. What I missed are salary, expenses and bonus. Each of these are weighted higher for classification than the stock features even though they have less population in the observations. Given their relation to total_payments, I was correct to re-introduce total_payments to my feature selection. Given these weights, including deferred_income is very questionable.  
+
+With this new information at hand, I'll once again shift direction on what information to feed my classifier. The redundant information of total_payments and total_stock_value will be removed. Features weighed in the negative will also be removed. That leaves bonus, expenses and salary as granular components of total_pay end exercised_stock_options as the principal component of total_stock_value. It's basically the same data model as I had already decided on except now flipping which set is more granular.  
+
+![./pickle_jar/data_pairplot.png](./pickle_jar/data_pairplot.png)  
+
+Definitly a more interesting set of plots.  
+
+## Outliers and scaling
+
+Even though the plots of this final dataset are more interesting, there's a question about how compressed and clumped they are. A bit of outlier detection is in order.
 
 ### Articles on 409A and Deferred Payments
 
