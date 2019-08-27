@@ -651,6 +651,25 @@ BHATNAGAR SANJAY has positive restricted stock deferrals
 
 Seems this data is dirtier than we first assumed. As we've reduced the scope of our classifier to just the stock data, it shouldn't be too difficult to add in some validators to the data cleaner. Just to catch anyone else with oddly shifted data.
 
+```{Python}
+BELFER ROBERT does not have sane stock totals.
+poi = False
+restricted_stock_deferred = 44093
+total_stock_value = -44093
+exercised_stock_options = 3285
+restricted_stock = NaN
+
+BHATNAGAR SANJAY does not have sane stock totals.
+poi = False
+restricted_stock_deferred = 15456290
+total_stock_value = NaN
+exercised_stock_options = 2604490
+restricted_stock = -2604490
+```
+
+Seems Sanjay isn't the only person with poorly parsed stock data. While it would be best to correct the error in the data wrangler, that is out of scope for this project. Instead, I'll just drop these non-poi from the dataset.
+
+
 
 
 ### Articles on 409A and Deferred Payments
