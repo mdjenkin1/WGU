@@ -57,14 +57,6 @@ email_data = featureFormat(cleaned_data, email_features, remove_NaN=False)
 _, email_data_np_arrays = targetFeatureSplit( email_data )
 email_data_df = pd.DataFrame(email_data_np_arrays, columns = email_features[1:])
 
-
-stock_features = ['poi', 'restricted_stock_deferred', 'total_stock_value', 'exercised_stock_options', 'restricted_stock']
-
-stock_data = featureFormat(cleaned_data, stock_features)
-_, stock_data_np_arrays = targetFeatureSplit(stock_data)
-stock_data_df = pd.DataFrame(stock_data_np_arrays, columns = stock_features[1:])
-
-
 pd.set_option('precision',2)
 pd.set_option('display.float_format', '{:.2f}'.format)
 
@@ -208,15 +200,3 @@ print("*** Observations < 30% Populated : {}***".format(bool_fin[bool_fin >= 0.2
 pprint.pprint(bool_fin[bool_fin <= 0.30])
 print("\r")
 
-
-###
-### Stock Data
-
-#plt.style.use('ggplot')
-#stock_matrix = pd.plotting.scatter_matrix(stock_data_df)
-#stock_matrix.show()
-
-#stock_matrix = sns.pairplot(stock_data_df)
-#plt.show()
-
-#pprint.pprint(stock_data_df)
