@@ -545,7 +545,7 @@ Another classifier based entirely on the stock game could also be ran. Considera
 
 ## Adaboosting financial data
 
-Out of the box, with no adjustments, the sklearn adaboost module provides 93.3% classification accuracy when trained on a 90% sampling of the financial features. For adjustment, the module gives us these parameters.
+For adjustment, the adaboost module gives us these parameters.
 
 * base_estimator: (default: DecisionTreeClassifier(max_depth=1)) The type of estimator (weak classifiers) to boost. e.g. random forest of stumps
 * n_estimators: (default: 50) number of estimators (weak classifiers) to create. Puts a limit on execution by implementing termination
@@ -553,20 +553,62 @@ Out of the box, with no adjustments, the sklearn adaboost module provides 93.3% 
 * algorithm: (default: 'SAMME.R') Two available algorithms for boosting: Real SAMME (SAMME.R) and Discrete SAMME
 * random_state: (default: None) Random number generator configuration. None uses what np.random uses.
 
-Of these options, learning_rate and n_estimators seem to be the most pertinent options for accuracy adjustments. As we're dealing with a two class problem, the mulitple class design of descrete SAMME is a waste. The default SAMME.R should offer better accuracy. Random forest of stumps is exactly what's wanted for this model. It handles each feature as a nuanced boolean that can be weighted into the classification calculation. Random state will need more consideration, bias introduced through training/testing split is a concern.  
+Of these options, learning_rate and n_estimators seem to be the most pertinent options for accuracy adjustments. As we're dealing with a two class problem, the mulitple class design of descrete SAMME is not necessary. The default SAMME.R should offer better accuracy. Random forest of stumps is exactly what's wanted for this model. It handles each feature as a nuanced boolean that can be weighted into the classification calculation.
 
-### Test/Train Split
+### Effect of high bias sparse feature
 
-Before digging too far into tuning the classifier, we should take a look at how well the data has been split.
+The idea that a highly biased and sparsely populated feature could be mitigated with boost weak learners is something I wanted to classify. The re-introduction of the loan advance data should be validated. For the first attempt at this validation, I took the stock adaboost algorithm and trained it on 100 random data splits. Each split was seeded with a value from 0-99. The statisics from these runs suggest inclusion of this feature is negligible on the performance of the learner.
 
 ```{Python}
-*** Observations < 30% Populated : 11***
-deferral_payments           0.27
-restricted_stock_deferred   0.12
-loan_advances               0.02
-director_fees               0.11
-Name: count, dtype: float64
+With Loan Data: DescribeResult(nobs=100L, minmax=(0.5333333333333333, 1.0), mean=0.8600000000000001, variance=0.006778900112233446, skewness=-0.8439686930037359, kurtosis=1.8782509539055363)
+Without Loan Data: DescribeResult(nobs=100L, minmax=(0.5333333333333333, 1.0), mean=0.8593333333333334, variance=0.006904152637485971, skewness=-0.8290566801887221, kurtosis=1.7280531992655
 ```
+
+After increasing the number of estimators, There was no change in the value of the sparsely populated features towards classification.
+
+```{python}
+[('salary', 0.077),
+ ('deferral_payments', 0.0154),
+ ('total_payments', 0.0994),
+ ('bonus', 0.0448),
+ ('restricted_stock_deferred', 0.0002),
+ ('deferred_income', 0.0566),
+ ('total_stock_value', 0.12),
+ ('expenses', 0.1792),
+ ('loan_advances', 0.0),
+ ('exercised_stock_options', 0.105),
+ ('other', 0.1644),
+ ('long_term_incentive', 0.0516),
+ ('restricted_stock', 0.0864),
+ ('director_fees', 0.0)]
+5000 estimator accuracy score: 0.733333333333
+```
+
+Going higher on the number of estimators still give accuracy within the wide range of values and no still weight to the sparsely populated features.  
+
+```{python}
+[('salary', 0.044606),
+ ('deferral_payments', 0.010066),
+ ('total_payments', 0.096564),
+ ('bonus', 0.036498),
+ ('restricted_stock_deferred', 0.002396),
+ ('deferred_income', 0.074054),
+ ('total_stock_value', 0.140456),
+ ('expenses', 0.087702),
+ ('loan_advances', 0.0),
+ ('exercised_stock_options', 0.131746),
+ ('other', 0.114154),
+ ('long_term_incentive', 0.053164),
+ ('restricted_stock', 0.208594),
+ ('director_fees', 0.0)]
+500000 estimator accuracy: 0.6
+```
+
+How the is data split appears to have a great effect on the training of our classifier. It also probably doesn't help that we have additional features that just aren't useful to the model. The assumption that went into using an adaboost classifier trained on sparse data do not appear to have panned out. It's not a total loss. A model of nuanced booleans may make for an interesting future case study. Plus in almost all classifiers, stock data was always highly weighted. This gives a clue that investigating how the stock game was played would provide a better case for this project's scope.  
+
+## Stock Data
+
+
 
 ### Articles on 409A and Deferred Payments
 
