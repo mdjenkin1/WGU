@@ -667,10 +667,11 @@ exercised_stock_options = 2604490
 restricted_stock = -2604490
 ```
 
-Seems Sanjay isn't the only person with poorly parsed stock data. While it would be best to correct the error in the data wrangler, that is out of scope for this project. Instead, I'll just drop these non-poi from the dataset.
+Seems Sanjay isn't the only person with poorly parsed stock data. While it would be best to correct the error in the data wrangler, that is out of scope for this project. Instead, I'll just drop these non-poi from the dataset.  
 
+![stock_pairplot_cleaned](./pickle_jar/stock_pairplot_cleaned.png)
 
-
+Now the data is seeming sane. Deferred restricted stock is on a negative scale, and there's no negative values for restricted stock. Exercised stock options and total stock appear highly correlated. That makes sense as total stock value is a calculated value and exercised stock is only additive. 
 
 ### Articles on 409A and Deferred Payments
 
