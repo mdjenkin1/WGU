@@ -608,6 +608,49 @@ How the is data split appears to have a great effect on the training of our clas
 
 ## Stock Data
 
+![Stock_data_pairplot](./pickle_jar/stock_pairplot.png)
+
+A few things stick out in the relationships between the stock features.  
+First, restricted_stock_deferred is a feature observed in only 12% of our population. It's quite sparse. If we were to ignore it we would be left with  two main stock features: exercised_stock and restricted_stock. It would be quite easy to and well within scope to ignore it but that would complicate the total_stock_value feature. Total_stock_value is a calculated feature. It could just be recalculated. Best thing to do is to recontextualize the values.
+
+exercised_stock_options is the net value of the stock over the exercise price.  
+restricted_stock is the gross value of restricted stock that lapsed in their vesting period.  
+restricted_stock_deferred appears to be where the lapsed restricted_stock was placed into the deferred income plan rather than liquidated.  
+
+So restricted_stock_deferred should always be negative as it subtracts from restricted_stock. Why then is there an entry with positive restricted_stock_deferred?  
+
+```{python}
+     restricted_stock_deferred  total_stock_value  exercised_stock_options  restricted_stock
+103                 15456290.0                0.0                2604490.0        -2604490.0
+BHATNAGAR SANJAY has positive restricted stock deferrals
+{'bonus': 'NaN',
+ 'deferral_payments': 'NaN',
+ 'deferred_income': 'NaN',
+ 'director_fees': 137864,
+ 'email_address': 'sanjay.bhatnagar@enron.com',
+ 'exercised_stock_options': 2604490,
+ 'expenses': 'NaN',
+ 'from_messages': 29,
+ 'from_poi_to_this_person': 0,
+ 'from_this_person_to_poi': 1,
+ 'has_email_statistics': True,
+ 'has_financial': True,
+ 'loan_advances': 'NaN',
+ 'long_term_incentive': 'NaN',
+ 'other': 137864,
+ 'poi': False,
+ 'restricted_stock': -2604490,
+ 'restricted_stock_deferred': 15456290,
+ 'salary': 'NaN',
+ 'shared_receipt_with_poi': 463,
+ 'to_messages': 523,
+ 'total_payments': 15456290,
+ 'total_stock_value': 'NaN'}
+
+```
+
+Seems this data is dirtier than we first assumed. As we've reduced the scope of our classifier to just the stock data, it shouldn't be too difficult to add in some validators to the data cleaner. Just to catch anyone else with oddly shifted data.
+
 
 
 ### Articles on 409A and Deferred Payments
