@@ -49,6 +49,19 @@ Pickled data sources and misc data files.
 * stock_pairplot_cleaned.png: semi-cleaned version of stock data pairplot
 * stock_pairplot_sans_redundant.png: semi-cleaned version of stock data pairplot without total_stock_value
 
+### ./submission
+
+Files required for project completion. If you're grading, these are the files for you.
+
+* about_project.md: Synopsis of the Enron_Poi_Identifier
+* my_dataset.pkl: dict of dicts
+* my_classifier.pkl: straight up classifier
+* my_feature_list.pkl: list of features used by classifier
+* poi_id.py: file that generates the three pkl files
+* references.md: listing of resources referenced in completion of this project
+* tester.py: provided script that tests the pkl files
+
+
 ### ./tools
 
 Primarily Udacity provided scripts with helper functions for the provided data structures.  

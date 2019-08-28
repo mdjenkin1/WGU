@@ -13,7 +13,7 @@ Each directory is atomic.
 
 ### .\my_project
 
-Only files necessary to the final project.  
+Files to develop the final project.  
 
 ### .\ud120
 

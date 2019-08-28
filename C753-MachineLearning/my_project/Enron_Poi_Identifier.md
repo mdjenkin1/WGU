@@ -740,7 +740,9 @@ Definitly a more interesting set of plots.
 
 ## Outliers and scaling
 
-Even though the plots of this final dataset are more interesting, there's a question about how compressed and clumped they are. A bit of outlier detection is in order.
+Even though the plots of this final dataset are more interesting, I question how compressed and clumped they are. A bit of outlier detection is in order.
+
+
 
 ### Articles on 409A and Deferred Payments
 
