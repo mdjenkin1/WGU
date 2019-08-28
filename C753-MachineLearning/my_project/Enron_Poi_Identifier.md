@@ -738,14 +738,27 @@ With this new information at hand, I'll once again shift direction on what infor
 
 Definitely a more interesting set of plots.  
 
-## Outliers and scaling
+## Data Scaling
 
 Even though the plots of this final dataset are more interesting, I question how some seem compressed and there's some heteroskedasticity. It would be best to apply some preprocessing.
 
 ![./pickle_jar/preped_data_pairplot.png](./pickle_jar/preped_data_pairplot.png)
 
-Scaling the data to unit variance has done nothing for the dispersion of points. It does open us up to classifiers that are dependant on similarly scaled data. We should now look at cleaning some outliers
+Scaling the data to unit variance has done nothing for the dispersion of points. It does open us up to classifiers that are dependant on similarly scaled data. The data should now be in a good place to compare the performance of some classifiers
 
+## Classifier Tuning
+
+Enough with the scope creep. Let's train and tune some classifiers
+
+### Untuned, Stock Classifiers
+
+To start with the classifiers proper, I trained a handful on their stock settings with a simple data split 
+
+### K-Nearest Neighbors
+
+### Support Vector Machine
+
+### Multivariate Linear Regression
 
 ### Articles on 409A and Deferred Payments
 
