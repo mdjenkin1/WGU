@@ -92,7 +92,5 @@ print("stock svm cross validation scores")
 print(svm_cv_scores)
 print("stock svm accuracy: {:.2f} (+/- {:.2f})".format(svm_cv_scores.mean(), svm_cv_scores.std()*2))
 
-
-
 ### Task 5: Tune your classifier to achieve better than .3 precision 
 ### Task 6: Dump your classifier, dataset, and features_list 
