@@ -736,12 +736,15 @@ With this new information at hand, I'll once again shift direction on what infor
 
 ![./pickle_jar/data_pairplot.png](./pickle_jar/data_pairplot.png)  
 
-Definitly a more interesting set of plots.  
+Definitely a more interesting set of plots.  
 
 ## Outliers and scaling
 
-Even though the plots of this final dataset are more interesting, I question how compressed and clumped they are. A bit of outlier detection is in order.
+Even though the plots of this final dataset are more interesting, I question how some seem compressed and there's some heteroskedasticity. It would be best to apply some preprocessing.
 
+![./pickle_jar/preped_data_pairplot.png](./pickle_jar/preped_data_pairplot.png)
+
+Scaling the data to unit variance has done nothing for the dispersion of points. It does open us up to classifiers that are dependant on similarly scaled data. We should now look at cleaning some outliers
 
 
 ### Articles on 409A and Deferred Payments
@@ -767,6 +770,13 @@ Even though the plots of this final dataset are more interesting, I question how
 ### Adaboost
 
 [https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html)
+
+### Regularization and Preprocessing
+
+[Statquest Part 1: Ridge Regression](https://www.youtube.com/watch?v=Q81RR3yKn30)
+[Statquest Part 2: LASSO Regression](https://www.youtube.com/watch?v=NGf0voTMlcs)
+
+[https://scikit-learn.org/stable/modules/preprocessing.html#preprocessing-scaler](https://scikit-learn.org/stable/modules/preprocessing.html#preprocessing-scaler)  
 
 ## Questions
 

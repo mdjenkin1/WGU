@@ -5,8 +5,9 @@ import pickle
 import pprint
 import pandas as pd
 
-sys.path.append("../tools/")
+from sklearn.preprocessing import StandardScaler
 
+sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data
 from data_scrubber import scrub_data
@@ -14,29 +15,40 @@ from data_scrubber import scrub_data
 
 ### Task 1: Select what features you'll use.
 
-# Reference ..\feature_selection\lasso_validation.py
-features_list = ['poi', 'exercised_stock_options', 'bonus', 'expenses', 'salary']
-
-# Raw dataset
+# Load Raw dataset
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
 
-# Preprocess dataset
-scrubs, scrubbed_data = scrub_data(data_dict, features_list)
-#print("These are the people scrubbed from our dataset")
-#pprint.pprint(scrubs)
-#print("\r")
-#print("These are the good values from the dataset")
-#pprint.pprint(data_set)
+# features determined from data exploration
+features_list = ['poi', 'exercised_stock_options', 'bonus', 'expenses', 'salary']
 
-# Save the preprocessed dataset
-with open("selected_features_dataset.pkl", "w") as data_file:
-    pickle.dump(data_set, data_file)
+# Save features_list
+with open("my_feature_list.pkl", "w") as data_file:
+    pickle.dump(features_list, data_file)
 
-# Load data, ready for processing
+# Scrub dataset
+_, scrubbed_data = scrub_data(data_dict, features_list)
+
+# Pickle scrubbed_data
+with open("my_scrubbed_data.pkl", "w") as data_file:
+    pickle.dump(scrubbed_data, data_file)
+
+# Preprocessing, split and scale features. Load to dataframe
 data_set = featureFormat(scrubbed_data, features_list)
 poi, data_np_arrays = targetFeatureSplit(data_set)
-data_df = pd.DataFrame(data_np_arrays, columns = features_list[1:])
+
+scaler = StandardScaler()
+scaled_array_data = scaler.fit_transform(data_np_arrays)
+preped_data = pd.DataFrame(scaled_array_data, columns = features_list[1:])
+
+# Pickle the preprocessed dataset
+with open("my_dataset.pkl", "w") as data_file:
+    pickle.dump(preped_data, data_file)
+
+# Pickle the scaler
+with open("my_data_scaler.pkl", "w") as data_file:
+    pickle.dump(scaler, data_file)
+
 
 ### Task 2: Remove outliers
 
