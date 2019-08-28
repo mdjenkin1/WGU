@@ -752,13 +752,38 @@ Enough with the scope creep. Let's train and tune some classifiers
 
 ### Untuned, Stock Classifiers
 
-To start with the classifiers proper, I trained a handful on their stock settings with a simple data split 
+To start with the classifiers proper, I trained a handful on their stock settings with a simple 90%/10% training/testing data split.
 
-### K-Nearest Neighbors
+> Stock configuration K-NN mean accuracy: 0.875  
+> Stock configuration SVM mean accuracy: 0.9  
+> Stock configuration linear coefficient of determination: 0.191549987364  
 
-### Support Vector Machine
+Out of the box SVM appears to have the best prediction accuracy. K-NN isn't too far off. I just don't necessarily trust these numbers. When I was training an adaboost classifier on higher dimensional sparse data the accuracy was highly data dependent. It seemed to be overfitting the data. It would be good to verify that's not the case here.  
 
-### Multivariate Linear Regression
+The score on the linear regression is quite poor. This isn't too surprising. Recalling the pair plots, that's not a big surprise. Ordinary least squares linear regression does poorly in data with a lot of heteroskedasticity. I'm going to drop it as an option for classifying this data.  
+
+### Cross Validation
+
+To get a better idea on the accuracy of regardless of the data split some cross validation scores were obtained
+
+```{python}
+stock knn cross validation scores
+[0.85714286 0.85714286 0.78571429 0.84615385 0.69230769 0.84615385
+ 0.84615385 0.76923077 0.91666667 0.91666667]
+stock knn accuracy: 0.83 (+/- 0.13)
+stock svm cross validation scores
+[0.85714286 0.85714286 0.85714286 0.84615385 0.84615385 0.84615385
+ 0.84615385 0.84615385 0.91666667 0.91666667]
+stock svm accuracy: 0.86 (+/- 0.05)
+```
+
+The deviation of K-Nearest Neighbors is quite high and the accuracy is worse. Looks like SVM is our winner for tuning and final submission.  
+
+### Tuning SVM
+
+
+
+## Research sources
 
 ### Articles on 409A and Deferred Payments
 
