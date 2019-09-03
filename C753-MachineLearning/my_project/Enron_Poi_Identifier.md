@@ -557,7 +557,7 @@ Of these options, learning_rate and n_estimators seem to be the most pertinent o
 
 ### Effect of high bias sparse feature
 
-The idea that a highly biased and sparsely populated feature could be mitigated with boost weak learners is something I wanted to classify. The re-introduction of the loan advance data should be validated. For the first attempt at this validation, I took the stock adaboost algorithm and trained it on 100 random data splits. Each split was seeded with a value from 0-99. The statisics from these runs suggest inclusion of this feature is negligible on the performance of the learner.
+The hypothesis that a highly biased and sparsely populated feature could be mitigated with boosted weak learners is something I wanted to test. The re-introduction of the loan advance data should be validated. For the first attempt at this validation, I took the stock adaboost algorithm and trained it on 100 random data splits. Each split was seeded with a value from 0-99. The statisics from these runs suggest inclusion of this feature is negligible on the performance of the learner.
 
 ```{Python}
 With Loan Data: DescribeResult(nobs=100L, minmax=(0.5333333333333333, 1.0), mean=0.8600000000000001, variance=0.006778900112233446, skewness=-0.8439686930037359, kurtosis=1.8782509539055363)
@@ -777,11 +777,65 @@ stock svm cross validation scores
 stock svm accuracy: 0.86 (+/- 0.05)
 ```
 
-The deviation of K-Nearest Neighbors is quite high and the accuracy is worse. Looks like SVM is our winner for tuning and final submission.  
+The deviation of K-Nearest Neighbors in our 10-fold cross validation is quite high and the accuracy is worse. Looks like SVM is our winner for tuning and final submission.  
 
-### Tuning SVM
+### Tuning the SVM classifier
 
+There's a few options for tuning the SVM classifier. Two of them appear critical.  
 
+* C: Penalty parameter C of the error term. Quite literally more bias or variance. Will adjust this last.
+* kernel: There's a few options here with rbf being the default.
+
+Most of the rest of the tuning parameters are kernel specific.
+
+```{python}
+***SVM Kernal Testing***
+[0.85714286 0.85714286 0.85714286 0.84615385 0.92307692 0.84615385
+ 0.84615385 0.92307692 0.91666667 0.91666667]
+linear accuracy: 0.88 (+/- 0.07)
+linear precision_score: 0.200
+linear recall_score: 0.500
+
+[0.85714286 0.92857143 0.85714286 0.76923077 0.84615385 0.84615385
+ 0.84615385 0.84615385 0.91666667 0.91666667]
+poly accuracy: 0.86 (+/- 0.09)
+poly precision_score: 0.286
+poly recall_score: 0.500
+
+[0.85714286 0.85714286 0.85714286 0.84615385 0.84615385 0.84615385
+ 0.84615385 0.84615385 0.91666667 0.91666667]
+C:\ProgramData\Anaconda3\envs\py27\lib\site-packages\sklearn\metrics\classification.py:1143: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 due to no predicted samples.
+  'precision', 'predicted', average, warn_for)
+rbf accuracy: 0.86 (+/- 0.05)
+rbf precision_score: 0.000
+rbf recall_score: 0.000
+
+[0.85714286 0.92857143 0.85714286 0.84615385 0.84615385 0.84615385
+ 0.84615385 0.84615385 0.75       0.91666667]
+sigmoid accuracy: 0.85 (+/- 0.09)
+sigmoid precision_score: 0.286
+sigmoid recall_score: 0.500
+```
+
+The stock rbf kernal is throwing an error for no predicted samples. After investigating this error, it's correct. The rbg kernal is not predicting anyone. Looking at our data set, 86% accuracy is inline with a classifier that classifies nothing.  
+
+## Metrics
+
+Some revisting on the topic of metrics.  
+
+Basic accuracy is the number of correctly classified items. When using this as a metric, it's important to remember the statistics of blind guessing. This is what was encountered with the SVM classifier. Accuracy has no concern about what the classification was, only that the classification was correct. Precision and recall measure the relevance of a specific label.  
+
+* Accuracy tells how many ducks and how many geese were correctly labeled as a duck or goose. How many 'true duck and true geese' out of all 'ducks and geese'
+* Recall states how many of the ducks were identified as ducks. Every duck labeled as a goose causes recall to decrease.
+  * How many 'true ducks' out of all 'true ducks and false geese'
+  * Ratio of 'duck is duck' out of all 'duck is duck' and 'goose is duck'.
+* Precision states how many identified ducks are actually ducks. Every goose labeled as a duck causes precision to decrease.
+  * How many 'true ducks' out of all 'true ducks and false ducks'.
+  * Ratio of 'duck is duck' for all 'duck is duck' and 'duck is goose'.
+
+For our poi identifier, accuracy doesn't tell us if we correctly classified a person of interest. It tells us the probability a person was correctly classified. Instead, we need to look at precision and recall. Recall describes how many poi we missed. Precision describes how many innocents were caught in our poi sweep. The F1-Score is a combination of these values. The selection process of the classifier needs revisitng. Precision and recall are more relevant to our use case than accuracy.  
+
+Given the project requirement of at least 30% precision, that will be our metric
 
 ## Research sources
 
@@ -815,6 +869,10 @@ The deviation of K-Nearest Neighbors is quite high and the accuracy is worse. Lo
 [Statquest Part 2: LASSO Regression](https://www.youtube.com/watch?v=NGf0voTMlcs)
 
 [https://scikit-learn.org/stable/modules/preprocessing.html#preprocessing-scaler](https://scikit-learn.org/stable/modules/preprocessing.html#preprocessing-scaler)  
+
+### Algorithm selection
+
+[https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html](https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html)  
 
 ## Questions
 

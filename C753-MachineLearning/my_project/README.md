@@ -53,12 +53,11 @@ Pickled data sources and misc data files.
 
 Files required for project completion. If you're grading, these are the files for you.
 
-* about_project.md: Synopsis of the Enron_Poi_Identifier
-* my_dataset.pkl: dict of dicts
+* data_scrubber.py: consolidation of all the data exploration scripts into one streamlined data set cleaner
+* my_dataset.pkl: scrubbed dataset. dict of dicts
 * my_classifier.pkl: straight up classifier
 * my_feature_list.pkl: list of features used by classifier
 * poi_id.py: file that generates the three pkl files
-* references.md: listing of resources referenced in completion of this project
 * tester.py: provided script that tests the pkl files
 
 
