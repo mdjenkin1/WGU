@@ -18,7 +18,7 @@ enron_mail*
 **/my_classifier.pkl
 **/my_dataset.pkl
 **/my_feature_list.pkl
-**/*pkl
+**/pickle_jar/*pkl
 **/final_project_dataset_cleaned*.pkl
 
 trash
