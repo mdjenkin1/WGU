@@ -1,21 +1,74 @@
-# Udacity Machine Learning Course Project
+# Udacity C753 Machine Learning Project
 
-This project originated with the starter code provided by Udacity: [https://github.com/udacity/ud120-projects.git](https://github.com/udacity/ud120-projects.git)  
+This project started with the starter code provided by Udacity for the introduction to machine learning portion of their data analytics nano degree: [https://github.com/udacity/ud120-projects.git](https://github.com/udacity/ud120-projects.git)  
 
-## Content
+## Contents
 
-Each directory is atomic.
+### ./
 
-### .\
+* Enron_Poi_Identifier.md: The long strange journey where scope keeps creeping
+* README.md: the thing you are reading
 
-* README.md: The file you're currently reading
-* BrainDump.md: scaling down understanding of project requirements and ramp up
+### ./classifier_selection
 
-### .\my_project
+Playgrounds for classifier selection
 
-Files to develop the final project.  
+* clf_select.py
 
-### .\ud120
+### ./datasets_questions
 
-Edited versions of the files Udacity in the mostly originally provided directory structure.  
-Edits contains study notes and fragments. Expect this directory to disappear once the project is solidified.  
+Initial investigations into the provided dataset  
+
+* data_prep.py: streamlined data cleaning and preparation.
+* explore_enron_data.py: initial dataset exploration.
+* explore_feature_detail.py: second stage feature exploration in conjunction with data_prep.py
+* explore_stock_data.py: feature selection based on manual data investigation and lasso_validation.py
+* investigative_data_prep.py: Initial dataset cleaning, mostly partially investigative.
+
+### ./feature_selection
+
+Scripts used for feature selection  
+
+* financial_adaboost_weighing.py: using adaboost to manually gauge feature relevance.
+* lasso_validation.py: feature selection done smarter.
+
+### ./pickle_jar
+
+Pickled data sources and misc data files.  
+
+* dataset_final_clean.pkl: product of data_prep.py
+* data_pairplot.png: pairplot graph of final feature set
+* enron61702insiderpay.pdf: financial data source
+* final_project_dataset.pkl: original dataset
+* final_project_dataset_cleaned.pkl: dataset for investigative cleaning
+* final_project_dataset_cleaned_no_loan.pkl: the other dataset for investigative cleaning
+* fin_data_pairplot.png: pairplot of manually selected feature set
+* poi_names.txt: manual data scrape from UsaToday identifying persons of interest.
+* stock_pairplot.png: initial pairplot of stock data
+* stock_pairplot_cleaned.png: semi-cleaned version of stock data pairplot
+* stock_pairplot_sans_redundant.png: semi-cleaned version of stock data pairplot without total_stock_value
+
+### ./submission
+
+Files required for project completion. If you're grading, these are the files for you.
+
+* data_scrubber.py: consolidation of all the data exploration scripts into one streamlined data set cleaner
+* my_dataset.pkl: scrubbed dataset. dict of dicts
+* my_classifier.pkl: straight up classifier
+* my_feature_list.pkl: list of features used by classifier
+* poi_id.py: file that generates the three pkl files
+* tester.py: provided script that tests the pkl files
+
+
+### ./tools
+
+Primarily Udacity provided scripts with helper functions for the provided data structures.  
+
+* feature_format.py: Tool for converting the provided dictionary of person : features to a processable format
+  * featureFormat(dictionary, features, remove_NaN, remove_all_zeros, sort_keys)
+    * return np.array(return_list)
+    * return_list are only the requested feature from provided dictionary
+  * targetFeatureSplit(data): make a feature a target
+    * return target, features
+    * target = data[item][0]
+    * features = data[item][1:]

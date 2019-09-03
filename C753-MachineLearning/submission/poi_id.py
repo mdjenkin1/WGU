@@ -4,13 +4,14 @@ import sys
 import pickle
 #import pprint
 import pandas as pd
+import warnings
 
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import precision_score
+from sklearn.metrics import precision_score, make_scorer
 from sklearn.model_selection import train_test_split
 
 sys.path.append("../tools/")
@@ -18,28 +19,26 @@ from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data
 from data_scrubber import scrub_data
 
+warnings.filterwarnings("ignore")
+
 # Load Raw dataset
-with open("final_project_dataset.pkl", "r") as data_file:
+with open("final_project_dataset.pkl", "rb") as data_file:
     data_dict = pickle.load(data_file)
 
 ### Task 1: Select what features you'll use.
 features_list = ['poi', 'exercised_stock_options', 'bonus', 'expenses', 'salary']
 
-# Save features_list
-with open("my_feature_list.pkl", "w") as data_file:
-    pickle.dump(features_list, data_file)
 
 ### Task 2: Remove outliers
 ### Task 3: Create new feature(s)
 # Scrub dataset
 _, my_dataset = scrub_data(data_dict, features_list)
 
-# Pickle scrubbed_data
-with open("my_dataset.pkl", "w") as data_file:
-    pickle.dump(my_dataset, data_file)
+data = featureFormat(my_dataset, features_list)
+labels, features = targetFeatureSplit(data)
+features_train, features_test, labels_train, labels_test = train_test_split(features, labels, test_size=0.3, random_state=42)
 
 ### Task 4: Try a variety of classifiers
-# Dataset loading, scaling has been moved to pipelines
 ### Task 5: Tune your classifier to achieve better than .3 precision 
 
 svc_params = {'svc__kernel':('linear','rbf','sigmoid','poly'), 'svc__C': range(1,10)}
@@ -57,3 +56,5 @@ knn_clf.fit(features,labels)
 clf = svc_clf if svc_clf.best_score_ > knn_clf.best_score_ else knn_clf
 
 ### Task 6: Dump your classifier, dataset, and features_list 
+
+dump_classifier_and_data(clf, my_dataset, features_list)
