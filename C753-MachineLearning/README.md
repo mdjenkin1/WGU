@@ -6,7 +6,8 @@ This project started with the starter code provided by Udacity for the introduct
 
 ### ./
 
-* Enron_Poi_Identifier.md: The long strange journey where scope keeps creeping
+* Enron_Poi_Identifier.md: The long strange journey where scope keeps creeping. list of referenced resources and project journal.
+* Project_QnA.md: Short answers to project directing questions
 * README.md: the thing you are reading
 
 ### ./classifier_selection
