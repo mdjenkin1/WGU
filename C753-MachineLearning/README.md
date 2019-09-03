@@ -34,35 +34,36 @@ Scripts used for feature selection
 
 ### ./pickle_jar
 
-Pickled data sources and misc data files.  
+Pickled data sources, images and misc data files.  
 
+* data_pairplot.png: unscaled final feature set pairplot
 * dataset_final_clean.pkl: product of data_prep.py
-* data_pairplot.png: pairplot graph of final feature set
 * enron61702insiderpay.pdf: financial data source
-* final_project_dataset.pkl: original dataset
-* final_project_dataset_cleaned.pkl: dataset for investigative cleaning
-* final_project_dataset_cleaned_no_loan.pkl: the other dataset for investigative cleaning
 * fin_data_pairplot.png: pairplot of manually selected feature set
+* final_project_dataset_cleaned_no_loan.pkl: the other dataset for investigative cleaning
+* final_project_dataset_cleaned.pkl: dataset for investigative cleaning
+* final_project_dataset.pkl: original dataset
 * poi_names.txt: manual data scrape from UsaToday identifying persons of interest.
-* stock_pairplot.png: initial pairplot of stock data
+* preped_data_pairplot.png: scaled final feature set pairplot
 * stock_pairplot_cleaned.png: semi-cleaned version of stock data pairplot
 * stock_pairplot_sans_redundant.png: semi-cleaned version of stock data pairplot without total_stock_value
+* stock_pairplot.png: initial pairplot of stock data
 
 ### ./submission
 
 Files required for project completion. If you're grading, these are the files for you.
 
-* data_scrubber.py: consolidation of all the data exploration scripts into one streamlined data set cleaner
-* my_dataset.pkl: scrubbed dataset. dict of dicts
+* data_scrubber.py: consolidation of pertinent data exploration into one data set cleaner
+* final_project_dataset.pkl: original provided dataset.
 * my_classifier.pkl: straight up classifier
+* my_dataset.pkl: scrubbed dataset. dict of dicts
 * my_feature_list.pkl: list of features used by classifier
 * poi_id.py: file that generates the three pkl files
-* tester.py: provided script that tests the pkl files
+* tester.py: udacity provided script to test the my*pkl files
 
+### ./tools ./submission/tools
 
-### ./tools
-
-Primarily Udacity provided scripts with helper functions for the provided data structures.  
+Udacity provided scripts with helper functions for the provided data structures.  
 
 * feature_format.py: Tool for converting the provided dictionary of person : features to a processable format
   * featureFormat(dictionary, features, remove_NaN, remove_all_zeros, sort_keys)
