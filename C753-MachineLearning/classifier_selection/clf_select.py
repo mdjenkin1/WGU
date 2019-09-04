@@ -7,13 +7,11 @@ import pandas as pd
 
 from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.linear_model import LinearRegression
 from sklearn.svm import SVC, LinearSVC
 from sklearn.decomposition import PCA
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score,GridSearchCV,KFold
 from sklearn.metrics import precision_score, recall_score, make_scorer, f1_score, accuracy_score
 from sklearn.metrics import classification_report
 
