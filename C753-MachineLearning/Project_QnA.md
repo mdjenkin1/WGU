@@ -14,10 +14,26 @@ After settling on financial data, the next step in feature selection was dimensi
 
 3. What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?  [relevant rubric item: “pick an algorithm”]
 
-When it came to algorithm selection, I decided to compare K-Nearest Neighbors and Support Vector Machines. Both of these are known for their ability to classify smaller datasets.  
+When it came to algorithm selection, I decided to compare K-Nearest Neighbors and Support Vector Classifiers. Both of these are known for their ability to classify smaller datasets under supervised learning. Deciding between them came to which gave the best precision. Some consideration was given to linear regression for classification. Given the plotted structure of the data and poor initial testing, this model was dropped.  
+
+Between K-Nearest Neighbors and Support Vector Classifiers, the stock SVC configuration had slightly better accuracy. Some tuning was done for both algorithms before I focused on tuning the SVC classifier.  
 
 4. What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?  How did you tune the parameters of your particular algorithm? What parameters did you tune? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier).  [relevant rubric items: “discuss parameter tuning”, “tune the algorithm”]
 
+Algorithm parameter tuning is a method of adjusting algorithm performance by manipulating constants within the algorithm. Performance adjustments can be made for algorithm speed or accuracy. In this case, performance in classifier precision was the target of the adjustments. Improper algorithm tuning can result in poor algorithm performance.  
+
+I took a brute force approach to classifier tuning. GridsearchCV allowed me to setup multiple parameter sets for an algorithm. It then runs through the parameter sets and returns the best parameter set based on the specified metric. This allowed me to try many different parameters for the SVC algorithm. In the initial pass, where I compared SVC to K-NN, I limited my parameter tuning to kernel type and penalty parameter for SVC and number of neighbors and weight functions for K-NN.  
+
 5. What is validation, and what’s a classic mistake you can make if you do it wrong? How did you validate your analysis?  [relevant rubric items: “discuss validation”, “validation strategy”]
 
+Validation is the process of ensuring any decision made doesn't improperly impact the algorithm. For instance, different training and testing splits in the dataset can have wildly different results in algorithm training. Another common issue for validation is balancing the bias, variance dilemma. Validation helps to ensure balance between overfitting and under fitting the data.  
+
+My validation strategy included cross validation through 10-fold data partitioning. This provided a wide sampling of data splits to avoid overfit and underfit scenarios.  
+
 6. Give at least 2 evaluation metrics and your average performance for each of them.  Explain an interpretation of your metrics that says something human-understandable about your algorithm’s performance. [relevant rubric item: “usage of evaluation metrics”]
+
+There were two evaluation metrics that I gave the most consideration. Accuracy was the first. Accuracy was problematic for the dataset in use because of the sparse nature of the persons of interest. Accuracy only states how many people were classified correctly. Classifying no one as a person of interest results in a 86% accuracy score.  
+
+The poor measure offered by accuracy pointed me to precision as the metric to judge the classifier. Precision tells how accurate the classification is. A classifier might claim a group of 10 birds are all ducks. In actuality, that group of 10 bird might have 7 geese and only 3 ducks. This would mean a precision of 30%. There may be more birds than the 10 originally accused of being ducks. Precision only cares about the ones that were classified as ducks. Accuracy takes into account all the other birds not labeled as ducks.
+
+Our interest is in who is classified as a poi. Are those classified as poi actually a person of interest? Precision best describes this interest.

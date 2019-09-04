@@ -604,7 +604,7 @@ Going higher on the number of estimators still give accuracy within the wide ran
 500000 estimator accuracy: 0.6
 ```
 
-How the is data split appears to have a great effect on the training of our classifier. It also probably doesn't help that we have additional features that just aren't useful to the model. The assumption that went into using an adaboost classifier trained on sparse data do not appear to have panned out. It's not a total loss. A model of nuanced booleans may make for an interesting future case study. Plus in almost all classifiers, stock data was always highly weighted. This gives a clue that investigating how the stock game was played would provide a better case for this project's scope.  
+How the data is split appears to have a great effect on the training of our classifier. It also probably doesn't help that we have additional features that just aren't useful to the model. The assumption that went into using an adaboost classifier trained on sparse data do not appear to have panned out. It's not a total loss. A model of nuanced booleans may make for an interesting future case study. Plus in almost all classifiers, stock data was always highly weighted. This gives a clue that investigating how the stock game was played would provide a better case for this project's scope.  
 
 ## Stock Data
 
@@ -836,6 +836,21 @@ Basic accuracy is the number of correctly classified items. When using this as a
 For our poi identifier, accuracy doesn't tell us if we correctly classified a person of interest. It tells us the probability a person was correctly classified. Instead, we need to look at precision and recall. Recall describes how many poi we missed. Precision describes how many innocents were caught in our poi sweep. The F1-Score is a combination of these values. The selection process of the classifier needs revisitng. Precision and recall are more relevant to our use case than accuracy.  
 
 Given the project requirement of at least 30% precision, that will be our metric
+
+```{python}
+"Support Vector Classifier's best precision is: 0.305"
+'K-Nearest Neighbors best precision is: 0.226'
+GridSearchCV(cv=10, error_score='raise-deprecating',
+       estimator=Pipeline(memory=None,
+     steps=[('standardscaler', StandardScaler(copy=True, with_mean=True, with_std=True)), ('svc', SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
+  decision_function_shape='ovr', degree=3, gamma='scale', kernel='rbf',
+  max_iter=-1, probability=False, random_state=None, shrinking=True,
+  tol=0.001, verbose=False))]),
+       fit_params=None, iid='warn', n_jobs=None,
+       param_grid={'svc__kernel': ('linear', 'rbf', 'sigmoid', 'poly'), 'svc__C': [1, 2, 3, 4, 5, 6, 7, 8, 9]},
+       pre_dispatch='2*n_jobs', refit=True, return_train_score='warn',
+       scoring=make_scorer(precision_score), verbose=0)
+```
 
 ## Research sources
 

@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.svm import SVC, LinearSVC
 from sklearn.decomposition import PCA
 from sklearn.model_selection import cross_val_score,GridSearchCV,KFold
@@ -22,17 +22,34 @@ warnings.filterwarnings("ignore")
 sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 
-with open("../pickle_jar/my_dataset.pkl", "r") as data_file:
+with open("../submission/my_dataset.pkl", "r") as data_file:
     my_dataset = pickle.load(data_file)
 
-with open("../pickle_jar/my_feature_list.pkl", "r") as data_file:
+with open("../submission/my_feature_list.pkl", "r") as data_file:
     features_list = pickle.load(data_file)
 
 data = featureFormat(my_dataset, features_list)
 labels, features = targetFeatureSplit(data)
 features_train, features_test, labels_train, labels_test = train_test_split(features, labels, test_size=0.3, random_state=42)
 
-svc_params = {'svc__kernel':('linear','rbf','sigmoid','poly'), 'svc__C': range(1,10)}
+lass_clf = Lasso(alpha=1, tol=1)
+lass_clf.fit(features_train, labels_train)
+feature_weights = {}
+feature_weight_normalizer = 0
+
+for i in range(len(features_list[1:])):
+    feature_weights.update({features_list[i+1] : lass_clf.coef_[i]})
+    feature_weight_normalizer += lass_clf.coef_[i]
+
+for feat in feature_weights:
+    feature_weights.update({feat : feature_weights[feat] / feature_weight_normalizer})
+
+sorted_val = sorted(feature_weights.values())
+sorted_key = sorted(feature_weights, key=feature_weights.get)
+pprint.pprint(zip(sorted_key,sorted_val))
+
+#svc_params = {'svc__kernel':('linear','rbf','sigmoid','poly'), 'svc__C': range(1,10)}
+svc_params = {'svc__kernel':('linear','rbf','sigmoid','poly'), 'svc__C': range(1,10), 'svc__probability':(True,False), 'svc__decision_function_shape':('ovo','ovr'), 'svc__gamma': ('scale', 0.1, 1, 10, 100)}
 svc = SVC(gamma='scale')
 svc_pipe = make_pipeline(StandardScaler(), svc)
 
@@ -51,7 +68,8 @@ knn_clf.fit(features,labels)
 pprint.pprint("K-Nearest Neighbors best precision is: {0:.3f}".format(knn_clf.best_score_))
 
 clf = svc_clf if svc_clf.best_score_ > knn_clf.best_score_ else knn_clf
-pprint.pprint(clf)
+#pprint.pprint(clf)
+pprint.pprint(clf.best_estimator_)
 
 #score_types = [f1_score, precision_score, recall_score, accuracy_score]
 #for pipe, params in clf_pipes:
