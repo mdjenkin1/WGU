@@ -22,7 +22,7 @@ from data_scrubber import scrub_data
 warnings.filterwarnings("ignore")
 
 # Load Raw dataset
-with open("final_project_dataset.pkl", "r") as data_file:
+with open("final_project_dataset.pkl", "rb") as data_file:
     data_dict = pickle.load(data_file)
 
 ### Task 1: Select what features you'll use.
