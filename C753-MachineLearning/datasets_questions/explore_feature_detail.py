@@ -17,8 +17,8 @@ from feature_format import featureFormat, targetFeatureSplit
 # Feature detail exploration
 ######
 
-cleaned_data_no_loan = pickle.load(open("../pickle_jar/final_project_dataset_cleaned_no_loan.pkl"))
-cleaned_data = pickle.load(open("../pickle_jar/final_project_dataset_cleaned.pkl"))
+cleaned_data_no_loan = pickle.load(open("../pickle_jar/final_project_dataset_cleaned_no_loan.pkl", "rb"))
+cleaned_data = pickle.load(open("../pickle_jar/final_project_dataset_cleaned.pkl", "rb"))
 
 ### 
 ### Basic statistics
@@ -137,6 +137,10 @@ pprint.pprint(elephant_in_cairo)
 print("\r")
 
 ###
+### Email Data Statistics
+
+
+###
 ### Financial Data scaling
  
 print("***Financial Data Summary, including null as zeros***")
@@ -181,7 +185,7 @@ print("****With Loan Advance****")
 print("*************************")
 
 print("*** Observations % Populated : {}***".format(bool_fin.size))
-pprint.pprint(bool_fin)
+pprint.pprint(bool_fin.sort_values())
 print("\r")
 
 print("*** Observations > 50% Populated : {}***".format(bool_fin[bool_fin >= 0.50].size))

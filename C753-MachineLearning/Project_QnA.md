@@ -1,12 +1,48 @@
 # Questions and Answers
 
-1. Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those?  [relevant rubric items: “data exploration”, “outlier investigation”]
+## Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those?  [relevant rubric items: “data exploration”, “outlier investigation”]
 
-The stated goal of this project is to create a person of interest classifier with a dataset scraped together from the Enron scandal. The actual goal of the project is to demonstrate an ability to apply statistical learning techniques to a toy dataset. This toy dataset was primed with areas to explore and nuggets of bad data to root out. Exploration of the dataset revealed 3 primary sources of information. A manually scraped news article provided labels for our people of interest. A financial reporting spreadsheet that provided the bulk of the data. Finally, a parse of an email dump that was eventually ignored.  
+The stated goal of this project is to create a person of interest classifier with a dataset scraped together from the Enron scandal. The actual goal of the project is to demonstrate an ability to apply statistical learning techniques to a toy dataset. The dataset has 3 primary sources of information. A manually scraped news article provides labels for our people of interest. A financial reporting spreadsheet provided the most populated data. Third, a partially parsed email dump.  
 
-Aside from the email dump, some other items in the dataset were dropped. Entries that did not meet the definition of "person" were dropped (i.e. "Total" and "The Travel Agency in the Park"). An extraneous entry (Eugene Lockhart) was located and dropped. Finally, data that appeared to have been corrupted/shifted on import was dropped (i.e. Robert Belfer and Sanjay Bhatnagar).  
+This mismatch of data sources resulted in an oddly shaped dataset. After removing the 5 problem entries, 141 entries remained. The removed entries are: "Total" and "The Travel Agency in the Park" for not being people; "Robert Belfer" and "Sanjay Bhatnagar" for values that are not sane; and "Eugene Lockhart" for no values.
 
-2. What features did you end up using in your POI identifier, and what selection process did you use to pick them? Did you have to do any scaling? Why or why not? As part of the assignment, you should attempt to engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it. (You do not necessarily have to use it in the final analysis, only engineer and test it.) In your feature selection step, if you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like SelectKBest, please report the feature scores and reasons for your choice of parameter values.  [relevant rubric items: “create new features”, “intelligently select features”, “properly scale features”]
+To assist in data exploration, I added two booleans to each entry. One to state if email data existed for the entry and another if financial data existed. These booleans were used to identify the intersection of the email and financial data sources.
+
+### Email Data Population
+
+Number of people with an email address: 110  
+Number of people with email stats: 85  
+Number of people with financial data: 141  
+Number of people with both data types: 85  
+Number of poi with both email stats: 14  
+
+All of the remaining entries have some type of financial data.  
+Twenty-five entries have an email address and no email statistics.  
+Just under two-thirds of our entries have email statistics. Of those that do have email statistics, all email statistics are populated.  
+With 18 persons of interest identified in our dataset, it's worth noting that 4 do not have any email statistics.
+
+### Financial Data Population
+
+On the financial data side, all observations have some amount of the 14 financial features populated. However, the financial data is more sparsely populated than the email statistics. The loan_advances field is especially of note. There's only 3 entries with something for loan_advances.  
+
+#### Financial Feature Percent Populated
+
+loan_advances               0.02
+director_fees               0.11
+restricted_stock_deferred   0.12
+deferral_payments           0.27
+deferred_income             0.34
+long_term_incentive         0.45
+bonus                       0.57
+other                       0.64
+salary                      0.66
+expenses                    0.66
+exercised_stock_options     0.71
+restricted_stock            0.76
+total_payments              0.86
+total_stock_value           0.87
+
+## What features did you end up using in your POI identifier, and what selection process did you use to pick them? Did you have to do any scaling? Why or why not? As part of the assignment, you should attempt to engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it. (You do not necessarily have to use it in the final analysis, only engineer and test it.) In your feature selection step, if you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like SelectKBest, please report the feature scores and reasons for your choice of parameter values.  [relevant rubric items: “create new features”, “intelligently select features”, “properly scale features”]
 
 Feature selection was a result of manual data investigation with some extension into some statistical techniques. One feature that was created during the investigation were booleans for "has_email_data" and "has_financial_data". All observations were found to have financial_data. Not all had email data. This presented an issue where having email could bias the result. The option then is to either weigh the bias of having email data and subtract that bias from the information gained by including the email data or drop the email data. Given the scope of this class and project, the decision was to drop email data. Another option would've been to include only those observations with email data. That may make for an interesting alternate exploration.  
 

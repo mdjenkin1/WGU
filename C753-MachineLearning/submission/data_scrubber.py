@@ -17,9 +17,9 @@ def scrub_data(raw_data, target_features):
 
     ##
     ## Helpers
-    processed_data = {}                                             # return structure
+    processed_data = {}                                                 # return structure
     skipped_persons = set(['THE TRAVEL AGENCY IN THE PARK', 'TOTAL'])   # Static entries to be dropped
-    impute_zero = lambda x: 0 if x == "NaN" else x                  # Simple imputator of NaN values
+    impute_zero = lambda x: 0 if x == "NaN" else x                      # Simple imputator of NaN values
     
     # These feature lists have calculated values to validate
     stock_features = ['restricted_stock_deferred', 'exercised_stock_options', 'restricted_stock']

@@ -14,7 +14,7 @@ from feature_format import featureFormat, targetFeatureSplit
 
 stock_features = ['poi', 'restricted_stock_deferred', 'total_stock_value', 'exercised_stock_options', 'restricted_stock']
 
-cleaned_data = pickle.load(open("../pickle_jar/final_project_dataset_cleaned.pkl"))
+cleaned_data = pickle.load(open("../pickle_jar/final_project_dataset_cleaned.pkl", "rb"))
 stock_data = featureFormat(cleaned_data, stock_features)
 poi_np, stock_data_np_arrays = targetFeatureSplit(stock_data)
 stock_data_df = pd.DataFrame(stock_data_np_arrays, columns = stock_features[1:])

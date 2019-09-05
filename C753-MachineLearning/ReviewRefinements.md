@@ -16,7 +16,7 @@ I have added a dump of my environment to ./submission/py27_env.txt. You can clon
 conda create --name <env> --file ./submission/py27_env.txt
 ```
 
-If you are still experiencing errors, please provide the head and tail of the stack dump and a dump of the environment you're using to grade.
+If you are still experiencing errors, please provide the head and tail of the stack dump. A dump of the environment you're using to grade would also be of help.
 _i.e._  
 
 ```{Python}
@@ -25,7 +25,7 @@ conda list --explicit > <env_dump_file>
 
 ### Understanding the Dataset
 
-Add Dataset Summary
+Dataset Summary has been added. Although this has 
 
 ### Identify Outlier(s)
 
