@@ -852,6 +852,10 @@ GridSearchCV(cv=10, error_score='raise-deprecating',
        scoring=make_scorer(precision_score), verbose=0)
 ```
 
+## Redo
+
+At this point, we're on to submission. Check Project_QnA.md and ReviewRefinements for more brain dumps.  
+
 ## Research sources
 
 ### Articles on 409A and Deferred Payments
@@ -885,9 +889,10 @@ GridSearchCV(cv=10, error_score='raise-deprecating',
 
 [https://scikit-learn.org/stable/modules/preprocessing.html#preprocessing-scaler](https://scikit-learn.org/stable/modules/preprocessing.html#preprocessing-scaler)  
 
-### Algorithm selection
+### Feature and Algorithm selection
 
 [https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html](https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html)  
+[https://www.quora.com/How-do-I-properly-use-SelectKBest-GridSearchCV-and-cross-validation-in-the-sklearn-package-together](https://www.quora.com/How-do-I-properly-use-SelectKBest-GridSearchCV-and-cross-validation-in-the-sklearn-package-together)  
 
 ## Questions
 

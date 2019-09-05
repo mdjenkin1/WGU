@@ -3,9 +3,6 @@
 import pickle
 import pprint
 import sys
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 sys.path.append("../submission/")
 sys.path.append("../tools/")
@@ -20,13 +17,6 @@ all_features = ['poi','salary', 'deferral_payments', 'total_payments', 'bonus',
     'loan_advances', 'exercised_stock_options', 'other', 'long_term_incentive', 
     'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person', 
     'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi', 'email_address']
-
-
-kept_features = ['poi','salary', 'deferral_payments', 'total_payments', 'bonus', 
-    'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses', 
-    'loan_advances', 'exercised_stock_options', 'other', 'long_term_incentive', 
-    'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person', 
-    'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']
 
 fin_features = ['poi','salary', 'deferral_payments', 'total_payments', 'bonus', 
     'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses', 
@@ -84,3 +74,8 @@ print("Number of poi with email stats: {}".format(poi_with_email))
 
 #print("Full dataset as dataframe")
 #pprint.pprint(data)
+
+kept_features = ['poi','salary', 'deferral_payments', 'bonus', 'restricted_stock_deferred', 
+    'deferred_income', 'expenses', 'exercised_stock_options', 'other', 'long_term_incentive', 
+    'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person', 
+    'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']

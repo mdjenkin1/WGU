@@ -25,7 +25,7 @@ conda list --explicit > <env_dump_file>
 
 ### Understanding the Dataset
 
-Dataset Summary has been added. Although this has 
+Dataset Summary has been added. Although, this has caused the section to go a little over the 2 paragraph recommended size.  
 
 ### Identify Outlier(s)
 
@@ -33,11 +33,15 @@ Eugene Lockhart was removed. Also removed, and not mentioned, were Robert Belfer
 
 ### Optimize Feature Selection/Engineering
 
-Clarity of purpose for dropping the email statistics does not appear to have been communicated.
-Explanation of feature selection process is unclear.  
+~~Clarity of purpose for dropping the email statistics does not appear to have been communicated.~~
+~~Explanation of feature selection process is unclear.~~  
 _e.g._ Simplify with SelectKBest?  
 [https://www.quora.com/How-do-I-properly-use-SelectKBest-GridSearchCV-and-cross-validation-in-the-sklearn-package-together](https://www.quora.com/How-do-I-properly-use-SelectKBest-GridSearchCV-and-cross-validation-in-the-sklearn-package-together)  
-Explanation of scaled features missing.  
+~~Explanation of scaled features missing.~~  
+
+Clarification of initial feature selection process has been streamlined.  
+Added information on manually scrubbed features.  
+Included explanation of scaled features in classifier pipelines.  
 
 ### Pick and Tune and Algorithm
 
