@@ -31,7 +31,7 @@ Initial investigations into the provided dataset
 Scripts used for feature selection  
 
 * financial_adaboost_weighing.py: using adaboost to manually gauge feature relevance.
-* lasso_validation.py: feature selection done smarter.
+* lasso_validation.py: feature selection experimentation.
 
 ### ./pickle_jar
 
@@ -60,6 +60,7 @@ Files required for project completion. If you're grading, these are the files fo
 * my_dataset.pkl: scrubbed dataset. dict of dicts
 * my_feature_list.pkl: list of features used by classifier
 * poi_id.py: file that generates the three pkl files
+* py27_env.txt: python environment description dump: conda list --explicit > py27_env.txt
 * tester.py: udacity provided script to test the my*pkl files
 
 ### ./tools ./submission/tools
