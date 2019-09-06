@@ -9,6 +9,7 @@ This project started with the starter code provided by Udacity for the introduct
 * Enron_Poi_Identifier.md: The long strange journey where scope keeps creeping. list of referenced resources and project journal.
 * Project_QnA.md: Short answers to project directing questions
 * README.md: the thing you are reading
+* ReviewRefinements.md: notes of improvements for reviewers
 
 ### ./classifier_selection
 
@@ -28,38 +29,37 @@ Initial investigations into the provided dataset
 
 ### ./feature_selection
 
-Scripts used for feature selection  
+Scripts used when investigating feature selection  
 
+* features_reloaded.py: further investigation into the email feature set.
 * financial_adaboost_weighing.py: using adaboost to manually gauge feature relevance.
 * lasso_validation.py: feature selection experimentation.
+
+### ./images
+
+various graphs generated through the dataset investigation and feature selection process
 
 ### ./pickle_jar
 
 Pickled data sources, images and misc data files.  
 
-* data_pairplot.png: unscaled final feature set pairplot
 * dataset_final_clean.pkl: product of data_prep.py
 * enron61702insiderpay.pdf: financial data source
-* fin_data_pairplot.png: pairplot of manually selected feature set
 * final_project_dataset_cleaned_no_loan.pkl: the other dataset for investigative cleaning
 * final_project_dataset_cleaned.pkl: dataset for investigative cleaning
 * final_project_dataset.pkl: original dataset
 * poi_names.txt: manual data scrape from UsaToday identifying persons of interest.
-* preped_data_pairplot.png: scaled final feature set pairplot
-* stock_pairplot_cleaned.png: semi-cleaned version of stock data pairplot
-* stock_pairplot_sans_redundant.png: semi-cleaned version of stock data pairplot without total_stock_value
-* stock_pairplot.png: initial pairplot of stock data
 
 ### ./submission
 
 Files required for project completion. If you're grading, these are the files for you.
 
-* data_scrubber.py: consolidation of pertinent data exploration into one data set cleaner
 * final_project_dataset.pkl: original provided dataset.
 * my_classifier.pkl: straight up classifier
 * my_dataset.pkl: scrubbed dataset. dict of dicts
 * my_feature_list.pkl: list of features used by classifier
 * poi_id.py: file that generates the three pkl files
+* Project_QnQ.pdf: Final submission questions and answers
 * py27_env.txt: python environment description dump: conda list --explicit > py27_env.txt
 * tester.py: udacity provided script to test the my*pkl files
 
@@ -75,3 +75,5 @@ Udacity provided scripts with helper functions for the provided data structures.
     * return target, features
     * target = data[item][0]
     * features = data[item][1:]
+* data_scrubber.py: consolidation of pertinent data exploration into one data set cleaner
+* email_feature_creation.py: script to create usable features based on the email parse.

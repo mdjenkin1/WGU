@@ -13,7 +13,7 @@ import re
     returns: skipped_persons, processed_data
 """
 
-def scrub_data(raw_data, target_features):
+def scrubData(raw_data, target_features):
 
     ##
     ## Helpers
