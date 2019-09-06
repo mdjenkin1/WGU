@@ -49,11 +49,11 @@ No Items
 
 ### Validate and Evaluate
 
-tester.py unable to run due to environmental issue noted above.  
+~~tester.py unable to run due to environmental issue noted above.~~  
 
 ### Revision Plan
 
-Rework feature selection logic  
+~~Rework feature selection logic~~  
 
 ## Second submission Revision
 
@@ -67,9 +67,9 @@ Show impact of new feature on final model.
 Add plots and graphs of feature selection.  
 Justify use of feature scaling  
 
-### Validate and Evaluate
+### Second Pass Validate and Evaluate
 
-Export the final model, not the grid search object.  
+~~Export the final model, not the grid search object.~~  
 
 ## Second Revision Plan
 
