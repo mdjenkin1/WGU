@@ -56,13 +56,34 @@ When it came to algorithm selection, I decided to compare K-Nearest Neighbors an
 
 Between K-Nearest Neighbors and Support Vector Classifiers, the stock SVC configuration had slightly better accuracy. Some tuning was done for both algorithms before I focused on tuning the SVC classifier. That was all before I revisited how I was handling feature selection.  
 
-After reintroducing the email data, precision of both SVC and KNN classifiers greatly improved. The KNN classifier improved so well that it is now performing better than SVC. The best precision for KNN reached 40% where as SVC only reached 35%.  
+After reintroducing the email data, precision of both SVC and KNN classifiers greatly improved. The KNN classifier improved so well that it is now performing better than SVC. The best precision for KNN reached 40% where as SVC only reached 35%. This was a short lived gain as I tuned algorithm parameters further.  
 
 ## What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?  How did you tune the parameters of your particular algorithm? What parameters did you tune? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier).  [relevant rubric items: “discuss parameter tuning”, “tune the algorithm”]
 
 Algorithm parameter tuning is a method of adjusting algorithm performance by manipulating constants within the algorithm. Performance adjustments can be made for algorithm speed or accuracy. In this case, performance in classifier precision was the target of the adjustments. Improper algorithm tuning can result in poor algorithm performance.  
 
 I took a brute force approach to classifier tuning. GridsearchCV allowed me to setup multiple parameter sets for an algorithm. It then runs through the parameter sets and returns the best parameter set based on the specified metric. This allowed me to try many different parameters for the SVC algorithm. In the initial pass, where I compared SVC to K-NN, I limited my parameter tuning to kernel type and penalty parameter for SVC and number of neighbors and weight functions for K-NN.  
+
+One adjustment I made was to the maximum number of features SelectKBest was allowed to use. Initially, I at most allowed only half of the features to be used. By doubling the number of allowed features in the final classifier resulted in an support vector classifier with a 45% precision score. Previously, it produced 35% precision at best. This gain in precision came at the cost of performance. Runtime had a noticeable increase in seconds if not minutes. As runtime is not of concern for this project, I accept this extra time. It is worth noting, that this new best classifier only used nine features. One more than the previous maximum. If runtime does become a concern, this would be the first parameter I'd adjust.  
+
+There was still one issue. All this focus on precision left a lot of room for improvement with the classifier's recall. To rebalance recall with precision, I changed my scorer to F1. The F1 score provides a weighted average between precision and recall. This additional parameter adjustment ended up sacrificing my latest gains in precision for a near tripling of recall. It also resulted in a switch back from SVC to KNN being better and a drop in only 3 features used in the resulting classifier.  
+
+```{python}
+Pipeline(memory=None,
+         steps=[('selectkbest',
+                 SelectKBest(k=3,
+                             score_func=<function f_classif at 0x000001D3F5125378>)),
+                ('standardscaler',
+                 StandardScaler(copy=True, with_mean=True, with_std=True)),
+                ('kneighborsclassifier',
+                 KNeighborsClassifier(algorithm='auto', leaf_size=30,
+                                      metric='minkowski', metric_params=None,
+                                      n_jobs=None, n_neighbors=1, p=2,
+                                      weights='uniform'))],
+         verbose=False)
+        Accuracy: 0.81267       Precision: 0.32437      Recall: 0.37400 F1: 0.34742     F2: 0.36290
+        Total predictions: 15000        True positives:  748    False positives: 1558   False negatives: 1252   True negatives: 11442
+```
 
 ## What is validation, and what’s a classic mistake you can make if you do it wrong? How did you validate your analysis?  [relevant rubric items: “discuss validation”, “validation strategy”]
 
@@ -76,4 +97,4 @@ There were two evaluation metrics that I gave the most consideration. Accuracy w
 
 The poor measure offered by accuracy pointed me to precision as the metric to judge the classifier. Precision tells how accurate the classification is. A classifier might claim a group of 10 birds are all ducks. In actuality, that group of 10 bird might have 7 geese and only 3 ducks. This would mean a precision of 30%. There may be more birds than the 10 originally accused of being ducks. Precision only cares about the ones that were classified as ducks. Accuracy takes into account all the other birds not labeled as ducks.
 
-Our interest is in who is classified as a poi. Are those classified as poi actually a person of interest? Precision best describes this interest.
+Our interest is in who is classified as a poi. Are those classified as poi actually a person of interest? Were all poi classified as poi? Precision tells us how many of those classified as poi are a hit. Recall tells us how many of all possible hits were made. Put to an extreme; if I say everyone is a poi then every actual poi has been labelled as such and my recall is perfect. That leaves a lot to be desired with my precision as I would have many innocents labelled as poi.  

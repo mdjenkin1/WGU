@@ -11,8 +11,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV, train_test_split
-from sklearn.metrics import precision_score, make_scorer
-from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.metrics import precision_score, make_scorer, f1_score
+from sklearn.feature_selection import SelectKBest
 
 sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
@@ -44,27 +44,31 @@ features_train, features_test, labels_train, labels_test = train_test_split(feat
 ### Task 4: Try a variety of classifiers
 ### Task 5: Tune your classifier to achieve better than .3 precision 
 
-svc_params = {'selectkbest__k':range(1,8), 
+svc_params = {'selectkbest__k':range(1,16), 
     'svc__kernel':('linear','rbf','sigmoid','poly'), 
     'svc__C': range(1,10)}
 svc = SVC(gamma='scale')
 svc_pipe = make_pipeline(SelectKBest(), StandardScaler(), svc)
-svc_clf = GridSearchCV(svc_pipe, svc_params, cv=10, scoring=make_scorer(precision_score))
+svc_clf = GridSearchCV(svc_pipe, svc_params, cv=10, scoring='f1')
 svc_clf.fit(features,labels)
 print("SVC Best Score: {}".format(svc_clf.best_score_))
+#print("SVC CV Results")
+#pprint.pprint(svc_clf.cv_results_['rank_test_score'])
 
-knn_params = {'selectkbest__k':range(1,8), 
+knn_params = {'selectkbest__k':range(1,16), 
     'kneighborsclassifier__n_neighbors': range(1,10), 
     'kneighborsclassifier__weights': ['uniform', 'distance']}
 knn = KNeighborsClassifier()
 knn_pipe = make_pipeline(SelectKBest(), StandardScaler(), knn)
-knn_clf = GridSearchCV(knn_pipe, knn_params, cv=10, scoring=make_scorer(precision_score))
+knn_clf = GridSearchCV(knn_pipe, knn_params, cv=10, scoring='f1')
 knn_clf.fit(features,labels)
 print("KNN Best Score: {}".format(knn_clf.best_score_))
+#print("KNN CV Results")
+#pprint.pprint(knn_clf.cv_results_['rank_test_score'])
 
-clf = svc_clf if svc_clf.best_score_ > knn_clf.best_score_ else knn_clf
+clf = svc_clf.best_estimator_ if svc_clf.best_score_ > knn_clf.best_score_ else knn_clf.best_estimator_
 print("Best Classifier")
-#pprint.pprint(clf)
+pprint.pprint(clf)
 
 ### Task 6: Dump your classifier, dataset, and features_list 
 

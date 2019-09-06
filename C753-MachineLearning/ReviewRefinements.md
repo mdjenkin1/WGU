@@ -54,3 +54,25 @@ tester.py unable to run due to environmental issue noted above.
 ### Revision Plan
 
 Rework feature selection logic  
+
+## Second submission Revision
+
+### Quality of Code
+
+Enrich the report. Export PDF?  
+
+### Optimize Feature Selection
+
+Show impact of new feature on final model.  
+Add plots and graphs of feature selection.  
+Justify use of feature scaling  
+
+### Validate and Evaluate
+
+Export the final model, not the grid search object.  
+
+## Second Revision Plan
+
+Add plots and graphs to illustrate feature selection.  
+Engineer one new feature that will be considered in the feature selection.  
+Add scaler justification.  
