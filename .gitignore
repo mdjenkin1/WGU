@@ -22,3 +22,5 @@ enron_mail*
 **/final_project_dataset_cleaned*.pkl
 
 trash
+
+**/*.csv.bz2
