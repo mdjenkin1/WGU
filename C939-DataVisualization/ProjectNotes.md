@@ -13,7 +13,8 @@ One of the suggested, intermediate, datasets is being used for this project. Spe
 |--|--|--|--|
 | Year | 1987-2008 | Quantitative | Continuous |
 | Month | 1-12 | Quantitative | Continuous |
-| DayofMonth | 1-31 | Quantitative | Continuous |
+| DayofMonth | 1-31 | Quantitative |
+ Continuous |
 | DayOfWeek | 1 (Monday) - 7 (Sunday) | Quantitative | Continuous |
 | DepTime | actual departure time (local, hhmm) | Quantitative | Continuous |
 | CRSDepTime | scheduled departure time (local, hhmm) | Quantitative | Continuous |
