@@ -60,4 +60,4 @@ How do origin airports compare for departure time vs scheduled departure time?
 Is there a misjudged component of travel time that could be better calculated to determine proper float for accurate scheduled arrival?  
 Are the attributed delay times calculated, derived or manually collected?  
 How do attributed delay times factor into total travel time?  
-What are the date/time impacts of 
+What are the date/time relations to delay times?  
