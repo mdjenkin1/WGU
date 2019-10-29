@@ -24,3 +24,4 @@ enron_mail*
 trash
 
 **/*.csv.bz2
+**/*.csv
