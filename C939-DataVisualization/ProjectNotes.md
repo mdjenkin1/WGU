@@ -61,3 +61,18 @@ Is there a misjudged component of travel time that could be better calculated to
 Are the attributed delay times calculated, derived or manually collected?  
 How do attributed delay times factor into total travel time?  
 What are the date/time relations to delay times?  
+
+### Project Scoping
+
+The primary goal of the course appears to be understanding the available functionality of Tableau. Data visualization and communication of data exploration appears to be secondary. Therefore the scope of this project will be directed to the capabilities of Tableau.  
+
+## Loading Dataset
+
+[https://kb.tableau.com/articles/howto/connecting-multiple-data-sources-without-joining-or-blending](https://kb.tableau.com/articles/howto/connecting-multiple-data-sources-without-joining-or-blending)  
+
+Apparent options:  
+
+* Load each csv as an individual data source
+* Union each csv to a singular data source
+
+Decision was to union. This resulted in a dataset of 123,534,969 rows. This is well in excess of the 15,000,000 row limit of Tableau. Saving is not available.  
