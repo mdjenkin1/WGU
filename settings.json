@@ -1,0 +1,78 @@
+{
+    "workbench.colorTheme": "Dracula At Night",
+    "cSpell.userWords": [
+        "bivariate",
+        "compositional",
+        "dataframe",
+        "dataset",
+        "datasets",
+        "deserialization",
+        "gini",
+        "hyperplane",
+        "lemmatization",
+        "overfitting",
+        "overplotting",
+        "preattentive",
+        "rebalance",
+        "sklearn",
+        "subnet",
+        "subsetting"
+    ],
+    "r.rterm.windows": "C:\\Program Files\\R\\R-3.5.1\\bin\\x64\\R.exe",
+    "markdown.extension.orderedList.marker": "one",
+    "window.zoomLevel": 0,
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "python.jediEnabled": false,
+    "workbench.tree.indent": 18,
+    "workbench.statusBar.feedback.visible": false,
+    "workbench.colorCustomizations" : {
+        "terminal.background":"#1E0528",
+        "terminal.foreground":"#FFEEFF",
+        "terminalCursor.background":"#FFEEFF",
+        "terminalCursor.foreground":"#FFEEFF",
+        "terminal.ansiBlack":"#1E0528",
+        "terminal.ansiBlue":"#550068",
+        "terminal.ansiBrightBlack":"#320F55",
+        "terminal.ansiBrightBlue":"#550068",
+        "terminal.ansiBrightCyan":"#B900B1",
+        "terminal.ansiBrightGreen":"#05CB0D",
+        "terminal.ansiBrightMagenta":"#8991BB",
+        "terminal.ansiBrightRed":"#00D9E9",
+        "terminal.ansiBrightWhite":"#F8C0FF",
+        "terminal.ansiBrightYellow":"#955AE7",
+        "terminal.ansiCyan":"#B900B1",
+        "terminal.ansiGreen":"#05CB0D",
+        "terminal.ansiMagenta":"#8991BB",
+        "terminal.ansiRed":"#00D9E9",
+        "terminal.ansiWhite":"#FFEEFF",
+        "terminal.ansiYellow":"#955AE7"
+    },
+    "terminal.integrated.shell.windows": "C:\\Windows\\System32\\cmd.exe",
+    "git.confirmSync": false,
+    "python.pythonPath": "C:\\ProgramData\\Anaconda3\\envs\\py27\\python.exe",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "terminal.explorerKind": "external",
+
+    "shellLauncher.shells.windows":[
+        {
+            "shell": "C:\\Windows\\System32\\cmd.exe",
+            "label": "cmd"
+        },
+        {
+            "shell": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "label": "PowerShell"
+        },
+        {
+            "shell": "C:\\Program Files\\Git\\bin\\bash.exe",
+            "label": "Git bash"
+        },
+        {
+            "shell": "C:\\Windows\\System32\\bash.exe",
+            "label": "WSL Bash"
+        }
+    ],
+    "powershell.codeFormatting.whitespaceBeforeOpenParen": false,
+    "editor.detectIndentation": false
+}
