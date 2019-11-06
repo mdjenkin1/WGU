@@ -12,7 +12,7 @@ from collections import Counter
 cntsOrigin = Counter()
 cntsDest = Counter()
 cntsLink = {}
-dfFullData = pd.DataFrame()
+ord_df = pd.DataFrame()
 
 def BasicCounts(csvfile):
     with open(csvfile) as openfile:
@@ -37,10 +37,21 @@ def BasicCounts(csvfile):
                     cntsLink[row[airport["Origin"]]] = Counter()
                     cntsLink[row[airport["Origin"]]][row[airport["Dest"]]] += 1
 
+def PickleFile(csvfile):
+    print("processing: {}".format(os.path.join("./RawData/", csvfile)))
+    tmpdf = pd.read_csv(os.path.join("./RawData/", csvfile), encoding="ISO-8859-1")
+
+    basename, _ = os.path.splitext(csvfile)
+    outname = basename + "pkl"
+    outfile = open(os.path.join("./pickles/", outname),'wb')
+    pickle.dump(tmpdf, outfile)
+    outfile.close
 
 for csvfile in os.listdir("./RawData"):
-    print("processing: {}".format(os.path.join("./RawData/", csvfile)))
-    dfFullData = pd.concat([dfFullData,pd.read_csv(os.path.join("./RawData/", csvfile))])
+
+    if(False):
+        PickleFile(csvfile)
+    
     if(False):
         BasicCounts(os.path.join("./RawData/", csvfile))
         #pprint.pprint(cntsLink)
@@ -48,12 +59,20 @@ for csvfile in os.listdir("./RawData"):
         #pprint.pprint(cntsDest.most_common(10))
         print("Salt Lake City had: {} flights leave.".format(cntsOrigin['SLC']))
         print("Salt Lake City had: {} flights arrive.".format(cntsDest['SLC']))
-        print("Orlando had: {} flights leave.".format(cntsOrigin['ORD']))
-        print("Orlando had: {} flights arrive.".format(cntsDest['ORD']))
+        print("ord had: {} flights leave.".format(cntsOrigin['ORD']))
+        print("ord had: {} flights arrive.".format(cntsDest['ORD']))
         print("{} flights from SLC went to ORD".format(cntsLink['SLC']['ORD']))
         print("{} flights from ORD went to SLC".format(cntsLink['ORD']['SLC']))
 
 
-outfile = open("FullRawPickled.pkl",'wb')
-pickle.dump(dfFullData, outfile)
-outfile.close
+for pickled in os.listdir("./pickles"):
+    #print("Processing: {}".format(pickled))
+    tmp_df = pd.read_pickle(os.path.join("./pickles/", pickled))
+    to_ord = tmp_df['Dest'] == "ORD"
+    from_ord = tmp_df['Origin'] == "ORD"
+    ord_df = pd.concat([ord_df, tmp_df[to_ord | from_ord]])
+
+pprint.pprint(ord_df)
+pprint.pprint(ord_df.describe())
+
+

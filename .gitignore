@@ -20,6 +20,7 @@ enron_mail*
 **/my_feature_list.pkl
 **/pickle_jar/*pkl
 **/final_project_dataset_cleaned*.pkl
+**/*pkl
 
 trash
 
