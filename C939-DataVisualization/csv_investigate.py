@@ -75,4 +75,6 @@ for pickled in os.listdir("./pickles"):
 pprint.pprint(ord_df)
 pprint.pprint(ord_df.describe())
 
+ord_df.to_csv("Orlando.csv")
+
 
