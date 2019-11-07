@@ -87,4 +87,35 @@ My first thought was to select a handful of the busiest airports. A quick parse 
 
 My next thought is to compare the growth in airport capacity/flow for two airports. In this case Salt Lake City and Orlando. Salt Lake City is the airport I've most commonly used and Orlando is the busiest. Even this is too much for Tableau.  
 
-It seems the best option would be to focus on one airport. Orlando has the most traffic, so it will be our pick. 
+It seems the best option would be to focus on one airport. Orlando has the most traffic, so it will be our pick. With a little bit of Python, all rows containing traffic into and out of Orlando has been extracted and compiled to one csv. In total, there's 13.2 million rows across the 22 years. Still a sizeable dataset, but not too big for Tableau.  
+
+```{python}
+(py37) C:\Users\Michael\Documents\WGU\WGU-Projects\C939-DataVisualization>python csv_investigate.py
+         Year  Month  DayofMonth  DayOfWeek  DepTime  CRSDepTime  ArrTime  CRSArrTime  ... Cancelled  CancellationCode Diverted  CarrierDelay  WeatherDelay  NASDelay  SecurityDelay  LateAircraftDelay
+14659    1987     10           1          4   1803.0        1800   1942.0        1915  ...         0               NaN        0           NaN           NaN       NaN            NaN                NaN
+14660    1987     10           2          5   1801.0        1800   1915.0        1915  ...         0               NaN        0           NaN           NaN       NaN            NaN                NaN
+14661    1987     10           5          1   1802.0        1800   1916.0        1915  ...         0               NaN        0           NaN           NaN       NaN            NaN                NaN
+14662    1987     10           7          3   1800.0        1800   1921.0        1915  ...         0               NaN        0           NaN           NaN       NaN            NaN                NaN
+14663    1987     10           8          4   1810.0        1800   1930.0        1915  ...         0               NaN        0           NaN           NaN       NaN            NaN                NaN
+...       ...    ...         ...        ...      ...         ...      ...         ...  ...       ...               ...      ...           ...           ...       ...            ...                ...
+7008446  2008     12          12          5    724.0         725   1018.0         956  ...         0               NaN        0           0.0           0.0      22.0            0.0                0.0
+7008484  2008     12          12          5   1619.0        1624   1854.0        1854  ...         0               NaN        0           NaN           NaN       NaN            NaN                NaN
+7008628  2008     12          12          5   1727.0        1650   2123.0        2054  ...         0               NaN        0           0.0           0.0       0.0            0.0               29.0
+7009156  2008     12          13          6    951.0         955   1112.0        1112  ...         0               NaN        0           NaN           NaN       NaN            NaN                NaN
+7009450  2008     12          13          6    714.0         715    944.0        1005  ...         0               NaN        0           NaN           NaN       NaN            NaN                NaN
+
+[13235476 rows x 29 columns]
+               Year         Month    DayofMonth     DayOfWeek       DepTime    CRSDepTime  ...      Diverted  CarrierDelay  WeatherDelay      NASDelay  SecurityDelay  LateAircraftDelay
+count  1.323548e+07  1.323548e+07  1.323548e+07  1.323548e+07  1.282051e+07  1.323548e+07  ...  1.323548e+07  3.561521e+06  3.561521e+06  3.561521e+06   3.561521e+06       3.561521e+06
+mean   1.998553e+03  6.552078e+00  1.571906e+01  3.934180e+00  1.323559e+03  1.293060e+03  ...  2.442602e-03  4.115982e+00  8.486082e-01  7.647379e+00   1.104528e-02       7.382481e+00
+std    6.141658e+00  3.440199e+00  8.785181e+00  1.988582e+00  4.687764e+02  4.811744e+02  ...  4.936229e-02  2.099290e+01  9.644373e+00  2.538340e+01   8.828610e-01       2.585451e+01
+min    1.987000e+03  1.000000e+00  1.000000e+00  1.000000e+00  1.000000e+00  0.000000e+00  ...  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00   0.000000e+00       0.000000e+00
+25%    1.993000e+03  4.000000e+00  8.000000e+00  2.000000e+00  9.250000e+02  9.070000e+02  ...  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00   0.000000e+00       0.000000e+00
+50%    1.999000e+03  7.000000e+00  1.600000e+01  4.000000e+00  1.320000e+03  1.310000e+03  ...  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00   0.000000e+00       0.000000e+00
+75%    2.004000e+03  1.000000e+01  2.300000e+01  6.000000e+00  1.715000e+03  1.700000e+03  ...  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00   0.000000e+00       0.000000e+00
+max    2.008000e+03  1.200000e+01  3.100000e+01  7.000000e+00  2.430000e+03  2.359000e+03  ...  1.000000e+00  1.393000e+03  1.352000e+03  1.359000e+03   3.820000e+02       1.280000e+03
+
+[8 rows x 24 columns]
+
+(py37) C:\Users\Michael\Documents\WGU\WGU-Projects\C939-DataVisualization>
+```
