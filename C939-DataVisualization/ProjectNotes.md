@@ -119,3 +119,15 @@ max    2.008000e+03  1.200000e+01  3.100000e+01  7.000000e+00  2.430000e+03  2.3
 
 (py37) C:\Users\Michael\Documents\WGU\WGU-Projects\C939-DataVisualization>
 ```
+
+### Data Cleaning in Tableau
+
+After loading the dataset to Tableau, it became apparent that it would be necessary to prepare the fields. For instance, the dates are split and the times are integers that have been converted to doubles.  
+
+For the dates, I concatenated the year, month and day of month fields into a string that was then converted into a date. Starting on the times is when trouble began. Every attempt at correcting a time field resulted in longer and longer processing time until the program eventually hung. So back to Python to further clean and prepare the dataset.  
+
+### Change of Venue
+
+With Orlando's data causing trouble for Tableau, I fell back to a smaller airport, SLC. Tableau does appear to be a powerful exploration tool, but it is limited in the size of data it can handle. It also appears to have some memory leaks that are exacerbated by data size.
+
+

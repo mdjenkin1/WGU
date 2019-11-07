@@ -4,15 +4,20 @@ import csv
 import os
 import pprint
 import pickle
+import re
 
 import pandas as pd
+import datetime as dt
 
 from collections import Counter
 
 cntsOrigin = Counter()
 cntsDest = Counter()
 cntsLink = {}
+
+# dataframe out
 ord_df = pd.DataFrame()
+slc_df = pd.DataFrame()
 
 def BasicCounts(csvfile):
     with open(csvfile) as openfile:
@@ -47,6 +52,36 @@ def PickleFile(csvfile):
     pickle.dump(tmpdf, outfile)
     outfile.close
 
+def IntToTime(intIn):
+    timeMask = re.compile('(\d{2})(\d{2})')
+    timeStr = str(int(intIn)).zfill(4)
+    timeParts = timeMask.match(timeStr)
+    timeOut = datetime.time(timeParts[1], timeParts[2]) 
+    return timeOut
+
+def PrepForTableau(airport_df):
+    # Making Dates
+    airport_df['Depart Date'] = dt.date(airport_df['Year'], airport_df['Month'], airport_df['DayofMonth'])
+    
+    # if the arrival time is earlier than the departure time then the arrival date is the day after the departure date
+    #if airport_df['ArrTime'] < airport_df['DepTime']:
+    #    airport_df['Arrive Date'] = airport_df['Depart Date'] + dt.timedelta(days=1)
+    #else: airport_df['Arrive Date'] = airport_df['Depart Date']
+    
+    # Drop the raw date fields
+    airport_df.drop(labels=['Year','Month','DayofMonth'])
+
+    # fixing times
+    #airport_df['DepartTime'] = IntToTime(airport_df['DepTime'])
+    #airport_df['SchDepartTime'] = IntToTime(airport_df['CRSDepTime'])
+    #airport_df['ArriveTime'] = IntToTime(airport_df['ArrTime'])
+    #airport_df['SchArriveTime'] = IntToTime(airport_df['CRSArrTime'])
+
+    # Drop the raw time fields
+    airport_df.drop(labels=['DepTime','CRSDepTime','ArrTime','CRSArrTime'])
+
+    return airport_df
+
 for csvfile in os.listdir("./RawData"):
 
     if(False):
@@ -68,13 +103,26 @@ for csvfile in os.listdir("./RawData"):
 for pickled in os.listdir("./pickles"):
     #print("Processing: {}".format(pickled))
     tmp_df = pd.read_pickle(os.path.join("./pickles/", pickled))
+    
+    # Orlando
     to_ord = tmp_df['Dest'] == "ORD"
     from_ord = tmp_df['Origin'] == "ORD"
     ord_df = pd.concat([ord_df, tmp_df[to_ord | from_ord]])
+    
+    # Salt Lake City
+    to_slc = tmp_df['Dest'] == "SLC"
+    from_slc = tmp_df['Origin'] == "SLC"
+    slc_df = pd.concat([slc_df, tmp_df[to_slc | from_slc]])
+    slc_df = PrepForTableau(slc_df)
 
-pprint.pprint(ord_df)
-pprint.pprint(ord_df.describe())
-
+# Orlando
+#pprint.pprint(ord_df)
+#pprint.pprint(ord_df.describe())
 #ord_df.to_csv("Orlando.csv")
+
+# Salt Lake City
+#pprint.pprint(slc_df)
+#pprint.pprint(slc_df.describe())
+#slc_df.to_csv("SaltLake.csv")
 
 
