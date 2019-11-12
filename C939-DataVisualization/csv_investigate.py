@@ -7,21 +7,38 @@ import pickle
 import re
 
 import pandas as pd
-import numpy as np
 import datetime as dt
 
 from collections import Counter, namedtuple
 
-cntsOrigin = Counter()
-cntsDest = Counter()
-cntsLink = {}
+#### Ghetto Script Control ####
 
-# dataframe out
+# original counts and initial processing
+getBasicCounts = False
+pickleRaws = False
+
+# run shortening for development
+shortRun = True
+stopAfter = 1
+
+# airport customization
+Airport = "SLC"
+
+#### Globals ####
+
+# Basic counts
+if getBasicCounts:
+    countsOrigin = Counter()
+    countsDest = Counter()
+    countsLink = {}
+
+# Processed Dataframe
 ord_df = pd.DataFrame()
 selectedAirports_df = pd.DataFrame()
 
-def InitialBasicCounts(csvfile):
-    with open(csvfile) as openfile:
+
+def InitialBasicCounts(csvFile):
+    with open(csvFile) as openfile:
         airport = {}
         reader = csv.reader(openfile)
         header = True
@@ -35,19 +52,19 @@ def InitialBasicCounts(csvfile):
                     fcnt += 1
                 header = False
             else:
-                cntsOrigin[row[airport["Origin"]]] += 1
-                cntsDest[row[airport["Dest"]]] += 1
-                if row[airport["Origin"]] in cntsLink.keys():
-                    cntsLink[row[airport["Origin"]]][row[airport["Dest"]]] += 1
+                countsOrigin[row[airport["Origin"]]] += 1
+                countsDest[row[airport["Dest"]]] += 1
+                if row[airport["Origin"]] in countsLink.keys():
+                    countsLink[row[airport["Origin"]]][row[airport["Dest"]]] += 1
                 else:
-                    cntsLink[row[airport["Origin"]]] = Counter()
-                    cntsLink[row[airport["Origin"]]][row[airport["Dest"]]] += 1
+                    countsLink[row[airport["Origin"]]] = Counter()
+                    countsLink[row[airport["Origin"]]][row[airport["Dest"]]] += 1
 
-def CsvToPickledDataframe(csvfile):
-    print("processing: {}".format(os.path.join("./RawData/", csvfile)))
-    tmpdf = pd.read_csv(os.path.join("./RawData/", csvfile), encoding="ISO-8859-1")
+def CsvToPickledDataframe(csvFile):
+    print("processing: {}".format(os.path.join("./RawData/", csvFile)))
+    tmpdf = pd.read_csv(os.path.join("./RawData/", csvFile), encoding="ISO-8859-1")
 
-    basename, _ = os.path.splitext(csvfile)
+    basename, _ = os.path.splitext(csvFile)
     outname = basename + "pkl"
     outfile = open(os.path.join("./pickles/", outname),'wb')
     pickle.dump(tmpdf, outfile)
@@ -193,34 +210,26 @@ def PrepForTableau(original_df):
 
     return preped_df
 
-getBasicCounts = False
-pickleRaws = False
-
-shortRun = True
-stopAfter = 1
-
-Airport = "SLC"
-
 if pickleRaws | getBasicCounts:
-    for csvfile in os.listdir("./RawData"):
+    for csvFile in os.listdir("./RawData"):
 
         if pickleRaws:
-            CsvToPickledDataframe(csvfile)
+            CsvToPickledDataframe(csvFile)
         
         if getBasicCounts:
-            InitialBasicCounts(os.path.join("./RawData/", csvfile))
-            #pprint.pprint(cntsLink)
-            #pprint.pprint(cntsOrigin.most_common(10))
-            #pprint.pprint(cntsDest.most_common(10))
-            print("Salt Lake City had: {} flights leave.".format(cntsOrigin['SLC']))
-            print("Salt Lake City had: {} flights arrive.".format(cntsDest['SLC']))
-            print("ord had: {} flights leave.".format(cntsOrigin['ORD']))
-            print("ord had: {} flights arrive.".format(cntsDest['ORD']))
-            print("{} flights from SLC went to ORD".format(cntsLink['SLC']['ORD']))
-            print("{} flights from ORD went to SLC".format(cntsLink['ORD']['SLC']))
+            InitialBasicCounts(os.path.join("./RawData/", csvFile))
+            #pprint.pprint(countsLink)
+            #pprint.pprint(countsOrigin.most_common(10))
+            #pprint.pprint(countsDest.most_common(10))
+            print("Salt Lake City had: {} flights leave.".format(countsOrigin['SLC']))
+            print("Salt Lake City had: {} flights arrive.".format(countsDest['SLC']))
+            print("ord had: {} flights leave.".format(countsOrigin['ORD']))
+            print("ord had: {} flights arrive.".format(countsDest['ORD']))
+            print("{} flights from SLC went to ORD".format(countsLink['SLC']['ORD']))
+            print("{} flights from ORD went to SLC".format(countsLink['ORD']['SLC']))
 
 for pickled in os.listdir("./pickles"):
-    # Orlando
+    # Orlando specific. Saved for posterity
     if (False):
         print("Processing: {}".format(pickled))
         tmp_df = pd.read_pickle(os.path.join("./pickles/", pickled))
@@ -228,7 +237,7 @@ for pickled in os.listdir("./pickles"):
         from_ord = tmp_df['Origin'] == "ORD"
         ord_df = pd.concat([ord_df, tmp_df[to_ord | from_ord]], sort=True)
         
-    # Selected Airports
+    # Preprocess for selected airports
     if (stopAfter > 0):
         if shortRun: stopAfter -= 1
 
