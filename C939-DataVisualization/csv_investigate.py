@@ -18,8 +18,8 @@ getBasicCounts = False
 pickleRaws = False
 
 # run shortening for development
-shortRun = True
-stopAfter = 1
+shortRun = False
+stopAfter = 1       #Keep > 0 to process files
 
 # airport customization
 Airport = "SLC"
@@ -84,10 +84,6 @@ def IntToTime(intIn):
     else:
         return "NaN"
 
-def GetNextDay(today):
-    tomorrow = today + dt.timedelta(days=1)
-    return tomorrow
-
 def IntOrNaN(value):
     try:
         return int(value)
@@ -103,6 +99,23 @@ def TimedeltaOrNaN(value):
         pass
     else:
         return "NaN"
+
+def GetNextDay(today):
+    tomorrow = today + dt.timedelta(days=1)
+    return tomorrow
+
+def GetArrivalDate(record):
+
+    # Assume sameday arrival
+    ArriveDate = record['DepartDate']
+
+    # if the arrival time is earlier than the departure time then the arrival date is the day after the departure date
+    if  type(record['ArrTime']) == dt.time and type(record['DepTime']) == dt.time:
+        nextDayArrival = record['ArrTime'] < record['DepTime']
+        if nextDayArrival: 
+            ArriveDate = record['DepartDate'] + dt.timedelta(days=1)
+
+    return ArriveDate
 
 def PrepForTableau(original_df):
 
@@ -147,66 +160,7 @@ def PrepForTableau(original_df):
     for mtime in measuredTimes:
         preped_df[mtime] = original_df.apply(lambda row: TimedeltaOrNaN(row[mtime]), axis = 1)
 
-
-    """
-    Work here next
-    Calculate Arrival Dates
-    """
-
-
-
-    # if the arrival time is earlier than the departure time then the arrival date is the day after the departure date
-    #nextDayArrivals = original_df['ArrTime'] < original_df['DepTime']
-
-    #preped_df['ArriveTime'] = preped_df.apply(lambda row: print(row)
-    #preped_df.apply(lambda row: pprint(row.index))
-    
-#    if nextDayArrivals.iloc(row.index): GetNextDay(row.DepartDate) else: row.DepartDate, axis = 1)
-
-    #for rowIndex, arrNextDay in nextDayArrivals.iteritems():
-    #    if arrNextDay:
-    #        preped_df.loc[rowIndex, 'ArriveDate'] = GetNextDay(preped_df.loc[rowIndex, 'DepartDate'])
-    #    else:
-    #        preped_df.loc[rowIndex, 'ArriveDate'] = preped_df.loc[rowIndex, 'DepartDate']
-
-    ### This is no good
-    #preped_df['ArriveDate'] = [ \
-    #    GetNextDay(preped_df['DepartDate']) if nextDay \
-    #    else preped_df['DepartDate'] \
-    #    for nextDay in nextDayArrivals \
-    #]
-
-
-
-            #print("Next Day Arrival: {} to {}".format(preped_df.loc[rowIndex, 'DepartDate'], GetNextDay(preped_df.loc[rowIndex, 'DepartDate'])))
-
-            #preped_df.iloc[index, 'ArrivalDate'] = preped_df.iloc[index, 'DepartDate'] + dt.timedelta(days=1)
-        #if index:
-        #    print("Index: {}, arrNextDay: {}".format(index, arrNextDay))
-    #preped_df.loc[nextDayArrival, 'ArriveDate'] = original_df.loc[nextDayArrival, ]
-
-
-    #preped_df.loc[nextDayArrival, 'ArriveDate'] = preped_df.loc[nextDayArrival, 'DepartDate'] + dt.timedelta(days=1)
-    #pprint.pprint(nextDayArrival)
-    #preped_df.loc[nextDayArrival, 'ArriveDate'] = original_df.loc[nextDayArrivalDepartDate + dt.timedelta(days=1), axis = 1)
-
-
-    #if original_df.loc['ArrTime'] < original_df.loc['DepTime']:
-    #    = original_df.apply(lambda row: row.DepartDate + dt.timedelta(days=1), axis = 1)
-    #else: 
-    #    original_df['ArriveDate'] = original_df.DepartDate
-    
-    # Drop the raw date fields
-    #original_df.drop(labels=['Year','Month','DayofMonth'])
-
-    # fixing times
-    #original_df['DepartTime'] = original_df.apply(lambda row: IntToTime(row['DepTime']), axis = 1)
-    #original_df['SchDepartTime'] = original_df.apply(lambda row: IntToTime(row['CRSDepTime']), axis = 1)
-    #irport_df['ArriveTime'] = original_df.apply(lambda row: IntToTime(row['ArrTime']), axis = 1)
-    #original_df['SchArriveTime'] = original_df.apply(lambda row: IntToTime(row['CRSArrTime']), axis = 1)
-
-    # Drop the raw time fields
-    #original_df.drop(labels=['DepTime','CRSDepTime','ArrTime','CRSArrTime'])
+    preped_df['ArriveDate'] = preped_df.apply(lambda row: GetArrivalDate(row), axis = 1)
 
     return preped_df
 
@@ -258,8 +212,8 @@ for pickled in os.listdir("./pickles"):
 #ord_df.to_csv("Orlando.csv")
 
 # Selected Airports
-#pprint.pprint(selectedAirports_df)
-#pprint.pprint(selectedAirports_df.describe())
-#selectedAirports_df.to_csv("SelectedAirports.csv")
+pprint.pprint(selectedAirports_df)
+pprint.pprint(selectedAirports_df.describe())
+selectedAirports_df.to_csv("SelectedAirports.csv")
 
 
