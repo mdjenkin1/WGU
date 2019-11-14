@@ -128,5 +128,50 @@ For the dates, I concatenated the year, month and day of month fields into a str
 
 With the size of Orlando's data causing trouble for Tableau, I fell back to a smaller airport, SLC. Tableau does appear to be a powerful exploration tool, but it is limited in the size of data it can handle. It also appears to have some memory leaks that are exacerbated by data size.
 
-These limitations of Tableau prompted a need for more power to clean the dataset. It's for this reason, the lion's share of data preprocessing has been moved to Python.  
+### Cleaning Data outside of Tableau
+
+These limitations of Tableau prompted a need for more power to clean the dataset. It's for this reason, the lion's share of data preprocessing has been moved to Python. In python, the date parts were concatenated into a date; scheduled time features were converted from numbers to times; and time measurements were transformed to timedeltas.  
+
+```{python}
+        ActualElapsedTime          AirTime          ArrDelay   ArrTime  ArriveDate CRSArrTime CRSDepTime CRSElapsedTime CancellationCode  Cancelled  ... FlightNum  LateAircraftDelay         NASDelay Origin    SecurityDelay TailNum           TaxiIn          TaxiOut  UniqueCarrier     WeatherDelay
+18149            02:47:00             None          00:06:00  19:20:00  1987-10-01   19:14:00   15:35:00       02:39:00              NaN          0  ...       190               None             None    SLC             None     NaN             None             None             TW             None
+18150            02:52:00             None          00:12:00  19:26:00  1987-10-02   19:14:00   15:35:00       02:39:00              NaN          0  ...       190               None             None    SLC             None     NaN             None             None             TW             None
+18151            02:51:00             None          00:10:00  19:24:00  1987-10-03   19:14:00   15:35:00       02:39:00              NaN          0  ...       190               None             None    SLC             None     NaN             None             None             TW             None
+18152            02:49:00             None          00:09:00  19:23:00  1987-10-04   19:14:00   15:35:00       02:39:00              NaN          0  ...       190               None             None    SLC             None     NaN             None             None             TW             None
+18153            02:38:00             None -1 days +23:57:00  19:11:00  1987-10-05   19:14:00   15:35:00       02:39:00              NaN          0  ...       190               None             None    SLC             None     NaN             None             None             TW             None
+...                   ...              ...               ...       ...         ...        ...        ...            ...              ...        ...  ...       ...                ...              ...    ...              ...     ...              ...              ...            ...              ...
+7009682          01:14:00  0 days 00:58:00          00:02:00  08:54:00  2008-12-13   08:52:00   07:40:00       01:12:00              NaN          0  ...      1585                NaT              NaT    BOI              NaT  N376DA  0 days 00:06:00  0 days 00:10:00             DL              NaT
+7009683          01:27:00  0 days 00:50:00          00:24:00  21:33:00  2008-12-13   21:09:00   19:54:00       01:15:00              NaN          0  ...      1586    0 days 00:12:00  0 days 00:12:00    SLC  0 days 00:00:00  N3735D  0 days 00:04:00  0 days 00:33:00             DL  0 days 00:00:00
+7009701          01:52:00  0 days 01:19:00          00:38:00  17:20:00  2008-12-13   16:42:00   15:00:00       01:42:00              NaN          0  ...      1611    0 days 00:12:00  0 days 00:10:00    SLC  0 days 00:00:00  N395DN  0 days 00:04:00  0 days 00:29:00             DL  0 days 00:00:00
+7009712          01:45:00  0 days 00:53:00          00:04:00  10:25:00  2008-12-13   10:21:00   08:43:00       01:38:00              NaN          0  ...      1624                NaT              NaT    SLC              NaT  N3738B  0 days 00:06:00  0 days 00:46:00             DL              NaT
+7009721          02:11:00  0 days 01:43:00          00:16:00  09:23:00  2008-12-13   09:07:00   06:15:00       01:52:00              NaN          0  ...      1635    0 days 00:00:00  0 days 00:16:00    GEG  0 days 00:00:00  N907DA  0 days 00:05:00  0 days 00:23:00             DL  0 days 00:00:00
+
+[4007604 rows x 28 columns]
+            ActualElapsedTime                ArrDelay          CRSElapsedTime     Cancelled     DayOfWeek                DepDelay      Distance      Diverted     FlightNum
+count                 3957451                 3957451                 4007488  4.007604e+06  4.007604e+06                 3963674  3.982811e+06  4.007604e+06  4.007604e+06
+mean   0 days 02:01:35.277025  0 days 00:05:40.060756  0 days 02:02:23.934344  1.097339e-02  3.979958e+00  0 days 00:06:36.422753  7.315265e+02  1.541070e-03  1.952975e+03
+std    0 days 00:59:38.948831  0 days 00:26:39.607207  0 days 00:58:47.248000  1.041776e-01  1.997685e+00  0 days 00:27:27.514608  4.685312e+02  3.922621e-02  1.371341e+03
+min         -1 days +12:30:00       -1 days +08:10:00       -1 days +23:34:00  0.000000e+00  1.000000e+00       -1 days +04:11:00  2.800000e+01  0.000000e+00  3.000000e+00
+25%           0 days 01:22:00       -1 days +23:53:00         0 days 01:23:00  0.000000e+00  2.000000e+00       -1 days +23:58:00  4.020000e+02  0.000000e+00  9.710000e+02
+50%           0 days 01:41:00         0 days 00:00:00         0 days 01:42:00  0.000000e+00  4.000000e+00         0 days 00:00:00  5.880000e+02  0.000000e+00  1.618000e+03
+75%           0 days 02:29:00         0 days 00:10:00         0 days 02:30:00  0.000000e+00  6.000000e+00         0 days 00:05:00  9.880000e+02  0.000000e+00  2.816000e+03
+max           1 days 05:19:00         0 days 23:55:00         0 days 09:25:00  1.000000e+00  7.000000e+00         0 days 23:59:00  2.994000e+03  1.000000e+00  9.604000e+03
+```
+
+There's some gaps in the dataset, but it should be good enough for our purposes. Time to go back to Tableau.
+
+There's some new problems loading to Tableau that need addressing. Times and dates should be combined and Tableau doesn't handle time deltas. To complicate matters, on reloading the preprocessed csv a mixed type warning is received for a number of columns.  
+
+```{python}
+sys:1: DtypeWarning: Columns (2,9,11,20,21,23,24,25,26,28) have mixed types. Specify dtype option on import or set low_memory=False.
+Index(['Unnamed: 0', 'ActualElapsedTime', 'AirTime', 'ArrDelay', 'ArrTime',
+       'ArriveDate', 'CRSArrTime', 'CRSDepTime', 'CRSElapsedTime',
+       'CancellationCode', 'Cancelled', 'CarrierDelay', 'DayOfWeek',
+       'DepDelay', 'DepTime', 'DepartDate', 'Dest', 'Distance', 'Diverted',
+       'FlightNum', 'LateAircraftDelay', 'NASDelay', 'Origin', 'SecurityDelay',
+       'TailNum', 'TaxiIn', 'TaxiOut', 'UniqueCarrier', 'WeatherDelay'],
+      dtype='object')
+```
+
+A closer inspection of this Dtypewarning shows it's nothing to be concerned with. The columns with mixed data types have a mix of NaN and actual values. I expect the missing values for AirTime can be calculated (e.g. AirTime). The others are values that just weren't captured. Seems some data sanity checking is in order.  
 

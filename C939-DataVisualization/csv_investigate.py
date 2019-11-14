@@ -5,6 +5,7 @@ import os
 import pprint
 import pickle
 import re
+import timeit
 
 import pandas as pd
 import datetime as dt
@@ -16,6 +17,8 @@ from collections import Counter, namedtuple
 # original counts and initial processing
 getBasicCounts = False
 pickleRaws = False
+initialPreprocess = False
+firstReprocess = True
 
 # run shortening for development
 shortRun = False
@@ -23,6 +26,7 @@ stopAfter = 1       #Keep > 0 to process files
 
 # airport customization
 Airport = "SLC"
+selectedAirportsCsv = "SelectedAirports.csv"
 
 #### Globals ####
 
@@ -36,6 +40,14 @@ if getBasicCounts:
 ord_df = pd.DataFrame()
 selectedAirports_df = pd.DataFrame()
 
+# Does python support enums?
+# Standardize date time feature names for each flight leg.
+flightStagePoints = {
+    'ActualArrival': ['ArriveDate', 'ArrTime'], 
+    'ActualDepart': ['DepartDate', 'DepTime'], 
+    'SchedArrival': ['ArriveDate', 'CSRArrTime'], 
+    'SchedDepart': ['DepartDate', 'CSRArrTime']
+}
 
 def InitialBasicCounts(csvFile):
     with open(csvFile) as openfile:
@@ -117,6 +129,16 @@ def GetArrivalDate(record):
 
     return ArriveDate
 
+def MergeDateTime(record, flightStage):
+    #print("Date: {} Time: {}".format(record[flightStage[0]], record[flightStage[1]]))
+
+    if type(record[flightStage[0]]) != "Date":
+        print("found an invalid date {} of type: {}".format(record[flightStage[0]], type(record[flightStage[0]])))
+    if type(record[flightStage[1]]) != "Time":
+        print("found an invalid time {} of type: {}".format(record[flightStage[1]], type(record[flightStage[1]])))
+    return True
+    #return dt.datetime.combine(record[flightStage[0]], record[flightStage[1]])
+
 def PrepForTableau(original_df):
 
     # Make a copy of the dataframe to ensure we know what's being modified and included
@@ -140,17 +162,21 @@ def PrepForTableau(original_df):
         "UniqueCarrier", "FlightNum", "TailNum", 
         "Cancelled", "CancellationCode", "Diverted", 
     ]
+    #print("Straight Column Copy")
     preped_df = original_df[columnsToCopy].copy()
 
     # Calculating dates
+    #print("Datetime Concatenation")
     preped_df['DepartDate'] = original_df.apply(lambda row: dt.date(row.Year, row.Month, row.DayofMonth), axis = 1)
     
     # Time is time
     clockTimes = ["DepTime", "CRSDepTime", "ArrTime", "CRSArrTime"]
     for ctime in clockTimes:
+        #print("Converting {} to time".format(ctime))
         preped_df[ctime] = original_df.apply(lambda row: IntToTime(row[ctime]), axis = 1)
 
     # Distances are integer miles, not floats
+    #print("Distances are whole numbers")
     preped_df['Distance'] = original_df.apply(lambda row: IntOrNaN(row['Distance']), axis = 1)
 
     # Timedeltas should be timedeltas
@@ -158,8 +184,10 @@ def PrepForTableau(original_df):
         "TaxiIn", "TaxiOut", "ActualElapsedTime", "CRSElapsedTime", "AirTime", "CarrierDelay", "WeatherDelay", 
         "NASDelay", "SecurityDelay", "LateAircraftDelay", "ArrDelay", "DepDelay" ]
     for mtime in measuredTimes:
+        #print("Converting {} to timepart".format(mtime))
         preped_df[mtime] = original_df.apply(lambda row: TimedeltaOrNaN(row[mtime]), axis = 1)
 
+    #print("Same or next day arrival")
     preped_df['ArriveDate'] = preped_df.apply(lambda row: GetArrivalDate(row), axis = 1)
 
     return preped_df
@@ -182,38 +210,51 @@ if pickleRaws | getBasicCounts:
             print("{} flights from SLC went to ORD".format(countsLink['SLC']['ORD']))
             print("{} flights from ORD went to SLC".format(countsLink['ORD']['SLC']))
 
-for pickled in os.listdir("./pickles"):
-    # Orlando specific. Saved for posterity
-    if (False):
-        print("Processing: {}".format(pickled))
-        tmp_df = pd.read_pickle(os.path.join("./pickles/", pickled))
-        to_ord = tmp_df['Dest'] == "ORD"
-        from_ord = tmp_df['Origin'] == "ORD"
-        ord_df = pd.concat([ord_df, tmp_df[to_ord | from_ord]], sort=True)
-        
-    # Preprocess for selected airports
-    if (stopAfter > 0):
-        if shortRun: stopAfter -= 1
+if initialPreprocess: 
+    for pickled in os.listdir("./pickles"):
+        # Orlando specific. Saved for posterity
+        if (False):
+            print("Processing: {}".format(pickled))
+            tmp_df = pd.read_pickle(os.path.join("./pickles/", pickled))
+            to_ord = tmp_df['Dest'] == "ORD"
+            from_ord = tmp_df['Origin'] == "ORD"
+            ord_df = pd.concat([ord_df, tmp_df[to_ord | from_ord]], sort=True)
+            
+        # Preprocess for selected airports
+        if (stopAfter > 0):
+            if shortRun: stopAfter -= 1
 
-        print("Processing: {}".format(pickled))
+            print("Processing: {}".format(pickled))
 
-        tmp_df = pd.read_pickle(os.path.join("./pickles/", pickled))
-        dest_port = tmp_df['Dest'] == Airport
-        from_port = tmp_df['Origin'] == Airport
-        processed_df = PrepForTableau(tmp_df.loc[dest_port | from_port].copy())
-        #pprint.pprint(processed_df)
-        selectedAirports_df = pd.concat([selectedAirports_df, processed_df], sort=True)
-    else: break
+            tmp_df = pd.read_pickle(os.path.join("./pickles/", pickled))
+            dest_port = tmp_df['Dest'] == Airport
+            from_port = tmp_df['Origin'] == Airport
+            processed_df = PrepForTableau(tmp_df.loc[dest_port | from_port].copy())
+            #pprint.pprint(processed_df)
+            selectedAirports_df = pd.concat([selectedAirports_df, processed_df], sort=True)
+        else: break
+
+    # Orlando
+    #pprint.pprint(ord_df)
+    #pprint.pprint(ord_df.describe())
+    #ord_df.to_csv("Orlando.csv")
+
+    # Selected Airports
+    pprint.pprint(selectedAirports_df)
+    pprint.pprint(selectedAirports_df.describe())
+    selectedAirports_df.to_csv("SelectedAirports.csv")
+
+if firstReprocess:
+    reloaded_df = pd.read_csv(selectedAirportsCsv, encoding="ISO-8859-1", low_memory=False)
+    reprocessed_df = pd.DataFrame()
+
+    # Drop the unnamed column of index numbers from previous dataframes
+    #reloaded_df = reloaded_df.drop(reloaded_df.columns[0], axis=1)
+
+    for flightStage in flightStagePoints.keys():
+        #pprint.pprint(flightStagePoints[flightStage])
+        #print("{} has fields {}".format(flightStage, flightStagePoints[flightStage]))
+        reprocessed_df[flightStage] = reloaded_df.apply(lambda row: MergeDateTime(row, flightStagePoints[flightStage]), axis = 1)
 
 
-# Orlando
-#pprint.pprint(ord_df)
-#pprint.pprint(ord_df.describe())
-#ord_df.to_csv("Orlando.csv")
-
-# Selected Airports
-pprint.pprint(selectedAirports_df)
-pprint.pprint(selectedAirports_df.describe())
-selectedAirports_df.to_csv("SelectedAirports.csv")
-
-
+    pprint.pprint(reprocessed_df)
