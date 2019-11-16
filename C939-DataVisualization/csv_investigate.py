@@ -29,8 +29,10 @@ stopAfter = 1       #Keep > 0 to process files
 # airport customization
 Airport = "SLC"
 selectedAirportsCsv = "SelectedAirports.csv"
+initProcessedFile = "SelectedAirports"
 initProcessedCsv = "SelectedAirports.csv"
 processedCsvPath = "PreprocessedCsv"
+picklePath="./pickles"
 
 #### Globals ####
 
@@ -81,7 +83,7 @@ def CsvToPickledDataframe(csvFile, csvPath="./RawData/", pklPath="./pickles", re
     tmpdf = pd.read_csv(os.path.join(csvPath, csvFile), encoding="ISO-8859-1", low_memory=False)
 
     basename, _ = os.path.splitext(csvFile)
-    outname = basename + "pkl"
+    outname = basename + ".pkl"
     outfile = open(os.path.join(pklPath, outname),'wb')
     pickle.dump(tmpdf, outfile)
     outfile.close
@@ -137,21 +139,28 @@ def GetArrivalDate(record):
     return ArriveDate
 
 def MergeDateTime(record, flightStage):
-    try:
-       #tmp_date = dt.datetime.strptime(record[flightStage[0]],"%Y-%m-%d")
-        #pprint.pprint("Converted {} to date {}".format(record[flightStage[0]], tmp_date))
-        tmp_time = dt.datetime.strptime(str(record[flightStage[1]]), "%H:%M:%S").time()
-        #
-        # pprint.pprint("Converted {} to time {}".format(record[flightStage[1]], tmp_time))
-        #return dt.datetime.combine(tmp_date, tmp_time)   
+    #try:
+        try:
+            tmp_date = dt.datetime.strptime(record[flightStage[0]],"%Y-%m-%d")
+            #pprint.pprint("Converted {} to date {}".format(record[flightStage[0]], tmp_date))
+        except:
+            tmp_date = dt.datetime()
+
+        try:
+            tmp_time = dt.datetime.strptime(str(record[flightStage[1]]), "%H:%M:%S").time()
+            #pprint.pprint("Converted {} to time {}".format(record[flightStage[1]], tmp_time))
+        except:
+            tmp_time = dt.time()
+
+        return dt.datetime.combine(tmp_date, tmp_time)   
         #return tmp_date
-        return tmp_time
-    except:
-        return "NaN"
-        pass
+        #return tmp_time
+    #except:
+    #    return "NaN"
+    #    pass
     #    print(sys.exc_info()[0])
-    else:
-        return "NaN"
+    #else:
+    #    return "NaN"
     #record[flightStage[0]], record[flightStage[1]])
 
 def PrepForTableau(original_df):
@@ -264,7 +273,7 @@ if firstReprocess:
     if repickle:
         reloaded_df = CsvToPickledDataframe(initProcessedCsv, csvPath = processedCsvPath, return_df=True)
     else:
-        reloaded_df = pd.read_pickle(os.path.join(processedCsvPath, initProcessedCsv))
+        reloaded_df = pd.read_pickle(os.path.join(picklePath, initProcessedFile + ".pkl"))
     
     reprocessed_df = pd.DataFrame()
 
