@@ -173,5 +173,5 @@ Index(['Unnamed: 0', 'ActualElapsedTime', 'AirTime', 'ArrDelay', 'ArrTime',
       dtype='object')
 ```
 
-A closer inspection of this Dtypewarning shows it's nothing to be concerned with. The columns with mixed data types have a mix of NaN and actual values. I expect the missing values for AirTime can be calculated (e.g. AirTime). The others are values that just weren't captured. Seems some data sanity checking is in order.  
+A closer inspection of this Dtypewarning shows it's nothing to be concerned with. The columns with mixed data types have a mix of NaN and actual values. I expect the missing values for AirTime can be calculated. Others are most likely values that just weren't captured. Seems some data sanity checks are in order.  
 

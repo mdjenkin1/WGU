@@ -2,6 +2,7 @@
 
 import csv
 import os
+import sys
 import pprint
 import pickle
 import re
@@ -18,6 +19,7 @@ from collections import Counter, namedtuple
 getBasicCounts = False
 pickleRaws = False
 initialPreprocess = False
+repickle = False
 firstReprocess = True
 
 # run shortening for development
@@ -27,6 +29,8 @@ stopAfter = 1       #Keep > 0 to process files
 # airport customization
 Airport = "SLC"
 selectedAirportsCsv = "SelectedAirports.csv"
+initProcessedCsv = "SelectedAirports.csv"
+processedCsvPath = "PreprocessedCsv"
 
 #### Globals ####
 
@@ -45,8 +49,8 @@ selectedAirports_df = pd.DataFrame()
 flightStagePoints = {
     'ActualArrival': ['ArriveDate', 'ArrTime'], 
     'ActualDepart': ['DepartDate', 'DepTime'], 
-    'SchedArrival': ['ArriveDate', 'CSRArrTime'], 
-    'SchedDepart': ['DepartDate', 'CSRArrTime']
+    'SchedArrival': ['ArriveDate', 'CRSArrTime'], 
+    'SchedDepart': ['DepartDate', 'CRSDepTime']
 }
 
 def InitialBasicCounts(csvFile):
@@ -72,15 +76,18 @@ def InitialBasicCounts(csvFile):
                     countsLink[row[airport["Origin"]]] = Counter()
                     countsLink[row[airport["Origin"]]][row[airport["Dest"]]] += 1
 
-def CsvToPickledDataframe(csvFile):
-    print("processing: {}".format(os.path.join("./RawData/", csvFile)))
-    tmpdf = pd.read_csv(os.path.join("./RawData/", csvFile), encoding="ISO-8859-1")
+def CsvToPickledDataframe(csvFile, csvPath="./RawData/", pklPath="./pickles", return_df = False):
+    print("processing: {}".format(os.path.join(csvPath, csvFile)))
+    tmpdf = pd.read_csv(os.path.join(csvPath, csvFile), encoding="ISO-8859-1", low_memory=False)
 
     basename, _ = os.path.splitext(csvFile)
     outname = basename + "pkl"
-    outfile = open(os.path.join("./pickles/", outname),'wb')
+    outfile = open(os.path.join(pklPath, outname),'wb')
     pickle.dump(tmpdf, outfile)
     outfile.close
+
+    if return_df:
+        return tmpdf
 
 def IntToTime(intIn):
     try:
@@ -130,14 +137,22 @@ def GetArrivalDate(record):
     return ArriveDate
 
 def MergeDateTime(record, flightStage):
-    #print("Date: {} Time: {}".format(record[flightStage[0]], record[flightStage[1]]))
-
-    if type(record[flightStage[0]]) != "Date":
-        print("found an invalid date {} of type: {}".format(record[flightStage[0]], type(record[flightStage[0]])))
-    if type(record[flightStage[1]]) != "Time":
-        print("found an invalid time {} of type: {}".format(record[flightStage[1]], type(record[flightStage[1]])))
-    return True
-    #return dt.datetime.combine(record[flightStage[0]], record[flightStage[1]])
+    try:
+       #tmp_date = dt.datetime.strptime(record[flightStage[0]],"%Y-%m-%d")
+        #pprint.pprint("Converted {} to date {}".format(record[flightStage[0]], tmp_date))
+        tmp_time = dt.datetime.strptime(str(record[flightStage[1]]), "%H:%M:%S").time()
+        #
+        # pprint.pprint("Converted {} to time {}".format(record[flightStage[1]], tmp_time))
+        #return dt.datetime.combine(tmp_date, tmp_time)   
+        #return tmp_date
+        return tmp_time
+    except:
+        return "NaN"
+        pass
+    #    print(sys.exc_info()[0])
+    else:
+        return "NaN"
+    #record[flightStage[0]], record[flightStage[1]])
 
 def PrepForTableau(original_df):
 
@@ -242,10 +257,15 @@ if initialPreprocess:
     # Selected Airports
     pprint.pprint(selectedAirports_df)
     pprint.pprint(selectedAirports_df.describe())
-    selectedAirports_df.to_csv("SelectedAirports.csv")
+    selectedAirports_df.to_csv(os.path.join(processedCsvPath, initProcessedCsv))
 
 if firstReprocess:
-    reloaded_df = pd.read_csv(selectedAirportsCsv, encoding="ISO-8859-1", low_memory=False)
+        
+    if repickle:
+        reloaded_df = CsvToPickledDataframe(initProcessedCsv, csvPath = processedCsvPath, return_df=True)
+    else:
+        reloaded_df = pd.read_pickle(os.path.join(processedCsvPath, initProcessedCsv))
+    
     reprocessed_df = pd.DataFrame()
 
     # Drop the unnamed column of index numbers from previous dataframes
