@@ -21,6 +21,7 @@ pickleRaws = False
 initialPreprocess = False
 repickle = False
 firstReprocess = True
+secondReprocess = False
 
 # run shortening for development
 shortRun = False
@@ -32,6 +33,7 @@ selectedAirportsCsv = "SelectedAirports.csv"
 initProcessedFile = "SelectedAirports"
 initProcessedCsv = "SelectedAirports.csv"
 processedCsvPath = "PreprocessedCsv"
+inprocessPkl = "inprocess"
 picklePath="./pickles"
 
 #### Globals ####
@@ -48,7 +50,7 @@ selectedAirports_df = pd.DataFrame()
 
 # Does python support enums?
 # Standardize date time feature names for each flight leg.
-flightStagePoints = {
+flightStages = {
     'ActualArrival': ['ArriveDate', 'ArrTime'], 
     'ActualDepart': ['DepartDate', 'DepTime'], 
     'SchedArrival': ['ArriveDate', 'CRSArrTime'], 
@@ -78,15 +80,18 @@ def InitialBasicCounts(csvFile):
                     countsLink[row[airport["Origin"]]] = Counter()
                     countsLink[row[airport["Origin"]]][row[airport["Dest"]]] += 1
 
-def CsvToPickledDataframe(csvFile, csvPath="./RawData/", pklPath="./pickles", return_df = False):
+def DataFramePickler(gherkin_df, outFile, pklPath=picklePath):
+    basename, _ = os.path.splitext(outFile)
+    outname = basename + ".pkl"
+    outfile = open(os.path.join(pklPath, outname),'wb')
+    pickle.dump(gherkin_df, outfile)
+    outfile.close
+
+def CsvToPickledDataframe(csvFile, csvPath="./RawData/", pklPath=picklePath, return_df = False):
     print("processing: {}".format(os.path.join(csvPath, csvFile)))
     tmpdf = pd.read_csv(os.path.join(csvPath, csvFile), encoding="ISO-8859-1", low_memory=False)
 
-    basename, _ = os.path.splitext(csvFile)
-    outname = basename + ".pkl"
-    outfile = open(os.path.join(pklPath, outname),'wb')
-    pickle.dump(tmpdf, outfile)
-    outfile.close
+    DataFramePickler(tmpdf, csvFile, pklPath)
 
     if return_df:
         return tmpdf
@@ -162,6 +167,14 @@ def MergeDateTime(record, flightStage):
     #else:
     #    return "NaN"
     #record[flightStage[0]], record[flightStage[1]])
+
+def ValidateDotW(record):
+    return True
+
+def GetElapsedTimes(record):
+    record['ActualArrival']
+    record['ActualDepart']
+    return True
 
 def PrepForTableau(original_df):
 
@@ -271,19 +284,55 @@ if initialPreprocess:
 if firstReprocess:
         
     if repickle:
+        print("Pickling initial preprocess csv")
         reloaded_df = CsvToPickledDataframe(initProcessedCsv, csvPath = processedCsvPath, return_df=True)
     else:
+        print("Using pickled initial preprocess")
         reloaded_df = pd.read_pickle(os.path.join(picklePath, initProcessedFile + ".pkl"))
     
-    reprocessed_df = pd.DataFrame()
+    columnsToCopy = [
 
-    # Drop the unnamed column of index numbers from previous dataframes
-    #reloaded_df = reloaded_df.drop(reloaded_df.columns[0], axis=1)
+            ### Normal Travel Times
+            "TaxiIn", "TaxiOut", "AirTime", "ArrDelay", 
 
-    for flightStage in flightStagePoints.keys():
-        #pprint.pprint(flightStagePoints[flightStage])
-        #print("{} has fields {}".format(flightStage, flightStagePoints[flightStage]))
-        reprocessed_df[flightStage] = reloaded_df.apply(lambda row: MergeDateTime(row, flightStagePoints[flightStage]), axis = 1)
+            ### Attributed Delay Times
+            "SecurityDelay", "WeatherDelay", "LateAircraftDelay", "NASDelay", "CarrierDelay", "DepDelay", 
 
+            ### Total times
+            "ActualElapsedTime", "CRSElapsedTime",
+
+            ### Scheduling milestones
+            # These are imported with the MergeDateTime function
+            #"ArrTime", "ArriveDate",
+            #"CRSArrTime", "CRSDepTime",
+            #"DepTime", "DepartDate", 
+            # Day of the Week as ISO number. Validated against depart date
+            "DayOfWeek", 
+
+            ### Flight Descriptors
+            "FlightNum", "TailNum", "UniqueCarrier", 
+            "Dest", "Origin", "Distance", 
+
+            ### Modified flight plan
+            "CancellationCode", "Cancelled", "Diverted",
+    ]
+    
+    # Making a copy of specific columns
+    print("Copying {} to new dataframe".format(columnsToCopy))
+    reprocessed_df = reloaded_df[columnsToCopy].copy()
+
+    for stage in flightStages.keys():
+        #pprint.pprint(flightStages[stage])
+        #print("{} has fields {}".format(stage, flightStages[stage]))
+        print("Merging dates and times for {}".format(flightStages[stage]))
+        reprocessed_df[stage] = reloaded_df.apply(lambda row: MergeDateTime(row, flightStages[stage]), axis = 1)
+
+    print("Saving dataframe to intermediate pickle {}".format())
+    DataFramePickler(reprocessed_df, inprocessPkl)
+
+if secondReprocess:
+    print("Using inprocess pickled df: {}".format(inprocessPkl + ".pkl"))
+    reloaded_df = pd.read_pickle(os.path.join(picklePath, inprocessPkl + ".pkl"))
 
     pprint.pprint(reprocessed_df)
+    pprint.pprint(reprocessed_df.describe())
