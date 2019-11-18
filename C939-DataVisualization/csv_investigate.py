@@ -176,6 +176,23 @@ def GetElapsedTimes(record):
     record['ActualDepart']
     return True
 
+def VerifyElapsedTimes(record):
+    TimeLogic = {}
+
+    # Is the elapsed traveltime negative?
+    if record['CalcElaspedTime'] < 0:
+        TimeLogic['ArrivedInPast'] = True
+    else:
+        TimeLogic['ArrivedInPast'] = False
+
+    # Is the scheduled traveltime negative?
+    if record['CalcCrsElaspedTime'] < 0:
+        TimeLogic['SchedPastArrival'] = True
+    else:
+        TimeLogic['SchedPastArrival'] = False
+
+    return TimeLogic
+
 def PrepForTableau(original_df):
 
     # Make a copy of the dataframe to ensure we know what's being modified and included
@@ -293,13 +310,16 @@ if firstReprocess:
     columnsToCopy = [
 
             ### Normal Travel Times
-            "TaxiIn", "TaxiOut", "AirTime", "ArrDelay", 
+            # Convert to minutes
+            #"TaxiIn", "TaxiOut", "AirTime", "ArrDelay", 
 
             ### Attributed Delay Times
-            "SecurityDelay", "WeatherDelay", "LateAircraftDelay", "NASDelay", "CarrierDelay", "DepDelay", 
+            # Convert to minutes
+            #"SecurityDelay", "WeatherDelay", "LateAircraftDelay", "NASDelay", "CarrierDelay", "DepDelay", 
 
             ### Total times
-            "ActualElapsedTime", "CRSElapsedTime",
+            # Convert to minutes
+            #"ActualElapsedTime", "CRSElapsedTime",
 
             ### Scheduling milestones
             # These are imported with the MergeDateTime function
@@ -317,6 +337,20 @@ if firstReprocess:
             "CancellationCode", "Cancelled", "Diverted",
     ]
     
+    timeDeltasToConvert = [
+            ### Normal Travel Times
+            # Convert to minutes
+            "TaxiIn", "TaxiOut", "AirTime", "ArrDelay", 
+
+            ### Attributed Delay Times
+            # Convert to minutes
+            "SecurityDelay", "WeatherDelay", "LateAircraftDelay", "NASDelay", "CarrierDelay", "DepDelay", 
+
+            ### Total times
+            # Convert to minutes
+            "ActualElapsedTime", "CRSElapsedTime",
+    ]
+
     # Making a copy of specific columns
     print("Copying {} to new dataframe".format(columnsToCopy))
     reprocessed_df = reloaded_df[columnsToCopy].copy()
@@ -327,12 +361,28 @@ if firstReprocess:
         print("Merging dates and times for {}".format(flightStages[stage]))
         reprocessed_df[stage] = reloaded_df.apply(lambda row: MergeDateTime(row, flightStages[stage]), axis = 1)
 
-    print("Saving dataframe to intermediate pickle {}".format())
+    # Calculating Elapsed Times
+    print("Calculating elapsed time in minutes")
+    reprocessed_df['CalcElapsedTime'] = reprocessed_df.apply(lambda row: int((row['ActualArrival'] - row['ActualDepart']).seconds/60), axis = 1)
+    print("Calculating scheduled elapsed time in minutes")
+    reprocessed_df['CalcCrsElapsedTime'] = reprocessed_df.apply(lambda row: int((row['SchedArrival'] - row['SchedDepart']).seconds/60), axis = 1)
+
+    #print("Converting timedeltas {} to minutes".format(timeDeltasToConvert))
+    #for delta in timeDeltasToConvert:
+    #    reprocessed_df[delta] = reloaded_df.apply(lambda row:int(row[delta].seconds/60))
+
+    print("Saving dataframe to intermediate pickle {}".format(inprocessPkl + ".pkl"))
     DataFramePickler(reprocessed_df, inprocessPkl)
+
+    pprint.pprint(reprocessed_df)
+    pprint.pprint(reprocessed_df.describe())
 
 if secondReprocess:
     print("Using inprocess pickled df: {}".format(inprocessPkl + ".pkl"))
     reloaded_df = pd.read_pickle(os.path.join(picklePath, inprocessPkl + ".pkl"))
 
-    pprint.pprint(reprocessed_df)
-    pprint.pprint(reprocessed_df.describe())
+    # Compare Calculated Elapsed Times to Recorded Elapsed Times
+
+
+    pprint.pprint(reloaded_df)
+    pprint.pprint(reloaded_df.describe())
