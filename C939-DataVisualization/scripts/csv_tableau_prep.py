@@ -17,8 +17,8 @@ fieldsToCopy = [
             "DayOfWeek", 
 
             ### Flight Descriptors
-            "FlightNum", "TailNum", "UniqueCarrier", 
-            "Dest", "Origin", "Distance", 
+            #"TailNum", "UniqueCarrier", 
+            "FlightNum", "Dest", "Origin", "Distance", 
 
             ### Modified flight plan
             #"CancellationCode", "Cancelled",
@@ -33,6 +33,7 @@ cancelCodes = {
 }
 
 cancelledOrDiverted = []
+unknownCarriers = []
 
 carriers = {}
 
@@ -41,7 +42,7 @@ with open(os.path.join(cfgDir, "carriers.csv"), 'r') as inFile:
     reader = csv.DictReader(inFile)
     for row in reader:
         if "Code" in row and "Description" in row:
-            carriers.update(row["Code"], row["Description"])
+            carriers.update({row["Code"]: row["Description"]})
         else:
             raise Exception("Unknown format: carriers.csv")
 
@@ -69,19 +70,40 @@ for csvFile in os.listdir(rawDir):
 
                 # Diverted as boolean
                 if row["Diverted"] == "1":
-                    cancelledOrDiverted.append(i)
+                    #cancelledOrDiverted.append(i)
                     #print("Diverted {}".format(row["CancellationCode"]))
                     processedFields.update({"Diverted" : True})
                 else: processedFields.update({"Diverted" : False})
 
+                # Tail Numbers, NA is Unknown
                 if row["TailNum"] == "NA":
                     processedFields.update({"TailNum": "Unknown"})
-                else processedFields.update({"TailNum": row["TailNum"]})
+                else: processedFields.update({"TailNum": row["TailNum"]})
+
+                # Carriers and their codes
+                if row["UniqueCarrier"] not in carriers:
+                    print("Unknown carrier code: {}".format(row["UniqueCarrier"]))
+                    processedFields.update({
+                        "CarrierCode" : row["UniqueCarrier"],
+                        "Carrier" : "Unknown"
+                    })
+                else:
+                    processedFields.update({
+                        "CarrierCode" : row["UniqueCarrier"],
+                        "Carrier" : carriers[row["UniqueCarrier"]]
+                    })
 
                 #processedData.append(row)
                 processedData.append(processedFields)
-                i +=1
+                i += 1
 
 for i in cancelledOrDiverted:
     pprint.pprint(processedData[i])
     print("\n")
+
+for i in unknownCarriers:
+    pprint.pprint(processedData[i])
+    print("\n")
+
+
+pprint.pprint(processedData[66])
