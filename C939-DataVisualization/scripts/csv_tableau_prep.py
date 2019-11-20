@@ -132,7 +132,7 @@ for csvFile in os.listdir(rawDir):
                         "Carrier" : carriers[row["UniqueCarrier"]]
                     })
 
-                # Managing airports codes
+                # Leveraging airport codes
 
                 #processedData.append(row)
                 processedData.append(processedFields)

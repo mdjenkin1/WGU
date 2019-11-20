@@ -183,9 +183,9 @@ During this iteration of preprocessing, I added some carrier code processing. Gr
 
 $$\Theta = \arctan2(sin \Delta\lambda \times \cos\phi_2, \cos\phi_1 \times \sin\phi_2 - \sin\phi_1 \times \cos\phi_2 \times \cos \Delta\lambda)$$  
 
-We can also use the 'Haversine' formula to validate distance.  
+We can also use the 'Haversine' formula to find the shortest distance. There's potentially a discrepancy between the reported distance and calculated distance. It's possible the direction of travel is opposite the calculated shortest distance.  
 
-$$a = \sin^2({\Delta\phi\over2}) + \cos\phi_1 \times \cos\phi_2 \times \sin^2({\Delta\lambda\over2})$$ 
+$$a = \sin^2({\Delta\phi\over2}) + \cos\phi_1 \times \cos\phi_2 \times \sin^2({\Delta\lambda\over2})$$
 $$c = 2 \times \arctan2(\sqrt{a}, \sqrt{(1-a)})$$
 $$d = R \times c$$  
 
