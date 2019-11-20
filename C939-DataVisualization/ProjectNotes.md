@@ -179,4 +179,18 @@ A closer inspection of this Dtypewarning shows it's nothing to be concerned with
 
 After troubleshooting validations and a code refactor, it seems a large number of the 'NaN' being introduced to my dataset is due to a regressive bug in pandas. The behavior closely resembles what is described here: [https://github.com/pandas-dev/pandas/issues/18775](https://github.com/pandas-dev/pandas/issues/18775). A major difference is that bug report specifies lambda returning a datetime field. I've recreated the bug with lambda returning afield of type 'object'. After searching for a workaround to this bug, I decided the best course of action would be to abandon pandas for cleaning this dataset and doing it the old fashioned way, while file each line like it's 1999. Once I have more time, I'll dig more into the bug reports and ensure there's a path to resolution on this.  
 
-During this iteration of preprocessing, I added some carrier code processing. Greater depth of carrier codes were obtained from [http://stat-computing.org/dataexpo/2009/carriers.csv](http://stat-computing.org/dataexpo/2009/carriers.csv)  
+During this iteration of preprocessing, I added some carrier code processing. Greater depth of carrier codes were obtained from [http://stat-computing.org/dataexpo/2009/carriers.csv](http://stat-computing.org/dataexpo/2009/carriers.csv). Also available is airline data: [http://stat-computing.org/dataexpo/2009/airports.csv](http://stat-computing.org/dataexpo/2009/airports.csv). This information was also incorporated into the preprocessing script. With this additional information, it is possible to add direction of travel as a feature to our dataset. [https://www.movable-type.co.uk/scripts/latlong.html](https://www.movable-type.co.uk/scripts/latlong.html).  
+
+$$\Theta = \arctan2(sin \Delta\lambda \times \cos\phi_2, \cos\phi_1 \times \sin\phi_2 - \sin\phi_1 \times \cos\phi_2 \times \cos \Delta\lambda)$$  
+
+We can also use the 'Haversine' formula to validate distance.  
+
+$$a = \sin^2({\Delta\phi\over2}) + \cos\phi_1 \times \cos\phi_2 \times \sin^2({\Delta\lambda\over2})$$ 
+$$c = 2 \times \arctan2(\sqrt{a}, \sqrt{(1-a)})$$
+$$d = R \times c$$  
+
+* $R$: Radius of the earth ($6,371 km \approx 3959miles$)
+* $\phi$: Latitude
+* $\lambda$: Longitude
+* $\phi_1\lambda_1$: Origin
+* $\phi_2\lambda_2$: Destination

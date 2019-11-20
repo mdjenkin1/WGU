@@ -17,8 +17,10 @@ fieldsToCopy = [
             "DayOfWeek", 
 
             ### Flight Descriptors
+            #"Dest", "Origin",
             #"TailNum", "UniqueCarrier", 
-            "FlightNum", "Dest", "Origin", "Distance", 
+            "FlightNum", "Distance"
+            
 
             ### Modified flight plan
             #"CancellationCode", "Cancelled",
@@ -36,6 +38,7 @@ cancelledOrDiverted = []
 unknownCarriers = []
 
 carriers = {}
+airports = {}
 
 # carriers.csv file obtained from http://stat-computing.org/dataexpo/2009/carriers.csv
 with open(os.path.join(cfgDir, "carriers.csv"), 'r') as inFile:
@@ -45,6 +48,42 @@ with open(os.path.join(cfgDir, "carriers.csv"), 'r') as inFile:
             carriers.update({row["Code"]: row["Description"]})
         else:
             raise Exception("Unknown format: carriers.csv")
+
+# airports.csv file obtained from http://stat-computing.org/dataexpo/2009/airports.csv
+with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
+    reader = csv.DictReader(inFile)
+    for row in reader:
+        if "iata" in row \
+        and "airport" in row\
+        and "city" in row\
+        and "state" in row\
+        and "country" in row\
+        and "lat" in row\
+        and "long" in row:
+            airports.update({
+                row["iata"]: {
+                    "airport": row["airport"],
+                    "city" : row["city"],
+                    "state" : row["state"],
+                    "country" : row["country"],
+                    "lat" : row["lat"],
+                    "long" : row["long"]
+                }
+            })
+        else:
+            raise Exception("Unknown format: airport.csv")
+
+# Use the Haversine formula to determine the distance and direction of travel
+# https://www.movable-type.co.uk/scripts/latlong.html
+def GetDirectionOfTravel(origin, dest):
+    if origin not in airports or dest not in airports:
+        raise Exception("Unknown airport. Cannot determine direction of travel.")
+
+    airports[origin]["lat"]
+    airports[origin]["long"]
+    airports[dest]["lat"]
+    airports[dest]["long"]
+    return "North"
 
 for csvFile in os.listdir(rawDir):
     print("processing {}".format(csvFile))
@@ -92,6 +131,8 @@ for csvFile in os.listdir(rawDir):
                         "CarrierCode" : row["UniqueCarrier"],
                         "Carrier" : carriers[row["UniqueCarrier"]]
                     })
+
+                # Managing airports codes
 
                 #processedData.append(row)
                 processedData.append(processedFields)
