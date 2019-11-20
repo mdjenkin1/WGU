@@ -175,3 +175,7 @@ Index(['Unnamed: 0', 'ActualElapsedTime', 'AirTime', 'ArrDelay', 'ArrTime',
 
 A closer inspection of this Dtypewarning shows it's nothing to be concerned with. The columns with mixed data types have a mix of NaN and actual values. I expect the missing values for AirTime can be calculated. Others are most likely values that just weren't captured. Seems some data sanity checks are in order.  
 
+### A whole new direction
+
+After troubleshooting validations and a code refactor, it seems a large number of the 'NaN' being introduced to my dataset is due to a regressive bug in pandas. The behavior closely resembles what is described here: [https://github.com/pandas-dev/pandas/issues/18775](https://github.com/pandas-dev/pandas/issues/18775). A major difference is that bug report specifies lambda returning a datetime field. I've recreated the bug with lambda returning afield of type 'object'. After searching for a workaround to this bug, I decided the best course of action would be to abandon pandas for cleaning this dataset and doing it the old fashioned way, while file each line like it's 1999. Once I have more time, I'll dig more into the bug reports and ensure there's a path to resolution on this.  
+

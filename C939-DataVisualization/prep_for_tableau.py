@@ -31,12 +31,21 @@ def SplitTime(intIn):
     try:
         timeStr = str(int(intIn)).zfill(4)
         timeParts = timeMask.match(timeStr)
-        return timeParts.groups()
+
+        return [int(timeParts.group(1)),int(timeParts.group(2))]
     except:
         return [0,0]
-        pass
     else:
         return [0,0]
+
+def GetNextDay(today):
+    tomorrow = today + dt.timedelta(days=1)
+    return tomorrow
+
+def ArrivedNextDay(departDt, arriveDt):
+    if departDt > arriveDt:
+        arriveDt = arriveDt + dt.timedelta(days=1)
+    return arriveDt
 
 # load the raw CSVs to a dataframe, extract only the airports of interest
 print("Loading raw csv files")
@@ -65,30 +74,30 @@ columnsToCopy = [
             "CancellationCode", "Cancelled", "Diverted",
 ]
 
-print("Copying {} to working dataframe".format(columnsToCopy))
-working_df = raw_df[columnsToCopy].copy()
+#print("Copying {} to working dataframe".format(columnsToCopy))
+#working_df = raw_df[columnsToCopy].copy()
+
+
 
 # Time is time
-clockTimes = ["Dep", "CRSDep", "Arr", "CRSArr"]
-for ctime in clockTimes:
-    print("Preparing {}".format(ctime))
-    raw_df[[ctime + "Hour", ctime + "Min"]] = pd.DataFrame(raw_df.apply(lambda row: SplitTime(row[ctime + "Time"]), axis = 1).values.tolist())
-
-    print("Calculating {} datetime".format(ctime + "DateTime"))
-    working_df[ctime + "DateTime"] = pd.to_datetime({
-        'year': raw_df['Year'],
-        'month': raw_df['Month'],
-        'day': raw_df['DayofMonth'],
-        'hour': raw_df[ctime+ "Hour"],
-        'minute': raw_df[ctime + "Min"]
-    })
+#clockTimes = ["Dep", "CRSDep", "Arr", "CRSArr"]
+#for ctime in clockTimes:
+#    print("Preparing {}".format(ctime + "Time"))
+#    raw_df[[ctime + "Hour", ctime + "Min"]] = pd.DataFrame(raw_df.apply(lambda row: SplitTime(row[ctime + "Time"]), axis = 1).values.tolist())#
+#
+#    print("Calculating {} datetime".format(ctime + "DateTime"))
+#    working_df[ctime + "DateTime"] = pd.to_datetime({
+#        'year': raw_df['Year'],
+#        'month': raw_df['Month'],
+#        'day': raw_df['DayofMonth'],
+#        'hour': raw_df[ctime+ "Hour"],
+#        'minute': raw_df[ctime + "Min"]
+#    })
 
 #print("Preparing arrival time")
 #raw_df['ArrHour'], raw_df['ArrMin'] = raw_df.apply(SplitTime(raw_df['ArrTime']))
 #print("Preparing departure time")
 #raw_df['DepHour', 'DepMin'] = raw_df.apply(SplitTime(raw_df['ArrTime']))
-
-
 
 #print("Determining which flights arrived the next day")
 
