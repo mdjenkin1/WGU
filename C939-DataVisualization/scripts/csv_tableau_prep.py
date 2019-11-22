@@ -217,4 +217,4 @@ for i in unknownCarriers:
 
 #pprint.pprint(legs)
 
-#pprint.pprint(processedData[107:110])
+pprint.pprint(processedData[385:389])

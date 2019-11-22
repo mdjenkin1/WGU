@@ -252,3 +252,8 @@ One consideration not addressed here is the accuracy of floating point calculati
 Calculated distances were rounded. There's no logic in comparing floats to integers for accuracy. For our development dataset, the difference between calculated and reported distances ranges from 0 to 5 miles. This is an acceptable range that can be attributed to differences in calculation method.  
 
 For directions and headings, a handful of flight paths were randomly selected and manually compared to an actual map. In each case, the determined direction matched what was seen on a map.  
+
+### Revisiting Dates
+
+All that should be left of preprocessing are the date and time fields that originally threw us down this preprocessing path. Converting our date time functions from pandas to file stream processing shouldn't be too difficult.  
+One refinement is including day of the week as named days instead of numbers. The source dataset provides day of the week as ISO defined numbers (Monday = 1). This can also be determined after the time parts are reassembled into an actual date. This provides an additional opportunity for data validation.  
