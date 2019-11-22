@@ -5,6 +5,7 @@ import re
 import sys
 import os
 import pprint
+import math
 
 #rawDir = ("../processedData")
 rawDir = ("../TestData")
@@ -17,9 +18,9 @@ fieldsToCopy = [
             "DayOfWeek", 
 
             ### Flight Descriptors
-            #"Dest", "Origin",
-            #"TailNum", "UniqueCarrier", 
-            "FlightNum", "Distance"
+            "Dest", "Origin", "Distance",
+            "FlightNum", "TailNum", 
+            #"UniqueCarrier", 
             
 
             ### Modified flight plan
@@ -35,10 +36,12 @@ cancelCodes = {
 }
 
 cancelledOrDiverted = []
-unknownCarriers = []
+unknownCarriers = {}
+distDiffs = {}
 
 carriers = {}
 airports = {}
+legs = {}
 
 # carriers.csv file obtained from http://stat-computing.org/dataexpo/2009/carriers.csv
 with open(os.path.join(cfgDir, "carriers.csv"), 'r') as inFile:
@@ -66,24 +69,67 @@ with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
                     "city" : row["city"],
                     "state" : row["state"],
                     "country" : row["country"],
-                    "lat" : row["lat"],
-                    "long" : row["long"]
+                    "lat" : math.radians(float(row["lat"])),
+                    "long" : math.radians(float(row["long"]))
                 }
             })
         else:
             raise Exception("Unknown format: airport.csv")
 
+#
+def GetDirection(degree):
+    compassPoints = (
+        "North", "NorthEast",
+        "East", "SouthEast",
+        "South", "SouthWest",
+        "West", "NorthWest"
+    )
+    dirIndex = round(degree * len(compassPoints) / 360) % len(compassPoints)
+    return compassPoints[dirIndex]
+
 # Use the Haversine formula to determine the distance and direction of travel
 # https://www.movable-type.co.uk/scripts/latlong.html
-def GetDirectionOfTravel(origin, dest):
+def DescribeLeg(origin, dest):
     if origin not in airports or dest not in airports:
         raise Exception("Unknown airport. Cannot determine direction of travel.")
 
-    airports[origin]["lat"]
-    airports[origin]["long"]
-    airports[dest]["lat"]
-    airports[dest]["long"]
-    return "North"
+    # Radius of the earth in miles
+    Radius = 3959
+
+    # Origin longitude and latitude in radians
+    oLat = airports[origin]["lat"]
+    oLong = airports[origin]["long"]
+
+    # Destination longitude and latitude in radians
+    dLat = airports[dest]["lat"]
+    dLong = airports[dest]["long"]
+    
+    # Delta longitude and latitude in radians
+    deltaLat = dLat - oLat
+    deltaLong = dLong - oLong
+
+    # Haversine formula to calculate distance
+    a = (math.sin(deltaLat/2))**2 + math.cos(oLat) * math.cos(dLat) * (math.sin(deltaLong/2))**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    calcDist = round(Radius * c)
+
+    # Direction
+    v1 = math.sin(deltaLong) * math.cos(dLat)
+    v2 = math.cos(oLat) * math.sin(dLat) - math.sin(oLat) * math.cos(dLat) * math.cos(deltaLong)
+    degHeading = round(math.atan2(v1, v2) * 180 / math.pi)
+    #if degHeading < 0: degHeading += 360 
+
+    direction = GetDirection(degHeading)
+
+    outDict = {
+        origin + "-" + dest : {
+            "CalculatedDistance": calcDist,
+            "Heading": degHeading,
+            "DirectionOfTravel": direction
+        }
+    }
+
+    return outDict
 
 for csvFile in os.listdir(rawDir):
     print("processing {}".format(csvFile))
@@ -132,7 +178,28 @@ for csvFile in os.listdir(rawDir):
                         "Carrier" : carriers[row["UniqueCarrier"]]
                     })
 
-                # Leveraging airport codes
+                ## Leveraging airport codes
+                if row["Origin"] not in airports.keys():
+                    unknownCarriers.update({row["Origin"]: True})
+                if row["Dest"] not in airports.keys():
+                    unknownCarriers.update({row["Dest"]: True})
+
+                # Ensure the source to destination journey leg has a description
+                journeyLeg = row["Origin"] + "-" + row["Dest"]
+                if journeyLeg not in legs:
+                    legs.update(DescribeLeg(row["Origin"], row["Dest"]))
+                # Add the journey leg description to our processed fields
+                for field in legs[journeyLeg]:
+                    processedFields.update({
+                        field: legs[journeyLeg][field]
+                    })
+
+                # Compare the supplied distance to the calculated distance
+                reportedDist = processedFields["Distance"]
+                calculatedDist = processedFields["CalculatedDistance"]
+                diffDist = abs(int(reportedDist) - int(calculatedDist))
+                #print("There's {} miles difference between calculated and reported distance for {}".format(diffDist, journeyLeg))
+                distDiffs.update({diffDist : True})
 
                 #processedData.append(row)
                 processedData.append(processedFields)
@@ -146,5 +213,8 @@ for i in unknownCarriers:
     pprint.pprint(processedData[i])
     print("\n")
 
+#pprint.pprint(distDiffs)
 
-pprint.pprint(processedData[66])
+#pprint.pprint(legs)
+
+#pprint.pprint(processedData[107:110])

@@ -189,8 +189,66 @@ $$a = \sin^2({\Delta\phi\over2}) + \cos\phi_1 \times \cos\phi_2 \times \sin^2({\
 $$c = 2 \times \arctan2(\sqrt{a}, \sqrt{(1-a)})$$
 $$d = R \times c$$  
 
+Another option for calculating distance presented to us is the Spherical Law of Cosines. Which is much simpler formula, although it has slower performance  
+
+$$d = \arccos(\sin \phi_1 \times \sin \phi_2 + \cos \phi_1 \times \cos \phi_2 \times \cos\Delta\phi) \times R$$  
+
+For all formulas:
+
 * $R$: Radius of the earth ($6,371 km \approx 3959miles$)
 * $\phi$: Latitude
 * $\lambda$: Longitude
-* $\phi_1\lambda_1$: Origin
-* $\phi_2\lambda_2$: Destination
+* $(\phi_1, \lambda_1)$: Origin
+* $(\phi_2, \lambda_2)$: Destination
+
+For the sake of performance, there's no reason to calculate distance and direction for each row in our dataset. Each origin, destination set should have the same distance and direction. This should also help simplify validation of the distance feature in our flight data. Should the same origin, destination flight have a wildly different distance, then that's something that should be investigated.  
+
+#### Converting a degree heading into a compass direction
+
+This solution exists on a number of websites.  
+[https://www.campbellsci.com/blog/convert-wind-directions](https://www.campbellsci.com/blog/convert-wind-directions)  
+[https://stackoverflow.com/questions/7490660/converting-wind-direction-in-angles-to-text-words](https://stackoverflow.com/questions/7490660/converting-wind-direction-in-angles-to-text-words)  
+
+while heading angles are useful for their exact description of travel; they're not very helpful when talking to your average person. So it would be best to convert these angles into a natural language direction. There's a number of solutions to this problem on the internet. The most common is a variation of the same theme. This is my explanation of the most common solution.  
+
+The number of points on our compass is arbitrary. Given functional logic, any number of desired points should result in proper direction resolution. Starting most simply would be 2 points on the compass North and South.  
+
+Degrees can range from -360 to 360. It's possible that a larger degree is supplied, but a modulo 360 will return the degree between our stated range. Further, Python's modulo operator will always return a number that agrees in sign with the denominator. This simplifies the logic further by always having a heading degree range of 0 inclusive and 360 exclusive.  
+
+The arcs for each point on our compass are equal. In the case of a "North, South" compass, the arc for each direction is 180 degrees. Exact North has a heading of 0 degrees and exact South has a heading of 180 degrees. Everything else in the arc ranges can be described as more North than South or more South than North. There is the exception of the boundaries between the two arcs. At exactly 90 degrees and 270 degrees, the direction cannot be described as more Northerly or Southerly.
+
+Dividing the heading degree by the directional arc size will return a number between 0 inclusive and N exclusive where N is the number of directions. The split between each directional arc happens at some fractional value between each whole number.  
+
+For our compass consisting of just North and South, the splits happen at 90 and 270 degrees. With N = 2, our arc size is 180.  
+Treating our splits as the headings to convert, we get 0.5 and 1.5 for arc direction boundaries.
+
+It's at this point in the solution an earlier assumption we made about "an arbitrary number of points" is betrayed. The commonly found solution relies on rounding rules to assign the degree to the correct arc. Rounding rules only work for this purpose if the number of points in our compass is a multiple of 2.  
+
+Another earlier statement we made can also be modified. It is not necessary to take the initial modulo of the supplied heading as we have to take the modulo of the resulting rounding. After rounding we'll have N+1 possible integers ranging from 0 to N. If we skip the initial modulo we'll have xN+1 possible integers ranging from 0 to xN. Either way, taking the modulo N of the resulting rounding, we'll have N possible integers ranging from 0 to N-1. The same range as the index of our compass point name list. At this point, we just use the index to retrieve and return the compass point.  
+
+To sum up the compass point calculation.  
+
+It is possible to determine the direction of travel for a degree heading using an ordered list of compass points. The ordered list must contain a multiple of 2 number of points in clockwise order. This method will return the index of the named arc within that ordered list.  
+
+##### Given
+
+> Heading (in degrees): $\phi$  
+> Ordered list of points: $P$  
+> Length of list $P$: $P.len$  
+> Arc size of each direction: $360 \over P.len$  
+> Index of direction in list: $I$  
+
+##### Return Direction
+
+> If $P.Len  \%  2 == 0$  
+> ${\phi \times P.len \over 360}$ will produce a fraction of the compass as a multiple of $P.len$  
+> $round({\phi \times P.len \over 360})$ will return an integer value $x \times P.len + I$  
+> $round({\phi \times P.len \over 360}) \% P.len$ will return $I$  
+
+One consideration not addressed here is the accuracy of floating point calculations, rounding and integer calculations. For our purpose, this is not a concern. Close is good enough for this art project.  
+
+#### Validations
+
+Calculated distances were rounded. There's no logic in comparing floats to integers for accuracy. For our development dataset, the difference between calculated and reported distances ranges from 0 to 5 miles. This is an acceptable range that can be attributed to differences in calculation method.  
+
+For directions and headings, a handful of flight paths were randomly selected and manually compared to an actual map. In each case, the determined direction matched what was seen on a map.  
