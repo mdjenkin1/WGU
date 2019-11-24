@@ -256,4 +256,5 @@ For directions and headings, a handful of flight paths were randomly selected an
 ### Revisiting Dates
 
 All that should be left of preprocessing are the date and time fields that originally threw us down this preprocessing path. Converting our date time functions from pandas to file stream processing shouldn't be too difficult.  
+
 One refinement is including day of the week as named days instead of numbers. The source dataset provides day of the week as ISO defined numbers (Monday = 1). This can also be determined after the time parts are reassembled into an actual date. This provides an additional opportunity for data validation.  

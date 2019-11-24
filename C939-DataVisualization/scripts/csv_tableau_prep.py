@@ -7,6 +7,8 @@ import os
 import pprint
 import math
 
+import datetime as dt
+
 #rawDir = ("../processedData")
 rawDir = ("../TestData")
 cfgDir = ("./StaticFiles")
@@ -42,6 +44,13 @@ distDiffs = {}
 carriers = {}
 airports = {}
 legs = {}
+
+flightTimes = {
+    "Arr": "ActualArrive", 
+    "Dep": "ActualDepart", 
+    "CRSArr": "SchedArrive", 
+    "CRSDep": "SchedDepart" 
+}
 
 # carriers.csv file obtained from http://stat-computing.org/dataexpo/2009/carriers.csv
 with open(os.path.join(cfgDir, "carriers.csv"), 'r') as inFile:
@@ -131,6 +140,46 @@ def DescribeLeg(origin, dest):
 
     return outDict
 
+def SplitTime(timeInt):
+    """Convert an integer representation of a 24hr time to a dictionary of hour and minute"""
+     
+    # Pad the integer as a 4 character string for the most predictable behavior
+    timeMask = re.compile(r'(\d{2})(\d{2})')
+    try:
+        timeStr = str(int(timeInt)).zfill(4)
+        timeParts = timeMask.match(timeStr)
+        #print("Split {} into hour {} and min {} ".format(timeInt, timeParts[1], timeParts[2]))
+    except:
+        return {"Hour": "00", "Min": "00"}
+    else:
+        return {"Hour": timeParts[1], "Min": timeParts[2]}
+
+def GetFlightStageDateTime(record, flightStage):
+    #try:
+    try:
+        tmp_date = dt.datetime.strptime(record[flightStage[0]],"%Y-%m-%d")
+        #pprint.pprint("Converted {} to date {}".format(record[flightStage[0]], tmp_date))
+    except:
+        tmp_date = dt.datetime()
+
+    try:
+        tmp_time = dt.datetime.strptime(str(record[flightStage[1]]), "%H:%M:%S").time()
+        #pprint.pprint("Converted {} to time {}".format(record[flightStage[1]], tmp_time))
+    except:
+        tmp_time = dt.time()
+
+    return dt.datetime.combine(tmp_date, tmp_time)   
+    #return tmp_date
+    #return tmp_time
+    #except:
+    #    return "NaN"
+    #    pass
+    #    print(sys.exc_info()[0])
+    #else:
+    #    return "NaN"
+    #record[flightStage[0]], record[flightStage[1]])
+
+
 for csvFile in os.listdir(rawDir):
     print("processing {}".format(csvFile))
     with open(os.path.join(rawDir, csvFile), 'r') as inFile:
@@ -201,9 +250,28 @@ for csvFile in os.listdir(rawDir):
                 #print("There's {} miles difference between calculated and reported distance for {}".format(diffDist, journeyLeg))
                 distDiffs.update({diffDist : True})
 
-                #processedData.append(row)
+                tmpTime = {}
+                for stage in flightTimes.keys():
+                    tmpTime.update(SplitTime(row[stage+"Time"]))
+                    if tmpTime["Hour"] == "24": tmpTime["Hour"] = 0
+                    stageDateTime = dt.datetime(
+                        year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"]),
+                        hour = int(tmpTime["Hour"]), minute = int(tmpTime["Min"])
+                    )
+                    processedFields.update({ flightTimes[stage]: stageDateTime })
+
+                if processedFields["ActualArrive"] < processedFields["ActualDepart"]:
+                    processedFields.update({"ActualArrive": processedFields["ActualArrive"] + dt.timedelta(days=1)})
+
+                if processedFields["SchedArrive"] < processedFields["SchedDepart"]:
+                    processedFields.update({"SchedArrive": processedFields["SchedArrive"] + dt.timedelta(days=1)})
+
                 processedData.append(processedFields)
                 i += 1
+
+
+
+                
 
 for i in cancelledOrDiverted:
     pprint.pprint(processedData[i])
