@@ -215,7 +215,8 @@ The number of points on our compass is arbitrary. Given functional logic, any nu
 
 Degrees can range from -360 to 360. It's possible that a larger degree is supplied, but a modulo 360 will return the degree between our stated range. Further, Python's modulo operator will always return a number that agrees in sign with the denominator. This simplifies the logic further by always having a heading degree range of 0 inclusive and 360 exclusive.  
 
-The arcs for each point on our compass are equal. In the case of a "North, South" compass, the arc for each direction is 180 degrees. Exact North has a heading of 0 degrees and exact South has a heading of 180 degrees. Everything else in the arc ranges can be described as more North than South or more South than North. There is the exception of the boundaries between the two arcs. At exactly 90 degrees and 270 degrees, the direction cannot be described as more Northerly or Southerly.
+The arcs for each point on our compass are equal. In the case of a "North,
+ South" compass, the arc for each direction is 180 degrees. Exact North has a heading of 0 degrees and exact South has a heading of 180 degrees. Everything else in the arc ranges can be described as more North than South or more South than North. There is the exception of the boundaries between the two arcs. At exactly 90 degrees and 270 degrees, the direction cannot be described as more Northerly or Southerly.
 
 Dividing the heading degree by the directional arc size will return a number between 0 inclusive and N exclusive where N is the number of directions. The split between each directional arc happens at some fractional value between each whole number.  
 
@@ -258,3 +259,77 @@ For directions and headings, a handful of flight paths were randomly selected an
 All that should be left of preprocessing are the date and time fields that originally threw us down this preprocessing path. Converting our date time functions from pandas to file stream processing shouldn't be too difficult.  
 
 One refinement is including day of the week as named days instead of numbers. The source dataset provides day of the week as ISO defined numbers (Monday = 1). This can also be determined after the time parts are reassembled into an actual date. This provides an additional opportunity for data validation.  
+
+### Wrapping up Preprocessing
+
+Having added the final fields to the data preprocessing scripts, the remainder of the raw data was queued for preprocessing. This is when some new anomalies were discovered.
+
+```{python}
+processing 2003.csv
+row: 1928155
+TimeField: ArrTime
+rawTime: 2524
+tmpTime: {'Hour': 25, 'Min': 24}
+```
+
+The hour and minute time split appears to be good. However, an arrival time greater than 2400 suggests this may be a calculated instead of recorded field. The thought that it's a recorded field was an assumption. Rather than working with assumed data definitions, it would be better to refer to the glossary.  
+
+[https://www.transtats.bts.gov/glossary.asp](https://www.transtats.bts.gov/glossary.asp)  
+
+With the glossary open, it's also good chance to review some time and scheduling fields.  
+
+| Name| Summary | Description |
+|--|--|--|
+| CRSArrTime | scheduled arrival time (local, hhmm) |  |
+| CRSDepTime | scheduled departure time (local, hhmm) |  |
+| CRSElapsedTime | in minutes | The time difference between</br>CRSArrTime and CRSDepTime |
+| DepTime | actual departure time (local, hhmm) | Parking Break Released |
+| TaxiOut | taxi out time in minutes | Minutes between</br>Leaving Gate</br>Wheels off Ground |
+| AirTime | in minutes | Minutes between</br>Wheels off Ground</br>Wheels on Ground |
+| TaxiIn | taxi in time, in minutes | Minutes between</br>Wheels on Ground</br>Arrival at Gate |
+| ArrTime | actual arrival time (local, hhmm) | Arrived at gate</br>Set Parking Break |
+| ActualElapsedTime | in minutes | ArrTime minus DepTime</br>TaxiOut + AirTime + TaxiIn |
+| ArrDelay | arrival delay</br>in minutes</br>Flight is On time if this is less than 15 min | Difference between</br>ArrTime and CRSArrTime |
+| DepDelay | departure delay</br>in minutes | Difference between</br>DepTime and CRSDepTime |
+
+So let's take a closer look at what's going on with this record.  
+
+```{python}
+OrderedDict([('Year', '2003'),
+             ('Month', '4'),
+             ('DayofMonth', '27'),
+             ('DayOfWeek', '7'),
+             ('DepTime', '2430'),
+             ('CRSDepTime', '2215'),
+             ('ArrTime', '2524'),
+             ('CRSArrTime', '2301'),
+             ('UniqueCarrier', 'EV'),
+             ('FlightNum', '4191'),
+             ('TailNum', 'N713EV'),
+             ('ActualElapsedTime', '114'),
+             ('CRSElapsedTime', '106'),
+             ('AirTime', '-1353'),
+             ('ArrDelay', '143'),
+             ('DepDelay', '135'),
+             ('Origin', 'SLC'),
+             ('Dest', 'ONT'),
+             ('Distance', '558'),
+             ('TaxiIn', '1449'),
+             ('TaxiOut', '18'),
+             ('Cancelled', '0'),
+             ('CancellationCode', 'NA'),
+             ('Diverted', '0'),
+             ('CarrierDelay', 'NA'),
+             ('WeatherDelay', 'NA'),
+             ('NASDelay', 'NA'),
+             ('SecurityDelay', 'NA'),
+             ('LateAircraftDelay', 'NA')])
+```
+
+Looking at the scheduled and actual depart times, it seems the recorded time was a method of illustrating arrival happening after midnight. However, there's a number of other oddities in this record. Negative time in the air? More than a day to taxi from landing to the gate?  
+
+Converting the times from HHMM to MinuteOfDay (1440 minutes in a day) shows a gate to gate time of 54 minutes. This doesn't match the recorded 114 Elapsed Time. For scheduled flight time, the 46 minutes doesn't match the reported 106 minutes. Both are off by 60 minutes. Direction of travel is southwest and a map check shows a flight takes approximately 1hr 45min. This suggests the missing hour is from a change in timezone. Flying west agrees with this. The origin is MST and the destination is PST. Clearly a calculation of local times. Time differences should be addressed for the various flights. A possible solution would be to maintain UTC time calculations.  
+
+The negative airtime is something else to consider. With 1440 minutes in a day and the AirTime/TaxiIn times falling on either side of this number, it seems this record has added and subtracted a day. I suspect what happened is the scheduled arrival and departure was for the same day and near midnight. However the flight didn't happen until after midnight. If the recorded departure date was accurate but the scheduled arrival date was recorded as the actual arrival, then this could introduce a miscalculation when determining flight time. Correcting this record gives an air time of 87 minutes. Looking at some air times for SLC to ONT, this is reasonable. What isn't reasonable are air times in the 180 minute range with elapsed times closer to 100 min.  
+
+With these inaccuracies, it will be necessary to redesign the logic used to prepare the date time information. Based on the investigation so far, scheduled information should be considered valid. Actual times should be held in question of arrival and depart delay times. Provided dates considered as scheduled depart dates. Seconds since the epoch seems to be Python's implemented solution to Datetime since 3.3. Working with epoch time should make this easier and cleaner.  

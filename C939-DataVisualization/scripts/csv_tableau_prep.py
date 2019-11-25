@@ -9,11 +9,17 @@ import math
 
 import datetime as dt
 
-#rawDir = ("../processedData")
+#rawDir = ("../RawData")
 rawDir = ("../TestData")
 cfgDir = ("./StaticFiles")
 selectAirports = ['SLC']
 processedData = []
+
+dtOutString = "%Y-%m-%d %H:%M"
+
+outDir = ("../PreprocessedData")
+airportsStr = "".join(selectAirports)
+csvOut = "preparedFlightData_" + airportsStr
 
 fieldsToCopy = [
             # Day of the Week as ISO number.
@@ -24,11 +30,19 @@ fieldsToCopy = [
             "FlightNum", "TailNum", 
             #"UniqueCarrier", 
             
+            ### In Minutes
+            # Delays
+            "CarrierDelay", "WeatherDelay", "NASDelay", 
+            "SecurityDelay", "LateAircraftDelay",
+            # Travel time
+            "ActualElapsedTime", "AirTime", "CRSArrTime"
 
             ### Modified flight plan
             #"CancellationCode", "Cancelled",
             #"Diverted"
 ]
+
+fieldsToWrite = set()
 
 cancelCodes = {
     "A" : "Carrier", 
@@ -39,7 +53,7 @@ cancelCodes = {
 
 cancelledOrDiverted = []
 unknownCarriers = {}
-distDiffs = {}
+distDiffs = set()
 
 carriers = {}
 airports = {}
@@ -85,7 +99,6 @@ with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
         else:
             raise Exception("Unknown format: airport.csv")
 
-#
 def GetDirection(degree):
     compassPoints = (
         "North", "NorthEast",
@@ -149,10 +162,10 @@ def SplitTime(timeInt):
         timeStr = str(int(timeInt)).zfill(4)
         timeParts = timeMask.match(timeStr)
         #print("Split {} into hour {} and min {} ".format(timeInt, timeParts[1], timeParts[2]))
-    except:
-        return {"Hour": "00", "Min": "00"}
+    except ValueError:
+        return {"Hour": "NA", "Min": "NA"}
     else:
-        return {"Hour": timeParts[1], "Min": timeParts[2]}
+        return {"Hour": int(timeParts[1]), "Min": int(timeParts[2])}
 
 def GetFlightStageDateTime(record, flightStage):
     #try:
@@ -178,7 +191,6 @@ def GetFlightStageDateTime(record, flightStage):
     #else:
     #    return "NaN"
     #record[flightStage[0]], record[flightStage[1]])
-
 
 for csvFile in os.listdir(rawDir):
     print("processing {}".format(csvFile))
@@ -244,21 +256,39 @@ for csvFile in os.listdir(rawDir):
                     })
 
                 # Compare the supplied distance to the calculated distance
-                reportedDist = processedFields["Distance"]
-                calculatedDist = processedFields["CalculatedDistance"]
-                diffDist = abs(int(reportedDist) - int(calculatedDist))
-                #print("There's {} miles difference between calculated and reported distance for {}".format(diffDist, journeyLeg))
-                distDiffs.update({diffDist : True})
-
-                tmpTime = {}
+                try:
+                    reportedDist = int(processedFields["Distance"])
+                    calculatedDist = int(processedFields["CalculatedDistance"])
+                    diffDist = abs(reportedDist - calculatedDist)
+                    #print("There's {} miles difference between calculated and reported distance for {}".format(diffDist, journeyLeg))
+                    distDiffs.add(diffDist)
+                except ValueError:
+                    pass
+                
                 for stage in flightTimes.keys():
-                    tmpTime.update(SplitTime(row[stage+"Time"]))
-                    if tmpTime["Hour"] == "24": tmpTime["Hour"] = 0
-                    stageDateTime = dt.datetime(
-                        year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"]),
-                        hour = int(tmpTime["Hour"]), minute = int(tmpTime["Min"])
-                    )
-                    processedFields.update({ flightTimes[stage]: stageDateTime })
+                    tmpTime = {}
+                    if row[stage+"Time"] != "NA":
+                        try:
+                            rawTime = int(row[stage+"Time"])
+                            tmpTime.update(SplitTime(rawTime))
+                            if tmpTime["Hour"] == 24: tmpTime.update({"Hour": 00})
+                            stageDateTime = dt.datetime(
+                                year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"]),
+                                hour = tmpTime["Hour"], minute = tmpTime["Min"]
+                            )
+                        except:
+                            print("row: {}\nTimeField: {}\nrawTime: {}\ntmpTime: {}\n".format(i, stage+"Time", rawTime, tmpTime))
+                            pprint.pprint(row)
+                            pprint.pprint(processedFields)
+                        else:
+                            processedFields.update({flightTimes[stage]: stageDateTime})
+                            processedFields.update({flightTimes[stage]+"Time": tmpTime["Hour"]*100 + tmpTime["Min"]})
+                    else:
+                        stageDateTime = dt.datetime(
+                            year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"])
+                        )
+                        processedFields.update({flightTimes[stage]: stageDateTime})
+                        processedFields.update({flightTimes[stage]+"Time": "NA"})
 
                 if processedFields["ActualArrive"] < processedFields["ActualDepart"]:
                     processedFields.update({"ActualArrive": processedFields["ActualArrive"] + dt.timedelta(days=1)})
@@ -266,23 +296,36 @@ for csvFile in os.listdir(rawDir):
                 if processedFields["SchedArrive"] < processedFields["SchedDepart"]:
                     processedFields.update({"SchedArrive": processedFields["SchedArrive"] + dt.timedelta(days=1)})
 
+                for stage in flightTimes.keys():
+                    processedFields.update({
+                        flightTimes[stage]: processedFields[flightTimes[stage]].strftime(dtOutString)
+                    })
+
                 processedData.append(processedFields)
-                i += 1
+                #i += 1
+                fieldsToWrite.update(list(processedFields.keys()))
+            i += 1
 
+print("writing preprocessed data to csv")
+#pprint.pprint(fieldsToWrite)
+with open(os.path.join(outDir, csvOut)+".csv", 'w', newline='') as csvfile:
+    print("fieldnames: {}".format(fieldsToWrite))
+    writer = csv.DictWriter(csvfile, fieldnames = fieldsToWrite)
+    
+    writer.writeheader()
+    for row in processedData:
+        writer.writerow(row)
 
+#for i in cancelledOrDiverted:
+#    pprint.pprint(processedData[i])
+#    print("\n")
 
-                
-
-for i in cancelledOrDiverted:
-    pprint.pprint(processedData[i])
-    print("\n")
-
-for i in unknownCarriers:
-    pprint.pprint(processedData[i])
-    print("\n")
+#for i in unknownCarriers:
+#    pprint.pprint(processedData[i])
+#    print("\n")
 
 #pprint.pprint(distDiffs)
 
 #pprint.pprint(legs)
 
-pprint.pprint(processedData[385:389])
+#pprint.pprint(processedData[385:389])

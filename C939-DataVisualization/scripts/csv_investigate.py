@@ -114,8 +114,6 @@ def IntOrNaN(value):
     try:
         return int(value)
     except:
-        pass
-    else:
         return "NaN"
 
 def TimedeltaOrNaN(value):
