@@ -8,6 +8,10 @@ import pprint
 import math
 
 import datetime as dt
+import pytz
+
+from pytz import timezone
+from timezonefinder import TimezoneFinder
 
 #rawDir = ("../RawData")
 rawDir = ("../TestData")
@@ -23,7 +27,7 @@ csvOut = "preparedFlightData_" + airportsStr
 
 fieldsToCopy = [
             # Day of the Week as ISO number.
-            "DayOfWeek", 
+            #"DayOfWeek", 
 
             ### Flight Descriptors
             "Dest", "Origin", "Distance",
@@ -35,7 +39,7 @@ fieldsToCopy = [
             "CarrierDelay", "WeatherDelay", "NASDelay", 
             "SecurityDelay", "LateAircraftDelay",
             # Travel time
-            "ActualElapsedTime", "AirTime", "CRSArrTime"
+            #"ActualElapsedTime", "AirTime", "CRSArrTime"
 
             ### Modified flight plan
             #"CancellationCode", "Cancelled",
@@ -59,12 +63,14 @@ carriers = {}
 airports = {}
 legs = {}
 
-flightTimes = {
+flightTimeNames = {
     "Arr": "ActualArrive", 
     "Dep": "ActualDepart", 
     "CRSArr": "SchedArrive", 
     "CRSDep": "SchedDepart" 
 }
+
+utc = pytz.utc
 
 # carriers.csv file obtained from http://stat-computing.org/dataexpo/2009/carriers.csv
 with open(os.path.join(cfgDir, "carriers.csv"), 'r') as inFile:
@@ -77,6 +83,7 @@ with open(os.path.join(cfgDir, "carriers.csv"), 'r') as inFile:
 
 # airports.csv file obtained from http://stat-computing.org/dataexpo/2009/airports.csv
 with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
+    tf = TimezoneFinder(in_memory=True)
     reader = csv.DictReader(inFile)
     for row in reader:
         if "iata" in row \
@@ -86,6 +93,7 @@ with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
         and "country" in row\
         and "lat" in row\
         and "long" in row:
+            tzone = tf.timezone_at(lng=float(row["long"]), lat=float(row["lat"]))
             airports.update({
                 row["iata"]: {
                     "airport": row["airport"],
@@ -93,11 +101,14 @@ with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
                     "state" : row["state"],
                     "country" : row["country"],
                     "lat" : math.radians(float(row["lat"])),
-                    "long" : math.radians(float(row["long"]))
+                    "long" : math.radians(float(row["long"])),
+                    "tzone" : tzone
                 }
             })
         else:
             raise Exception("Unknown format: airport.csv")
+
+pprint.pprint(airports)
 
 def GetDirection(degree):
     compassPoints = (
@@ -142,6 +153,10 @@ def DescribeLeg(origin, dest):
     #if degHeading < 0: degHeading += 360 
 
     direction = GetDirection(degHeading)
+
+    oTz = tf.timezone_at(lng=oLong, lat=oLat)
+    dTz = tf.timezone_at(lng=dLong, lat=dLat)
+
 
     outDict = {
         origin + "-" + dest : {
@@ -265,30 +280,36 @@ for csvFile in os.listdir(rawDir):
                 except ValueError:
                     pass
                 
-                for stage in flightTimes.keys():
-                    tmpTime = {}
-                    if row[stage+"Time"] != "NA":
-                        try:
-                            rawTime = int(row[stage+"Time"])
-                            tmpTime.update(SplitTime(rawTime))
-                            if tmpTime["Hour"] == 24: tmpTime.update({"Hour": 00})
-                            stageDateTime = dt.datetime(
-                                year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"]),
-                                hour = tmpTime["Hour"], minute = tmpTime["Min"]
-                            )
-                        except:
-                            print("row: {}\nTimeField: {}\nrawTime: {}\ntmpTime: {}\n".format(i, stage+"Time", rawTime, tmpTime))
-                            pprint.pprint(row)
-                            pprint.pprint(processedFields)
-                        else:
-                            processedFields.update({flightTimes[stage]: stageDateTime})
-                            processedFields.update({flightTimes[stage]+"Time": tmpTime["Hour"]*100 + tmpTime["Min"]})
-                    else:
-                        stageDateTime = dt.datetime(
-                            year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"])
-                        )
-                        processedFields.update({flightTimes[stage]: stageDateTime})
-                        processedFields.update({flightTimes[stage]+"Time": "NA"})
+                ### Datetime calculations
+                # Provided date is assumed scheduled date
+                # 4 timestamps; 2 in 2 timezones
+                # 
+                tmpDate = {}
+                # If only we had good time data to start with
+                #for stage in flightTimes.keys():
+                #    tmpTime = {}
+                #    if row[stage+"Time"] != "NA":
+                #        try:
+                #            rawTime = int(row[stage+"Time"])
+                #            tmpTime.update(SplitTime(rawTime))
+                #            if tmpTime["Hour"] == 24: tmpTime.update({"Hour": 00})
+                #            stageDateTime = dt.datetime(
+                #                year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"]),
+                #                hour = tmpTime["Hour"], minute = tmpTime["Min"]
+                #            )
+                #        except:
+                #            print("row: {}\nTimeField: {}\nrawTime: {}\ntmpTime: {}\n".format(i, stage+"Time", rawTime, tmpTime))
+                #            pprint.pprint(row)
+                #            pprint.pprint(processedFields)
+                #        else:
+                #            processedFields.update({flightTimes[stage]: stageDateTime})
+                #            processedFields.update({flightTimes[stage]+"Time": tmpTime["Hour"]*100 + tmpTime["Min"]})
+                #    else:
+                #        stageDateTime = dt.datetime(
+                #            year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"])
+                #        )
+                #        processedFields.update({flightTimes[stage]: stageDateTime})
+                #        processedFields.update({flightTimes[stage]+"Time": "NA"})
 
                 if processedFields["ActualArrive"] < processedFields["ActualDepart"]:
                     processedFields.update({"ActualArrive": processedFields["ActualArrive"] + dt.timedelta(days=1)})

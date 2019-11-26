@@ -332,4 +332,31 @@ Converting the times from HHMM to MinuteOfDay (1440 minutes in a day) shows a ga
 
 The negative airtime is something else to consider. With 1440 minutes in a day and the AirTime/TaxiIn times falling on either side of this number, it seems this record has added and subtracted a day. I suspect what happened is the scheduled arrival and departure was for the same day and near midnight. However the flight didn't happen until after midnight. If the recorded departure date was accurate but the scheduled arrival date was recorded as the actual arrival, then this could introduce a miscalculation when determining flight time. Correcting this record gives an air time of 87 minutes. Looking at some air times for SLC to ONT, this is reasonable. What isn't reasonable are air times in the 180 minute range with elapsed times closer to 100 min.  
 
-With these inaccuracies, it will be necessary to redesign the logic used to prepare the date time information. Based on the investigation so far, scheduled information should be considered valid. Actual times should be held in question of arrival and depart delay times. Provided dates considered as scheduled depart dates. Seconds since the epoch seems to be Python's implemented solution to Datetime since 3.3. Working with epoch time should make this easier and cleaner.  
+With these inaccuracies, it will be necessary to redesign the logic used to prepare the date time information. Based on the investigation so far, scheduled information should be considered valid. Actual times should be held in question of arrival and depart delay times. Provided dates considered as scheduled depart dates. Seconds since the epoch seems to be Python's implemented solution to Datetime since 3.3. Working with epoch time should make this easier.  
+
+### Restructing Time
+
+Local timezone information is nowhere in our dataset. Luckily, a quick search turned up [https://pypi.org/project/timezonefinder/](https://pypi.org/project/timezonefinder/). We do have longitude and latitude data. So now it's just a matter of storing timezone information in a useful format.  
+
+Digging deeper into the datetime and timezone solutions for python returned quite a selection. For determining timezones on a map, timezonefinder and tzwhere. Despite it's apparent popularity, tzwhere seems to be a stagnant project and timezonefinder has been updated recently.  
+
+For timezone aware datetimes, there's no shortage of options. A bit of searching turned up, datetime with pytz, arrow, pendulum, delorean and udatetime. Scratching the surface of those uncovered ciso8601 and mxDateTime.
+
+Pendulum's latest release is from october of last year.  
+Delorean's last merge is also from last year. They released v1.0 and dropped Python 2 support.  
+Pytz had a release just last month and has had consistent updates.  
+Udatetime has some impressive benchmarks, but development of it has slowed. The last release was almost 2 years ago.  
+ciso8601 has had a slow release schedule but was updated last month for python 3.8 support.  
+MxDateTime looks to be an opensource pet project that someone tried to monetize. It doesn't even list python 3.  
+
+It seems that, despite all the options, there's really only datetime with pytz.  
+
+### Assumed Good Time
+
+A straight translation of times isn't going to be possible. Instead, I'll need to take a tested assumption approach. The place to start would be the scheduled timestamps.  
+
+Starting with flight scheduling, the provided date must be scheduled departure date. Scheduled departure and arrival times will need to be converted to UTC. With both times in UTC the scheduled elapsed time can be calculated and compared. If the calculated elapsed time matches the scheduled elapsed time, then confidence in the reported scheduled times should be increased.  
+
+Scheduled 
+
+ the provided date is the scheduled date. Assume scheduled times are good and in local time
