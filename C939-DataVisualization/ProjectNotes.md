@@ -357,6 +357,17 @@ After integrating timezonefinder to provide timezones, it introduced a new probl
 
 The information on timezonefinder's project page, there's no simple drop in replacement for replacing the data set with ocean aware information. My solution will be to manually assign the timezone for these eight airports. Given the scope of the project and the need for these airports, this is an acceptable manual process. It will also give me the chance of addressing any issue with the TT01 and Z08 airports. One of these has too many characters for an IATA code and both of them have non-letter characters.  
 
+| Code | Detail | Olsen tz |
+|--|--|--|
+| TT01 | Pagan Airstrip</br>Pagan Island</br>No IATA number | Pacific/Saipan |
+| GRO | Rota Island | Pacific/Saipan |
+| GSN | Saipan International | Pacific/Saipan |
+| GUM | Guam International | Pacific/Saipan |
+| TNI | West Tinian | Pacific/Saipan |
+| Z08 | Ofu Village Airport</br>No IATA number | Pacific/Samoa |
+| PPG | Pago Pago International | Pacific/Samoa |
+| FAQ | Fitiuta Village | Pacific/Samoa |
+
 #### Save the dates
 
 For timezone aware datetimes, there's no shortage of options. A bit of searching turned up, datetime with pytz, arrow, pendulum, delorean and udatetime. Scratching the surface of those uncovered ciso8601 and mxDateTime.
@@ -370,11 +381,25 @@ MxDateTime looks to be an opensource pet project that someone tried to monetize.
 
 It seems that, despite all the options, there's really only datetime with pytz.  
 
-### Assumed Good Time
+### Assumed Good Times
 
 A straight translation of times isn't going to be possible. Instead, I'll need to take a tested assumption approach. The place to start would be the scheduled timestamps.  
 
 Starting with flight scheduling, the provided date is assumed to be scheduled departure date. Scheduled departure and arrival times will need to be converted to UTC. With both times in UTC the scheduled elapsed time can be calculated and compared. If the calculated elapsed time matches the scheduled elapsed time, then confidence in the reported scheduled times should be increased.  
+
+These assumptions seem to be dead on. Calculated and provided elapsed times are in perfect agreement. Where they differ appears to be where daylight savings time is a possible factor. In these cases, the times are off by an hour. This can be accounted for by the ambiguous times introduced by daylight savings time. In these cases, the provided elapsed times can be used to flag the record as needing extra attention. This can help us address ambiguities of daylight savings time.  
+
+```{python}
+Ending daylight savings
+Flying from LAS to SLC
+local depart time: 2003-10-26 22:15:00-08:00 Timezone: America/Los_Angeles
+local arrive time: 2003-10-26 00:30:00-06:00 Timezone: America/Denver
+depart time UTC: 2003-10-27 06:15:00+00:00
+arrive time UTC: 2003-10-27 06:30:00+00:00
+Calculated scheduled elapsed time: 0:15:00
+Provided scheduled elapsed time: 1:15:00
+```
+
 
 Scheduled 
 

@@ -8,6 +8,7 @@ import pprint
 import math
 
 import datetime as dt
+import time
 import pytz
 
 from pytz import timezone
@@ -177,7 +178,7 @@ with open(os.path.join(cfgDir, "carriers.csv"), 'r') as inFile:
 
 airports = {}
 airportTimeZones = {}
-airportTimeZoneNames = set()
+airportTimeZoneNames = set(["Pacific/Samoa", "Pacific/Saipan"])
 # airports.csv file obtained from http://stat-computing.org/dataexpo/2009/airports.csv
 with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
     
@@ -194,12 +195,16 @@ with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
         and "country" in row\
         and "lat" in row\
         and "long" in row:
-            tzone = tf.timezone_at(lng=float(row["long"]), lat=float(row["lat"]))
-            airportTimeZoneNames.add(tzone)
-            if not tzone: 
-                print("Null timezone at airport {} Long: {} Lat: {}".format(row["iata"], row["long"], row["lat"]))
-                #tzone = tf.closest_timezone_at(lng=float(row["long"]), lat=float(row["lat"]), delta_degree=5, return_distances=True)
-                #print("Closest timezone: {}".format(tzone))
+
+            OlsenTz = tf.timezone_at(lng=float(row["long"]), lat=float(row["lat"]))
+
+            # Timezonefinder does not include the Pacific ocean. This a manual correction.
+            if not OlsenTz: 
+                #print("Null timezone at airport {} Long: {} Lat: {}".format(row["iata"], row["long"], row["lat"]))
+                OlsenTz = "Pacific/Samoa" if row["iata"] in ("Z08", "PPG", "FAQ") else "Pacific/Saipan"
+
+            #airportTimeZoneNames.update([OlsenTz])
+
             airports.update({
                 row["iata"]: {
                     "airport": row["airport"],
@@ -208,7 +213,7 @@ with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
                     "country" : row["country"],
                     "lat" : math.radians(float(row["lat"])),
                     "long" : math.radians(float(row["long"])),
-                    "tzone" : tzone
+                    "OlsenTz" : OlsenTz
                 }
             })
         else:
@@ -220,19 +225,18 @@ if False:
 else: print("airports loaded")
 
 # create timezone objects for each of our timezones
-#for atzName in airportTimeZoneNames:
-    #print("Creating Timezone: {}".format(atzName))
-    #airportTimeZones.update({
-    #    atzName: timezone(atzName)
-    #})
+#for OlsenTz in airportTimeZoneNames:
+    #print("Creating Timezone: {}".format(OlsenTz))
+#    airportTimeZones.update({
+#        OlsenTz: timezone(OlsenTz)
+#    })
 # and update our airports dictionary
 #for aport in list(airports.keys()):
-#    airports[aport]["tzone"] = airportTimeZones[airports[aport]["tzone"]]
-
+#    airports[aport]["OlsenTz"] = airportTimeZones[airports[aport]["OlsenTz"]]
 # take a sample of our airport dictionary for visual inspection
-if False:
-    for key in list(airports.keys())[53:57]: pprint.pprint(airports[key]) 
-else: print("airports timezones added")
+#if False:
+#    for key in list(airports.keys())[53:57]: pprint.pprint(airports[key]) 
+#else: print("airports timezones added")
 
 utc = pytz.utc
 
@@ -314,10 +318,79 @@ for csvFile in os.listdir(rawDir):
                     pass
                 
                 ### Datetime calculations
-                # Provided date is assumed scheduled date
-                # 4 timestamps; 2 in 2 timezones
-                # 
-                tmpDate = {}
+                #print("Flying from {} to {}".format(row['Origin'],row['Dest']))
+                tmpDT = {}
+                
+                # Provided date is assumed scheduled depart date
+                tmpDT['RawDate'] = dt.datetime(year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"]))
+                schDepTm = dt.datetime.strptime(row['CRSDepTime'].zfill(4),"%H%M").time()
+                naiveSchDep = dt.datetime.combine(tmpDT['RawDate'], schDepTm)
+                depTz = pytz.timezone(airports[row['Origin']]['OlsenTz'])
+                tmpDT['SchDep'] = depTz.localize(naiveSchDep)
+                tmpDT['SchedDepart'] = tmpDT['SchDep'].astimezone(utc)
+
+                # Are scheduled arrival time and elapsed time sane
+                schArrTm = dt.datetime.strptime(row['CRSArrTime'].zfill(4),"%H%M").time()
+                naiveSchArr = dt.datetime.combine(tmpDT['RawDate'], schArrTm)
+                arrTz = pytz.timezone(airports[row['Dest']]['OlsenTz'])
+                tmpDT['SchArr'] = arrTz.localize(naiveSchArr)
+                tmpDT['SchedArrive'] = tmpDT['SchArr'].astimezone(utc)
+                
+                tmpDT['SchTime'] = dt.timedelta(minutes=int(row['CRSElapsedTime']))
+                tmpDT['CalcSchTime'] = tmpDT['SchedArrive'] - tmpDT['SchedDepart']
+
+
+
+                #print("Scheduled depart at {} local {} UTC".format(tmpDT['SchDep'], tmpDT['SchedDepart']))
+                #print("Scheduled arrive at {} local {} UTC".format(tmpDT['SchArr'], tmpDT['SchedArrive']))
+
+                # If it thinks we traveled backwards in time, add one day.
+                # This is because the clock restarts at midnight.
+                while (tmpDT['CalcSchTime'] < dt.timedelta()):
+                    tmpDT['SchedArrive'] = tmpDT['SchedArrive'] + dt.timedelta(days=1)
+                    tmpDT['CalcSchTime'] = tmpDT['SchedArrive'] - tmpDT['SchedDepart']
+                    #print("Added a day to arrival for sanity {}".format(tmpDT['SchedArrive']))
+                
+                # 2003 DST dates, logic check
+                dstStart = dt.datetime(year=2003,month=4,day=6,hour=3)
+                dstEnd = dt.datetime(year=2003,month=10,day=26,hour=1)
+                # Set date ranges around daylight savings time
+                dstRng = tmpDT['SchTime'] + dt.timedelta(hours=1)
+                dstStartTop = dstStart + dstRng
+                dstStartBottom = dstStart - dstRng
+                dstEndTop = dstEnd + dstRng
+                dstEndBottom = dstEnd - dstRng
+                # if the local arrival or departure datetime is within 1 hour + the scheduled elapsed time of dst end/start times, show me
+                if depTz.localize(dstStartBottom) < tmpDT['SchDep'] < depTz.localize(dstStartTop) or arrTz.localize(dstStartBottom) < tmpDT['SchArr'] < arrTz.localize(dstStartTop):
+                    print("Nearing daylight savings")
+                    print("Flying from {} to {}".format(row['Origin'], row['Dest']))
+                    print("local depart time: {} Timezone: {}".format(tmpDT['SchDep'], tmpDT['SchDep'].tzinfo))
+                    print("local arrive time: {} Timezone: {}".format(tmpDT['SchArr'], tmpDT['SchArr'].tzinfo))
+                    print("depart time UTC: {}".format(tmpDT['SchedDepart']))
+                    print("arrive time UTC: {}".format(tmpDT['SchedArrive']))
+                    print("Calculated scheduled elapsed time: {}".format(tmpDT['CalcSchTime']))
+                    print("Provided scheduled elapsed time: {}".format(tmpDT['SchTime']))
+                    print("")
+                if depTz.localize(dstEndBottom) < tmpDT['SchDep'] < depTz.localize(dstEndTop) or arrTz.localize(dstEndBottom) < tmpDT['SchArr'] < arrTz.localize(dstEndTop):
+                    print("Ending daylight savings")
+                    print("Flying from {} to {}".format(row['Origin'], row['Dest']))
+                    print("local depart time: {} Timezone: {}".format(tmpDT['SchDep'], tmpDT['SchDep'].tzinfo))
+                    print("local arrive time: {} Timezone: {}".format(tmpDT['SchArr'], tmpDT['SchArr'].tzinfo))
+                    print("depart time UTC: {}".format(tmpDT['SchedDepart']))
+                    print("arrive time UTC: {}".format(tmpDT['SchedArrive']))
+                    print("Calculated scheduled elapsed time: {}".format(tmpDT['CalcSchTime']))
+                    print("Provided scheduled elapsed time: {}".format(tmpDT['SchTime']))
+                    print("")
+
+                #print("Calculated scheduled elapsed time: {}".format(tmpDT['CalcSchTime']))
+                #print("Provided scheduled elapsed time: {}".format(tmpDT['SchTime']))
+                #print("")
+
+                #pprint.pprint(tmpDT)
+
+                #print("Depart local: {}".format(tmpDT['SchDep']))
+                #print("Depart utc: {}".format(processedFields['SchedDepart']))
+
                 # If only we had good time data to start with
                 #for stage in flightTimes.keys():
                 #    tmpTime = {}
@@ -344,16 +417,16 @@ for csvFile in os.listdir(rawDir):
                 #        processedFields.update({flightTimes[stage]: stageDateTime})
                 #        processedFields.update({flightTimes[stage]+"Time": "NA"})
 
-                if processedFields["ActualArrive"] < processedFields["ActualDepart"]:
-                    processedFields.update({"ActualArrive": processedFields["ActualArrive"] + dt.timedelta(days=1)})
+                #if processedFields["ActualArrive"] < processedFields["ActualDepart"]:
+                #    processedFields.update({"ActualArrive": processedFields["ActualArrive"] + dt.timedelta(days=1)})
 
-                if processedFields["SchedArrive"] < processedFields["SchedDepart"]:
-                    processedFields.update({"SchedArrive": processedFields["SchedArrive"] + dt.timedelta(days=1)})
+                #if processedFields["SchedArrive"] < processedFields["SchedDepart"]:
+                #    processedFields.update({"SchedArrive": processedFields["SchedArrive"] + dt.timedelta(days=1)})
 
-                for stage in flightTimes.keys():
-                    processedFields.update({
-                        flightTimes[stage]: processedFields[flightTimes[stage]].strftime(dtOutString)
-                    })
+                #for stage in flightTimes.keys():
+                #    processedFields.update({
+                #        flightTimes[stage]: processedFields[flightTimes[stage]].strftime(dtOutString)
+                #    })
 
                 processedData.append(processedFields)
                 #i += 1
