@@ -340,6 +340,25 @@ Local timezone information is nowhere in our dataset. Luckily, a quick search tu
 
 Digging deeper into the datetime and timezone solutions for python returned quite a selection. For determining timezones on a map, timezonefinder and tzwhere. Despite it's apparent popularity, tzwhere seems to be a stagnant project and timezonefinder has been updated recently.  
 
+#### Lost at Sea
+
+```{cmd}
+Null timezone at airport FAQ Long: -169.4239058 Lat: 14.21577583
+Null timezone at airport GRO Long: -145.2425353 Lat: 14.1743075
+Null timezone at airport GSN Long: -145.7293561 Lat: 15.11900139
+Null timezone at airport GUM Long: -144.7959825 Lat: 13.48345
+Null timezone at airport PPG Long: -170.7105258 Lat: 14.33102278
+Null timezone at airport TNI Long: -145.6180383 Lat: 14.99685028
+Null timezone at airport TT01 Long: -145.7686111 Lat: 18.12444444
+Null timezone at airport Z08 Long: -169.6700236 Lat: 14.18435056
+```
+
+After integrating timezonefinder to provide timezones, it introduced a new problem. It seems it cannot correctly provide timezones for islands in the middle of the Pacific ocean. To compensate for this, I attempted to lean on tzwhere. That package failed to install. It seems Anaconda doesn't provide for it in the default libraries and pip has it listed with a broken dependency chain. Taking another look at the timezonefinder page on pypi.org, ocean data has been excluded from the current dataset.  
+
+The information on timezonefinder's project page, there's no simple drop in replacement for replacing the data set with ocean aware information. My solution will be to manually assign the timezone for these eight airports. Given the scope of the project and the need for these airports, this is an acceptable manual process. It will also give me the chance of addressing any issue with the TT01 and Z08 airports. One of these has too many characters for an IATA code and both of them have non-letter characters.  
+
+#### Save the dates
+
 For timezone aware datetimes, there's no shortage of options. A bit of searching turned up, datetime with pytz, arrow, pendulum, delorean and udatetime. Scratching the surface of those uncovered ciso8601 and mxDateTime.
 
 Pendulum's latest release is from october of last year.  
@@ -355,7 +374,7 @@ It seems that, despite all the options, there's really only datetime with pytz.
 
 A straight translation of times isn't going to be possible. Instead, I'll need to take a tested assumption approach. The place to start would be the scheduled timestamps.  
 
-Starting with flight scheduling, the provided date must be scheduled departure date. Scheduled departure and arrival times will need to be converted to UTC. With both times in UTC the scheduled elapsed time can be calculated and compared. If the calculated elapsed time matches the scheduled elapsed time, then confidence in the reported scheduled times should be increased.  
+Starting with flight scheduling, the provided date is assumed to be scheduled departure date. Scheduled departure and arrival times will need to be converted to UTC. With both times in UTC the scheduled elapsed time can be calculated and compared. If the calculated elapsed time matches the scheduled elapsed time, then confidence in the reported scheduled times should be increased.  
 
 Scheduled 
 

@@ -13,102 +13,7 @@ import pytz
 from pytz import timezone
 from timezonefinder import TimezoneFinder
 
-#rawDir = ("../RawData")
-rawDir = ("../TestData")
-cfgDir = ("./StaticFiles")
-selectAirports = ['SLC']
-processedData = []
 
-dtOutString = "%Y-%m-%d %H:%M"
-
-outDir = ("../PreprocessedData")
-airportsStr = "".join(selectAirports)
-csvOut = "preparedFlightData_" + airportsStr
-
-fieldsToCopy = [
-            # Day of the Week as ISO number.
-            #"DayOfWeek", 
-
-            ### Flight Descriptors
-            "Dest", "Origin", "Distance",
-            "FlightNum", "TailNum", 
-            #"UniqueCarrier", 
-            
-            ### In Minutes
-            # Delays
-            "CarrierDelay", "WeatherDelay", "NASDelay", 
-            "SecurityDelay", "LateAircraftDelay",
-            # Travel time
-            #"ActualElapsedTime", "AirTime", "CRSArrTime"
-
-            ### Modified flight plan
-            #"CancellationCode", "Cancelled",
-            #"Diverted"
-]
-
-fieldsToWrite = set()
-
-cancelCodes = {
-    "A" : "Carrier", 
-    "B" : "Weather", 
-    "C" : "NAS", 
-    "D" : "Security"
-}
-
-cancelledOrDiverted = []
-unknownCarriers = {}
-distDiffs = set()
-
-carriers = {}
-airports = {}
-legs = {}
-
-flightTimeNames = {
-    "Arr": "ActualArrive", 
-    "Dep": "ActualDepart", 
-    "CRSArr": "SchedArrive", 
-    "CRSDep": "SchedDepart" 
-}
-
-utc = pytz.utc
-
-# carriers.csv file obtained from http://stat-computing.org/dataexpo/2009/carriers.csv
-with open(os.path.join(cfgDir, "carriers.csv"), 'r') as inFile:
-    reader = csv.DictReader(inFile)
-    for row in reader:
-        if "Code" in row and "Description" in row:
-            carriers.update({row["Code"]: row["Description"]})
-        else:
-            raise Exception("Unknown format: carriers.csv")
-
-# airports.csv file obtained from http://stat-computing.org/dataexpo/2009/airports.csv
-with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
-    tf = TimezoneFinder(in_memory=True)
-    reader = csv.DictReader(inFile)
-    for row in reader:
-        if "iata" in row \
-        and "airport" in row\
-        and "city" in row\
-        and "state" in row\
-        and "country" in row\
-        and "lat" in row\
-        and "long" in row:
-            tzone = tf.timezone_at(lng=float(row["long"]), lat=float(row["lat"]))
-            airports.update({
-                row["iata"]: {
-                    "airport": row["airport"],
-                    "city" : row["city"],
-                    "state" : row["state"],
-                    "country" : row["country"],
-                    "lat" : math.radians(float(row["lat"])),
-                    "long" : math.radians(float(row["long"])),
-                    "tzone" : tzone
-                }
-            })
-        else:
-            raise Exception("Unknown format: airport.csv")
-
-pprint.pprint(airports)
 
 def GetDirection(degree):
     compassPoints = (
@@ -207,11 +112,139 @@ def GetFlightStageDateTime(record, flightStage):
     #    return "NaN"
     #record[flightStage[0]], record[flightStage[1]])
 
+
+#rawDir = ("../RawData")
+rawDir = ("../TestData")
+cfgDir = ("./StaticFiles")
+selectAirports = ['SLC']
+processedData = []
+
+dtOutString = "%Y-%m-%d %H:%M"
+
+outDir = ("../PreprocessedData")
+airportsStr = "_".join(selectAirports)
+csvOut = "preparedFlightData" + airportsStr
+
+fieldsToCopy = [
+            # Day of the Week as ISO number.
+            #"DayOfWeek", 
+
+            ### Flight Descriptors
+            "Dest", "Origin", "Distance",
+            "FlightNum", "TailNum", 
+            #"UniqueCarrier", 
+            
+            ### In Minutes
+            # Delays
+            "CarrierDelay", "WeatherDelay", "NASDelay", 
+            "SecurityDelay", "LateAircraftDelay",
+            # Travel time
+            #"ActualElapsedTime", "AirTime", "CRSArrTime"
+
+            ### Modified flight plan
+            #"CancellationCode", "Cancelled",
+            #"Diverted"
+]
+fieldsToWrite = set()
+
+cancelCodes = {
+    "A" : "Carrier", 
+    "B" : "Weather", 
+    "C" : "NAS", 
+    "D" : "Security"
+}
+
+cancelledOrDiverted = []
+
+
+flightTimeNames = {
+    "Arr": "ActualArrive", 
+    "Dep": "ActualDepart", 
+    "CRSArr": "SchedArrive", 
+    "CRSDep": "SchedDepart" 
+}
+
+
+carriers = {}
+# carriers.csv file obtained from http://stat-computing.org/dataexpo/2009/carriers.csv
+with open(os.path.join(cfgDir, "carriers.csv"), 'r') as inFile:
+    reader = csv.DictReader(inFile)
+    for row in reader:
+        if "Code" in row and "Description" in row:
+            carriers.update({row["Code"]: row["Description"]})
+        else:
+            raise Exception("Unknown format: carriers.csv")
+
+airports = {}
+airportTimeZones = {}
+airportTimeZoneNames = set()
+# airports.csv file obtained from http://stat-computing.org/dataexpo/2009/airports.csv
+with open(os.path.join(cfgDir, "airports.csv"), 'r') as inFile:
+    
+    # Data validation construct
+    unknownCarriers = {}
+
+    tf = TimezoneFinder(in_memory=True)
+    reader = csv.DictReader(inFile)
+    for row in reader:
+        if "iata" in row \
+        and "airport" in row\
+        and "city" in row\
+        and "state" in row\
+        and "country" in row\
+        and "lat" in row\
+        and "long" in row:
+            tzone = tf.timezone_at(lng=float(row["long"]), lat=float(row["lat"]))
+            airportTimeZoneNames.add(tzone)
+            if not tzone: 
+                print("Null timezone at airport {} Long: {} Lat: {}".format(row["iata"], row["long"], row["lat"]))
+                #tzone = tf.closest_timezone_at(lng=float(row["long"]), lat=float(row["lat"]), delta_degree=5, return_distances=True)
+                #print("Closest timezone: {}".format(tzone))
+            airports.update({
+                row["iata"]: {
+                    "airport": row["airport"],
+                    "city" : row["city"],
+                    "state" : row["state"],
+                    "country" : row["country"],
+                    "lat" : math.radians(float(row["lat"])),
+                    "long" : math.radians(float(row["long"])),
+                    "tzone" : tzone
+                }
+            })
+        else:
+            raise Exception("Unknown format: airport.csv")
+
+# take a sample of our airport dictionary for visual inspection
+if False:
+    for key in list(airports.keys())[53:57]: pprint.pprint(airports[key]) 
+else: print("airports loaded")
+
+# create timezone objects for each of our timezones
+#for atzName in airportTimeZoneNames:
+    #print("Creating Timezone: {}".format(atzName))
+    #airportTimeZones.update({
+    #    atzName: timezone(atzName)
+    #})
+# and update our airports dictionary
+#for aport in list(airports.keys()):
+#    airports[aport]["tzone"] = airportTimeZones[airports[aport]["tzone"]]
+
+# take a sample of our airport dictionary for visual inspection
+if False:
+    for key in list(airports.keys())[53:57]: pprint.pprint(airports[key]) 
+else: print("airports timezones added")
+
+utc = pytz.utc
+
+# There is no reason to recalculate the journey from one airport to another more than once
+legs = {}
+
 for csvFile in os.listdir(rawDir):
     print("processing {}".format(csvFile))
     with open(os.path.join(rawDir, csvFile), 'r') as inFile:
         reader = csv.DictReader(inFile)
         i = 0
+        distDiffs = set()
         for row in reader:
             processedFields = {}
             if row["Origin"] in selectAirports or row["Dest"] in selectAirports:
@@ -326,6 +359,8 @@ for csvFile in os.listdir(rawDir):
                 #i += 1
                 fieldsToWrite.update(list(processedFields.keys()))
             i += 1
+        print("Differences in distances")
+        pprint.pprint(distDiffs)
 
 print("writing preprocessed data to csv")
 #pprint.pprint(fieldsToWrite)
