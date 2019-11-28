@@ -14,8 +14,6 @@ import pytz
 from pytz import timezone
 from timezonefinder import TimezoneFinder
 
-
-
 def GetDirection(degree):
     compassPoints = (
         "North", "NorthEast",
@@ -55,64 +53,30 @@ def DescribeLeg(origin, dest):
     # Direction
     v1 = math.sin(deltaLong) * math.cos(dLat)
     v2 = math.cos(oLat) * math.sin(dLat) - math.sin(oLat) * math.cos(dLat) * math.cos(deltaLong)
-    degHeading = round(math.atan2(v1, v2) * 180 / math.pi)
-    #if degHeading < 0: degHeading += 360 
+    degBearing = round(math.atan2(v1, v2) * 180 / math.pi)
+    #if degBearing < 0: degBearing += 360 
 
-    direction = GetDirection(degHeading)
+    direction = GetDirection(degBearing)
 
     oTz = tf.timezone_at(lng=oLong, lat=oLat)
     dTz = tf.timezone_at(lng=dLong, lat=dLat)
 
-
     outDict = {
         origin + "-" + dest : {
             "CalculatedDistance": calcDist,
-            "Heading": degHeading,
-            "DirectionOfTravel": direction
+            "Bearing": degBearing,
+            "DirectionOfTravel": direction,
+            "EstTimeZonesCrossed": 24
         }
     }
 
     return outDict
 
-def SplitTime(timeInt):
-    """Convert an integer representation of a 24hr time to a dictionary of hour and minute"""
-     
-    # Pad the integer as a 4 character string for the most predictable behavior
-    timeMask = re.compile(r'(\d{2})(\d{2})')
-    try:
-        timeStr = str(int(timeInt)).zfill(4)
-        timeParts = timeMask.match(timeStr)
-        #print("Split {} into hour {} and min {} ".format(timeInt, timeParts[1], timeParts[2]))
-    except ValueError:
-        return {"Hour": "NA", "Min": "NA"}
-    else:
-        return {"Hour": int(timeParts[1]), "Min": int(timeParts[2])}
+def NextDayArrival(departDt, arriveDt, estTzCrossed, bearing, estTime):
+    # Guestimate how many timezones we're going to cross
+    # simple trig on 
 
-def GetFlightStageDateTime(record, flightStage):
-    #try:
-    try:
-        tmp_date = dt.datetime.strptime(record[flightStage[0]],"%Y-%m-%d")
-        #pprint.pprint("Converted {} to date {}".format(record[flightStage[0]], tmp_date))
-    except:
-        tmp_date = dt.datetime()
-
-    try:
-        tmp_time = dt.datetime.strptime(str(record[flightStage[1]]), "%H:%M:%S").time()
-        #pprint.pprint("Converted {} to time {}".format(record[flightStage[1]], tmp_time))
-    except:
-        tmp_time = dt.time()
-
-    return dt.datetime.combine(tmp_date, tmp_time)   
-    #return tmp_date
-    #return tmp_time
-    #except:
-    #    return "NaN"
-    #    pass
-    #    print(sys.exc_info()[0])
-    #else:
-    #    return "NaN"
-    #record[flightStage[0]], record[flightStage[1]])
-
+    return False
 
 #rawDir = ("../RawData")
 rawDir = ("../TestData")
@@ -224,20 +188,6 @@ if False:
     for key in list(airports.keys())[53:57]: pprint.pprint(airports[key]) 
 else: print("airports loaded")
 
-# create timezone objects for each of our timezones
-#for OlsenTz in airportTimeZoneNames:
-    #print("Creating Timezone: {}".format(OlsenTz))
-#    airportTimeZones.update({
-#        OlsenTz: timezone(OlsenTz)
-#    })
-# and update our airports dictionary
-#for aport in list(airports.keys()):
-#    airports[aport]["OlsenTz"] = airportTimeZones[airports[aport]["OlsenTz"]]
-# take a sample of our airport dictionary for visual inspection
-#if False:
-#    for key in list(airports.keys())[53:57]: pprint.pprint(airports[key]) 
-#else: print("airports timezones added")
-
 utc = pytz.utc
 
 # There is no reason to recalculate the journey from one airport to another more than once
@@ -323,20 +273,25 @@ for csvFile in os.listdir(rawDir):
                 
                 # Provided date is assumed scheduled depart date
                 tmpDT['RawDate'] = dt.datetime(year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"]))
-                schDepTm = dt.datetime.strptime(row['CRSDepTime'].zfill(4),"%H%M").time()
-                naiveSchDep = dt.datetime.combine(tmpDT['RawDate'], schDepTm)
-                depTz = pytz.timezone(airports[row['Origin']]['OlsenTz'])
-                tmpDT['SchDep'] = depTz.localize(naiveSchDep)
+                tmpDT['schDepTm'] = dt.datetime.strptime(row['CRSDepTime'].zfill(4),"%H%M").time()
+                tmpDT['naiveSchDep'] = dt.datetime.combine(tmpDT['RawDate'], tmpDT['schDepTm'])
+                tmpDT['depTz'] = pytz.timezone(airports[row['Origin']]['OlsenTz'])
+                tmpDT['SchDep'] = tmpDT['depTz'].localize(tmpDT['naiveSchDep'])
                 tmpDT['SchedDepart'] = tmpDT['SchDep'].astimezone(utc)
 
                 # Are scheduled arrival time and elapsed time sane
-                schArrTm = dt.datetime.strptime(row['CRSArrTime'].zfill(4),"%H%M").time()
-                naiveSchArr = dt.datetime.combine(tmpDT['RawDate'], schArrTm)
-                arrTz = pytz.timezone(airports[row['Dest']]['OlsenTz'])
-                tmpDT['SchArr'] = arrTz.localize(naiveSchArr)
+                tmpDT['schArrTm'] = dt.datetime.strptime(row['CRSArrTime'].zfill(4),"%H%M").time()
+                tmpDT['naiveSchArr'] = dt.datetime.combine(tmpDT['RawDate'], tmpDT['schArrTm'])
+                tmpDT['SchTime'] = dt.timedelta(minutes=int(row['CRSElapsedTime']))
+                
+                # Determine next day arrival before localizing the arrival datetime.
+                while (NextDayArrival(tmpDT['naiveSchDep'], tmpDT['naiveSchArr'], legs[journeyLeg]['EstTimeZonesCrossed'], legs[journeyLeg]['Bearing'], tmpDT['SchTime'])):
+                    tmpDT['naiveSchArr'] = tmpDT['naiveSchArr'] + dt.timedelta(days=1)
+
+                tmpDT['arrTz'] = pytz.timezone(airports[row['Dest']]['OlsenTz'])
+                tmpDT['SchArr'] = tmpDT['arrTz'].localize(tmpDT['naiveSchArr'])
                 tmpDT['SchedArrive'] = tmpDT['SchArr'].astimezone(utc)
                 
-                tmpDT['SchTime'] = dt.timedelta(minutes=int(row['CRSElapsedTime']))
                 tmpDT['CalcSchTime'] = tmpDT['SchedArrive'] - tmpDT['SchedDepart']
 
 
@@ -361,7 +316,7 @@ for csvFile in os.listdir(rawDir):
                 dstEndTop = dstEnd + dstRng
                 dstEndBottom = dstEnd - dstRng
                 # if the local arrival or departure datetime is within 1 hour + the scheduled elapsed time of dst end/start times, show me
-                if depTz.localize(dstStartBottom) < tmpDT['SchDep'] < depTz.localize(dstStartTop) or arrTz.localize(dstStartBottom) < tmpDT['SchArr'] < arrTz.localize(dstStartTop):
+                if tmpDT['depTz'].localize(dstStartBottom) < tmpDT['SchDep'] < tmpDT['depTz'].localize(dstStartTop) or tmpDT['arrTz'].localize(dstStartBottom) < tmpDT['SchArr'] < tmpDT['arrTz'].localize(dstStartTop):
                     print("Nearing daylight savings")
                     print("Flying from {} to {}".format(row['Origin'], row['Dest']))
                     print("local depart time: {} Timezone: {}".format(tmpDT['SchDep'], tmpDT['SchDep'].tzinfo))
@@ -371,7 +326,7 @@ for csvFile in os.listdir(rawDir):
                     print("Calculated scheduled elapsed time: {}".format(tmpDT['CalcSchTime']))
                     print("Provided scheduled elapsed time: {}".format(tmpDT['SchTime']))
                     print("")
-                if depTz.localize(dstEndBottom) < tmpDT['SchDep'] < depTz.localize(dstEndTop) or arrTz.localize(dstEndBottom) < tmpDT['SchArr'] < arrTz.localize(dstEndTop):
+                if tmpDT['depTz'].localize(dstEndBottom) < tmpDT['SchDep'] < tmpDT['depTz'].localize(dstEndTop) or tmpDT['arrTz'].localize(dstEndBottom) < tmpDT['SchArr'] < tmpDT['arrTz'].localize(dstEndTop):
                     print("Ending daylight savings")
                     print("Flying from {} to {}".format(row['Origin'], row['Dest']))
                     print("local depart time: {} Timezone: {}".format(tmpDT['SchDep'], tmpDT['SchDep'].tzinfo))

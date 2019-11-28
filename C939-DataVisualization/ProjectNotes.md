@@ -400,7 +400,79 @@ Calculated scheduled elapsed time: 0:15:00
 Provided scheduled elapsed time: 1:15:00
 ```
 
+#### Ambiguities of DST
 
-Scheduled 
+[https://en.wikipedia.org/wiki/Daylight_saving_time_in_the_United_States](https://en.wikipedia.org/wiki/Daylight_saving_time_in_the_United_States)  
 
- the provided date is the scheduled date. Assume scheduled times are good and in local time
+For timezones affected by daylight savings time, twice a year, time keeping stops being continuous.  
+
+At the start of daylight savings, the clock rolls over from 00:59 to 02:00. If a flight begins before the roll over and lands after the rollover, an additional hour may be aded to the flight time. This is what we see in the following example. The flight took off before the DST "spring forward" event and landed afterwards. The earlier arrival time on same day in this output is a result of date determination. Next day determination occurs after the converstion to UTC.  
+
+```{cmd}
+Nearing daylight savings
+Flying from SLC to ATL
+local depart time: 2003-04-05 22:55:00-07:00 Timezone: America/Denver
+local arrive time: 2003-04-05 05:20:00-05:00 Timezone: America/New_York
+depart time UTC: 2003-04-06 05:55:00+00:00
+arrive time UTC: 2003-04-06 10:20:00+00:00
+Calculated scheduled elapsed time: 4:25:00
+Provided scheduled elapsed time: 3:25:00
+```
+
+```{cmd}
+Nearing daylight savings
+Flying from SLC to TUL
+local depart time: 2003-04-06 20:50:00-06:00 Timezone: America/Denver
+local arrive time: 2003-04-06 00:08:00-06:00 Timezone: America/Chicago
+depart time UTC: 2003-04-07 02:50:00+00:00
+arrive time UTC: 2003-04-07 06:08:00+00:00
+Calculated scheduled elapsed time: 3:18:00
+Provided scheduled elapsed time: 2:18:00
+```
+
+Another, related issue, is observed when pytz applies a non-DST timestamp to a DST time. This also appears to be an artifact of order of date determination. Rather than trying to determine how to correct these errors after the fact, it would be better try to prevent the error and then re-evaluate.  
+
+One thing to be aware of is the loss of time by traveling West. It is not so straight forward to say "next day" arrival if the arrival time is earlier than the depart time. With a high confidence in the provided scheduled elapsed time, we can improve the logic to determine next day arrival.  
+
+[http://www.physicalgeography.net/fundamentals/2c.html](http://www.physicalgeography.net/fundamentals/2c.html)  
+
+For next day arrival, first question is how many timezones are we expecting to cross. There are 24 timezones and each are 15 degrees of longitude in width. The length of a degree of longitude varies according to latitude. This will not produce an accurate number of actual timezone crossed. There's other factors used to determine timezone boundaries. Artificial human constructs like government borders are a major factor in timezone construction. Still, it should suffice for our purposes. As this calculation doesn't change for each leg of flight, it should suffice to calculate it once as a part of leg description.  
+
+The error introduced by this approximation of timezones crossed would be an addition day in flight time. That can easily be determined and removed after the conversion to UTC. However, if the arrival time is determined to be next day near or on a DST change date, what effect would this error produce? Rather than determine how to handle an error that could occur, it would be better to treat a next day arrival as a questioned boolean.  
+
+This is our current "Probably Next Day Arrival" algorithm
+
+1. Departure time is known: start with it in minute of the day
+1. If traveling East: add the product of 60 times the number of estimated timezones crossed
+1. If traveling West: subtract the product of 60 times the number of estimated timezones crossed.
+1. Add minutes equal the predicted travel time.
+1. Subtract 1440 (number of minutes in a day)
+1. Is the result negative? Yes: probably same day arrival
+1. Is the result positive? Yes: probably next day arrival
+1. Is the absolute value of the result less than 120? (4 hour questionable range)
+    * No: Signage should be good enough. It's clearly same day or next day.
+    * Yes: Arrival time is close to midnight, local time.
+        * Is the scheduled local arrival time greater than 22:00? Yes, same day
+        * Is the scheduled local arrival time less than 03:00? Yes, next day
+
+Perhaps that is over complicating the problem. Perhaps it would be simpler to just compare departure time to arrival time in light of estimated travel time.  
+
+There's only 1440 minutes in a day.  
+If we subtract the departure minute from 1440, then we know how many minutes are left on the day we departed. Dividing this by 1440 will return a ratio of how much of a day I have remaining.  
+If we subtract the scheduled arrival minute from 1440, then we know how many minutes are left on the day we arrive.  
+If we divide the number of minutes estimated traveling by 1440, then we know how much of a day was spent traveling.  
+
+The ratio of day remaining plus the ratio of day traveling will provide a value relative to one. If that value is less than one, the travel didn't eat up the remainder of my day and relative to where I started, it's the same day. If that value is greater or equal to one, than it took up all of my remaining day and I arrived the next day relative to my starting point.
+
+The ratio of day remaining on my arrival day minus the ratio of day spend traveling will produce a number between negative one and one. If that number is negative, then I started my journey the day before, relative to the place of my arrival. If that number is zero or positive, then I started my journey on the same day, relative to the place of my arrival.  
+
+This provides four possible descriptions for my travel from the perspectives of where I started and where I ended.
+
+|  | Depart Perspective</br>Arrived Same Day | Depart Perspective</br>Arrived Next Day |
+|--|:--:|:--:|
+| Arrival Perspective:</br>Departed Previous Day | Next Day | Next Day |
+| Arrival Perspective:</br>Departed Same Day | Same Day | Same Day |
+
+This shows that the arrival perspective is the only factor for deciding if arrival is "next day". It suggests to me there's a flaw in the logic used to get to this point. After some consideration, the flaw is it has ignored the relationship between dates of the origin and destination. While this didn't pan out, it did help illustrate a simpler method of determining "next day arrival".  
+
+Up to now, we've been maintaining separate considerations for arrival and departure times. What the failure of the last algorithm illustrated to me is to expand this consideration for the destination timezone before converting to UTC.  
