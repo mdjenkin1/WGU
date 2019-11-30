@@ -475,4 +475,76 @@ This provides four possible descriptions for my travel from the perspectives of 
 
 This shows that the arrival perspective is the only factor for deciding if arrival is "next day". It suggests to me there's a flaw in the logic used to get to this point. After some consideration, the flaw is it has ignored the relationship between dates of the origin and destination. While this didn't pan out, it did help illustrate a simpler method of determining "next day arrival".  
 
-Up to now, we've been maintaining separate considerations for arrival and departure times. What the failure of the last algorithm illustrated to me is to expand this consideration for the destination timezone before converting to UTC.  
+Up to now, we've been maintaining separate considerations for arrival and departure times. What the failure of the last algorithm illustrated to me is to expand this consideration to include all times at the destination timezone before converting to UTC. This is probably the most important lesson for dealing with time. Maintain a single standard and convert only when necessary. In this case, each record will be manipulated in the destination's time zone before conversion to UTC for export.  
+
+The result of this simpler approach was a greater improvement in scheduled date times. Only two records in the 2003 test set resulted in not sane scheduled date times. Both of these seem to not be an issue in logic
+
+```{python}
+Scheduled times for RNO-SLC
+{'ArrTime': datetime.time(0, 0),
+ 'ArrTimeGood': False,
+ 'CRSArrTime': datetime.time(21, 15),
+ 'CRSArrTimeGood': True,
+ 'CRSDepTime': datetime.time(20, 20),
+ 'CRSDepTimeGood': True,
+ 'DepTime': datetime.time(20, 33),
+ 'DepTimeGood': True,
+ 'ElapsedTime_Sched': datetime.timedelta(days=-1, seconds=86100),
+ 'ElapsedTime_SchedCalc': datetime.timedelta(seconds=86100),
+ 'RawDate': datetime.datetime(2003, 2, 27, 0, 0),
+ 'SchedArrive_dest': datetime.datetime(2003, 2, 28, 21, 15, tzinfo=<DstTzInfo 'America/Denver' MST-1 day, 17:00:00 STD>),
+ 'SchedDepart_dest': datetime.datetime(2003, 2, 27, 21, 20, tzinfo=<DstTzInfo 'America/Denver' MST-1 day, 17:00:00 STD>),
+ 'SchedDepart_local': datetime.datetime(2003, 2, 27, 20, 20, tzinfo=<DstTzInfo 'America/Los_Angeles' PST-1 day, 16:00:00 STD>)}
+Difference in scheduled elapsed time for RNO-SLC.
+Provided elapsed time: -1 day, 23:55:00
+Calculated elapsed time: 23:55:00
+```
+
+For the first one, the provided elapsed time is negative. This is just bad data. The calculated elapsed time is also bad. The drive from Reno to Salt Lake only takes eight hours. Five minutes short of a full day for a flight is more than just unreasonable. According to Google, this flight should only take 1 hr 20 min. The issue appears to be one of the scheduled times was recorded in the timezone of the other end of the leg.  
+
+```{python}
+Scheduled times for ANC-SLC
+{'ArrTime': datetime.time(7, 27),
+ 'ArrTimeGood': True,
+ 'CRSArrTime': datetime.time(7, 10),
+ 'CRSArrTimeGood': True,
+ 'CRSDepTime': datetime.time(1, 45),
+ 'CRSDepTimeGood': True,
+ 'DepTime': datetime.time(0, 45),
+ 'DepTimeGood': True,
+ 'ElapsedTime_Sched': datetime.timedelta(seconds=15900),
+ 'ElapsedTime_SchedCalc': datetime.timedelta(seconds=12300),
+ 'RawDate': datetime.datetime(2003, 10, 26, 0, 0),
+ 'SchedArrive_dest': datetime.datetime(2003, 10, 26, 7, 10, tzinfo=<DstTzInfo 'America/Denver' MST-1 day, 17:00:00 STD>),
+ 'SchedDepart_dest': datetime.datetime(2003, 10, 26, 3, 45, tzinfo=<DstTzInfo 'America/Denver' MST-1 day, 17:00:00 STD>),
+ 'SchedDepart_local': datetime.datetime(2003, 10, 26, 1, 45, tzinfo=<DstTzInfo 'America/Anchorage' AKST-1 day, 15:00:00 STD>)}
+Difference in scheduled elapsed time for ANC-SLC.
+Provided elapsed time: 4:25:00
+Calculated elapsed time: 3:25:00
+```
+
+On this record, it's not clear why there's an hour difference between reported and calculated times. One troubling aspect is the predicted 4 hr 25 min travel time. According to Google, this should be closer to 6 hrs.  
+
+[https://www.timeanddate.com/time/change/usa/anchorage?year=2003](https://www.timeanddate.com/time/change/usa/anchorage?year=2003)  
+
+My first instinct for DST ambiguity seems to be the main factor. 1:45am happened twice on 10/26/2003. There's no way to say if the clock was the AKDT or AKST occurrence. If it was the AKDT occurrence, then the predicted time is correct. The shorter than modern predicted travel time is less concerning for our purpose.  
+
+### Scheduled Time Edge Cases
+
+Addressing the first error record is a question of completeness. The error seems to have occurred during data capture. Therefore it's out of my control to correct this error. As it's a capture error, the value of the record is put in question. What to do with it is a question of data completeness. For the needs of this project, I assume the inclusion of this record is not pivotal. So I'll make note of it as a dropped record and move on.  
+
+For the second error, it's ambiguity of DST. Given a choice, I would do away with this ambiguity by having year round DST. As that's beyond my power, I'll need to introduce some rudimentary logic that determines potentially ambiguous DST datetimes and takes steps to mitigate any errors they may introduce.  
+
+The first case is easy enough to address. If the scheduled elapsed time is negative, throw away the record. The second case needs some consideration. First step would be to determine if the scheduled arrival or departure time is causing the time skew. This would require knowing which timestamps can be ambiguous.  
+
+One option is to build a determiner from information found on the internet: [https://www.worldtimeserver.com/time_zone_guide/documentation/](https://www.worldtimeserver.com/time_zone_guide/documentation/)  
+Another option is to see what the pytz api offers. [http://pytz.sourceforge.net/](http://pytz.sourceforge.net/)  
+
+The pytz sourceforge page specifically calls out this problem of DST caused ambiguous times under "[problems with local time](http://pytz.sourceforge.net/#problems-with-localtime)". The solution it offers is a boolean parameter "is_dst". Being able to specify if a date time is or is not DST will be helpful to ensure the correct local time zone is set. More useful is the ability to throw an exception by forcing pytz to not guess when a potentially ambiguous or impossible DST time is encountered.  
+
+There's one error case involving ambiguous DST not covered by our logic this far. When both the departure and arrival datetimes are ambiguous and both are determined to fall on the wrong side of the DST switch, this error case is not caught with our current logic. For this purposes of this project, this error doesn't matter.
+
+### Actual Travel Datetimes
+
+With scheduled date times in place, what's left are the date times of actual travel.
+

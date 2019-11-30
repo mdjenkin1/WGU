@@ -72,11 +72,52 @@ def DescribeLeg(origin, dest):
 
     return outDict
 
-def NextDayArrival(departDt, arriveDt, estTzCrossed, bearing, estTime):
-    # Guestimate how many timezones we're going to cross
-    # simple trig on 
+def GetTime(timeIn):
+    """convert a 4 digit integer or string to time. Return midnight if "NA" or invalid. 
+    Include a boolean to flag false midnight return"""
+    goodTime = True
+    try:
+        timeOut = dt.datetime.strptime(timeIn.zfill(4),"%H%M").time()
+    except:
+        timeOut = dt.time(hour=0, minute=0)
+        goodTime = False
+    return timeOut, goodTime
 
-    return False
+def IsDstAmbiguousTime(dtime, dtz):
+    exitBool = False
+    try:
+        dtz.localize(dtime, is_dst=None)
+    except pytz.exceptions.AmbiguousTimeError:
+        exitBool = True
+        pass
+    finally:
+        return exitBool
+
+def IsDstNonExistentTime(dtime, dtz):
+    exitBool = False
+    try:
+        dtz.localize(dtime, is_dst=None)
+    except pytz.exceptions.NonExistentTimeError:
+        exitBool = True
+        pass
+    finally:
+        return exitBool
+
+def CorrectDstAmbiguousTime(event, dtime, dtz, timeDiff):
+    # timeDiff is the expected travel time minus the calculated travel time
+    # if the difference is negative, then the depart time was an hour late or the arrive time was an hour early
+    # if the difference is positive, then the depart time was an hour early or the arrive time was an hour late
+
+    if event == "depart":
+        if timeDiff > 0:
+            return dtz.localize(dtime, is_dst=True)
+        else:
+            return dtz.localize(dtime, is_dst=False)
+    if event == "arrive":
+        if timeDiff > 0:
+            return dtz.localize(dtime, is_dst=False)
+        else:
+            return dtz.localize(dtime, is_dst=True)
 
 #rawDir = ("../RawData")
 rawDir = ("../TestData")
@@ -89,6 +130,10 @@ dtOutString = "%Y-%m-%d %H:%M"
 outDir = ("../PreprocessedData")
 airportsStr = "_".join(selectAirports)
 csvOut = "preparedFlightData" + airportsStr
+droppedRecordsStr = "droppedRecords" + airportsStr
+droppedRecords = []
+
+rowFields = set()
 
 fieldsToCopy = [
             # Day of the Week as ISO number.
@@ -121,7 +166,7 @@ cancelCodes = {
 
 cancelledOrDiverted = []
 
-
+# Used for field access and renaming to support reuse of time processors
 flightTimeNames = {
     "Arr": "ActualArrive", 
     "Dep": "ActualDepart", 
@@ -197,6 +242,7 @@ for csvFile in os.listdir(rawDir):
     print("processing {}".format(csvFile))
     with open(os.path.join(rawDir, csvFile), 'r') as inFile:
         reader = csv.DictReader(inFile)
+        rowFields.update(reader.fieldnames)
         i = 0
         distDiffs = set()
         for row in reader:
@@ -269,30 +315,92 @@ for csvFile in os.listdir(rawDir):
                 
                 ### Datetime calculations
                 #print("Flying from {} to {}".format(row['Origin'],row['Dest']))
+
                 tmpDT = {}
+                orgTz = pytz.timezone(airports[row['Origin']]['OlsenTz'])
+                destTz = pytz.timezone(airports[row['Dest']]['OlsenTz'])
+
+                for field in list(flightTimeNames.keys()):
+                    timeField = field + "Time"
+                    tmpDT[timeField], tmpDT[timeField+"Good"] = GetTime(row[timeField])
                 
-                # Provided date is assumed scheduled depart date
+                # Scheduled departure
                 tmpDT['RawDate'] = dt.datetime(year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"]))
-                tmpDT['schDepTm'] = dt.datetime.strptime(row['CRSDepTime'].zfill(4),"%H%M").time()
-                tmpDT['naiveSchDep'] = dt.datetime.combine(tmpDT['RawDate'], tmpDT['schDepTm'])
-                tmpDT['depTz'] = pytz.timezone(airports[row['Origin']]['OlsenTz'])
-                tmpDT['SchDep'] = tmpDT['depTz'].localize(tmpDT['naiveSchDep'])
-                tmpDT['SchedDepart'] = tmpDT['SchDep'].astimezone(utc)
+                naiveSchedDepart = dt.datetime.combine(tmpDT['RawDate'], tmpDT['CRSDepTime'])
+                tmpDT['SchedDepart_local'] = orgTz.localize(naiveSchedDepart)
+                tmpDT['SchedDepart_dest'] = tmpDT['SchedDepart_local'].astimezone(destTz)
 
-                # Are scheduled arrival time and elapsed time sane
-                tmpDT['schArrTm'] = dt.datetime.strptime(row['CRSArrTime'].zfill(4),"%H%M").time()
-                tmpDT['naiveSchArr'] = dt.datetime.combine(tmpDT['RawDate'], tmpDT['schArrTm'])
-                tmpDT['SchTime'] = dt.timedelta(minutes=int(row['CRSElapsedTime']))
-                
-                # Determine next day arrival before localizing the arrival datetime.
-                while (NextDayArrival(tmpDT['naiveSchDep'], tmpDT['naiveSchArr'], legs[journeyLeg]['EstTimeZonesCrossed'], legs[journeyLeg]['Bearing'], tmpDT['SchTime'])):
-                    tmpDT['naiveSchArr'] = tmpDT['naiveSchArr'] + dt.timedelta(days=1)
+                # Determine date of scheduled arrival
+                if tmpDT['CRSArrTimeGood']:
+                    schedArriveDate = tmpDT["SchedDepart_dest"].date()
+                    # compare depart and arrive times as clocked at the destination
+                    # add a day if the arrival time is earlier than depart time
+                    if tmpDT['CRSArrTime'] < tmpDT['SchedDepart_dest'].time():
+                        schedArriveDate = schedArriveDate + dt.timedelta(days=1)
+                else:
+                    print("Bad Arrival Time Recorded")
+                    continue
 
-                tmpDT['arrTz'] = pytz.timezone(airports[row['Dest']]['OlsenTz'])
-                tmpDT['SchArr'] = tmpDT['arrTz'].localize(tmpDT['naiveSchArr'])
-                tmpDT['SchedArrive'] = tmpDT['SchArr'].astimezone(utc)
                 
-                tmpDT['CalcSchTime'] = tmpDT['SchedArrive'] - tmpDT['SchedDepart']
+
+                naiveSchedArrive = dt.datetime.combine(schedArriveDate, tmpDT['CRSArrTime'])
+                tmpDT['SchedArrive_dest'] = destTz.localize(naiveSchedArrive)
+
+                # Is the scheduled elapsed time sane
+                tmpDT['ElapsedTime_Sched'] = dt.timedelta(minutes=int(row['CRSElapsedTime']))
+                tmpDT['ElapsedTime_SchedCalc'] = tmpDT['SchedArrive_dest'] - tmpDT['SchedDepart_dest']
+                elapsedTimesDiff = (tmpDT['ElapsedTime_Sched'] - tmpDT['ElapsedTime_SchedCalc']).total_seconds()
+
+                if elapsedTimesDiff != 0:
+                    print("")
+                    print("Non-sane elapsed times, difference in seconds: {}".format(elapsedTimesDiff))
+                    # Is the error one of DST Ambiguity?
+                    # Is the error one of data capture?
+                    if tmpDT['ElapsedTime_Sched'] <= dt.timedelta(minutes=0):
+                        print("Dropping record: {}".format(row))
+                        droppedRecords.append(row)
+                        continue
+                    
+                    # One or Two hour differences in elapsed times suggests an error of DST ambiguity
+                    if elapsedTimesDiff % 3600 == 0:
+                        for label, dtime, dtz in (["depart", naiveSchedDepart, orgTz],["arrive", naiveSchedArrive, destTz]):
+                            if IsDstAmbiguousTime(dtime, dtz):
+                                print("Ambiguous {} time: {} {}".format(label, dtime, dtz))
+                                correctedTime = CorrectDstAmbiguousTime(label, dtime, dtz, elapsedTimesDiff)
+                                if label == "depart":
+                                    tmpDT['SchedDepart_local'] = correctedTime
+                                    tmpDT['SchedDepart_dest'] = tmpDT['SchedDepart_local'].astimezone(destTz)
+                                if label == "arrive":
+                                    tmpDT['SchedArrive_dest'] = correctedTime
+                                
+                                newElapsedTime = tmpDT['SchedArrive_dest'] - tmpDT['SchedDepart_dest']
+                                if (tmpDT['ElapsedTime_Sched'] - newElapsedTime).total_seconds() == 0:
+                                    print("Corrected ambiguous DST time.")
+                                else: print ("Did not correct ambiguous DST time")
+                        
+
+                            if IsDstNonExistentTime(dtime, dtz):
+                                print("Nonexistant {} time: {} {}".format(label, dtime, dtz))
+                                print("Dropping record: {}".format(row))
+                                droppedRecords.append(row)
+                                continue
+                              
+
+                    #print("Scheduled times for {}".format(journeyLeg))
+                    #pprint.pprint(tmpDT)
+                    #print("Difference in scheduled elapsed time for {}.".format(journeyLeg))
+                    #print("Provided elapsed time: {}".format(tmpDT['ElapsedTime_Sched']))
+                    #print("Calculated elapsed time: {}".format(tmpDT['ElapsedTime_SchedCalc']))
+                    #print("")
+                #else: print("Sane times for {}".format(journeyLeg))
+                #print("")
+
+
+                #tmpDT['arrTz'] = pytz.timezone(airports[row['Dest']]['OlsenTz'])
+                #tmpDT['SchArr'] = tmpDT['arrTz'].localize(tmpDT['naiveSchArr'])
+                #tmpDT['SchedArrive'] = tmpDT['SchArr'].astimezone(utc)
+                
+                #tmpDT['ElapsedTime_SchedCalc'] = tmpDT['SchedArrive'] - tmpDT['SchedDepart']
 
 
 
@@ -301,44 +409,44 @@ for csvFile in os.listdir(rawDir):
 
                 # If it thinks we traveled backwards in time, add one day.
                 # This is because the clock restarts at midnight.
-                while (tmpDT['CalcSchTime'] < dt.timedelta()):
-                    tmpDT['SchedArrive'] = tmpDT['SchedArrive'] + dt.timedelta(days=1)
-                    tmpDT['CalcSchTime'] = tmpDT['SchedArrive'] - tmpDT['SchedDepart']
+                #while (tmpDT['ElapsedTime_SchedCalc'] < dt.timedelta()):
+                #    tmpDT['SchedArrive'] = tmpDT['SchedArrive'] + dt.timedelta(days=1)
+                #    tmpDT['ElapsedTime_SchedCalc'] = tmpDT['SchedArrive'] - tmpDT['SchedDepart']
                     #print("Added a day to arrival for sanity {}".format(tmpDT['SchedArrive']))
                 
                 # 2003 DST dates, logic check
-                dstStart = dt.datetime(year=2003,month=4,day=6,hour=3)
-                dstEnd = dt.datetime(year=2003,month=10,day=26,hour=1)
+                #dstStart = dt.datetime(year=2003,month=4,day=6,hour=3)
+                #dstEnd = dt.datetime(year=2003,month=10,day=26,hour=1)
                 # Set date ranges around daylight savings time
-                dstRng = tmpDT['SchTime'] + dt.timedelta(hours=1)
-                dstStartTop = dstStart + dstRng
-                dstStartBottom = dstStart - dstRng
-                dstEndTop = dstEnd + dstRng
-                dstEndBottom = dstEnd - dstRng
+                #dstRng = tmpDT['SchedTime'] + dt.timedelta(hours=1)
+                #dstStartTop = dstStart + dstRng
+                #dstStartBottom = dstStart - dstRng
+                #dstEndTop = dstEnd + dstRng
+                #dstEndBottom = dstEnd - dstRng
                 # if the local arrival or departure datetime is within 1 hour + the scheduled elapsed time of dst end/start times, show me
-                if tmpDT['depTz'].localize(dstStartBottom) < tmpDT['SchDep'] < tmpDT['depTz'].localize(dstStartTop) or tmpDT['arrTz'].localize(dstStartBottom) < tmpDT['SchArr'] < tmpDT['arrTz'].localize(dstStartTop):
-                    print("Nearing daylight savings")
-                    print("Flying from {} to {}".format(row['Origin'], row['Dest']))
-                    print("local depart time: {} Timezone: {}".format(tmpDT['SchDep'], tmpDT['SchDep'].tzinfo))
-                    print("local arrive time: {} Timezone: {}".format(tmpDT['SchArr'], tmpDT['SchArr'].tzinfo))
-                    print("depart time UTC: {}".format(tmpDT['SchedDepart']))
-                    print("arrive time UTC: {}".format(tmpDT['SchedArrive']))
-                    print("Calculated scheduled elapsed time: {}".format(tmpDT['CalcSchTime']))
-                    print("Provided scheduled elapsed time: {}".format(tmpDT['SchTime']))
-                    print("")
-                if tmpDT['depTz'].localize(dstEndBottom) < tmpDT['SchDep'] < tmpDT['depTz'].localize(dstEndTop) or tmpDT['arrTz'].localize(dstEndBottom) < tmpDT['SchArr'] < tmpDT['arrTz'].localize(dstEndTop):
-                    print("Ending daylight savings")
-                    print("Flying from {} to {}".format(row['Origin'], row['Dest']))
-                    print("local depart time: {} Timezone: {}".format(tmpDT['SchDep'], tmpDT['SchDep'].tzinfo))
-                    print("local arrive time: {} Timezone: {}".format(tmpDT['SchArr'], tmpDT['SchArr'].tzinfo))
-                    print("depart time UTC: {}".format(tmpDT['SchedDepart']))
-                    print("arrive time UTC: {}".format(tmpDT['SchedArrive']))
-                    print("Calculated scheduled elapsed time: {}".format(tmpDT['CalcSchTime']))
-                    print("Provided scheduled elapsed time: {}".format(tmpDT['SchTime']))
-                    print("")
+                #if tmpDT['depTz'].localize(dstStartBottom) < tmpDT['SchDep'] < tmpDT['depTz'].localize(dstStartTop) or tmpDT['arrTz'].localize(dstStartBottom) < tmpDT['SchArr'] < tmpDT['arrTz'].localize(dstStartTop):
+                #    print("Nearing daylight savings")
+                #    print("Flying from {} to {}".format(row['Origin'], row['Dest']))
+                #    print("local depart time: {} Timezone: {}".format(tmpDT['SchDep'], tmpDT['SchDep'].tzinfo))
+                #    print("local arrive time: {} Timezone: {}".format(tmpDT['SchArr'], tmpDT['SchArr'].tzinfo))
+                #    print("depart time UTC: {}".format(tmpDT['SchedDepart']))
+                #    print("arrive time UTC: {}".format(tmpDT['SchedArrive']))
+                #    print("Calculated scheduled elapsed time: {}".format(tmpDT['ElapsedTime_SchedCalc']))
+                #    print("Provided scheduled elapsed time: {}".format(tmpDT['SchedTime']))
+                #    print("")
+                #if tmpDT['depTz'].localize(dstEndBottom) < tmpDT['SchDep'] < tmpDT['depTz'].localize(dstEndTop) or tmpDT['arrTz'].localize(dstEndBottom) < tmpDT['SchArr'] < tmpDT['arrTz'].localize(dstEndTop):
+                #    print("Ending daylight savings")
+                #    print("Flying from {} to {}".format(row['Origin'], row['Dest']))
+                #    print("local depart time: {} Timezone: {}".format(tmpDT['SchDep'], tmpDT['SchDep'].tzinfo))
+                #    print("local arrive time: {} Timezone: {}".format(tmpDT['SchArr'], tmpDT['SchArr'].tzinfo))
+                #    print("depart time UTC: {}".format(tmpDT['SchedDepart']))
+                #    print("arrive time UTC: {}".format(tmpDT['SchedArrive']))
+                #    print("Calculated scheduled elapsed time: {}".format(tmpDT['ElapsedTime_SchedCalc']))
+                #    print("Provided scheduled elapsed time: {}".format(tmpDT['SchedTime']))
+                #    print("")
 
-                #print("Calculated scheduled elapsed time: {}".format(tmpDT['CalcSchTime']))
-                #print("Provided scheduled elapsed time: {}".format(tmpDT['SchTime']))
+                #print("Calculated scheduled elapsed time: {}".format(tmpDT['ElapsedTime_SchedCalc']))
+                #print("Provided scheduled elapsed time: {}".format(tmpDT['SchedTime']))
                 #print("")
 
                 #pprint.pprint(tmpDT)
@@ -387,9 +495,11 @@ for csvFile in os.listdir(rawDir):
                 #i += 1
                 fieldsToWrite.update(list(processedFields.keys()))
             i += 1
+        print("")
         print("Differences in distances")
         pprint.pprint(distDiffs)
 
+print("")
 print("writing preprocessed data to csv")
 #pprint.pprint(fieldsToWrite)
 with open(os.path.join(outDir, csvOut)+".csv", 'w', newline='') as csvfile:
@@ -399,6 +509,17 @@ with open(os.path.join(outDir, csvOut)+".csv", 'w', newline='') as csvfile:
     writer.writeheader()
     for row in processedData:
         writer.writerow(row)
+
+print("")
+print("writing dropped data to csv")
+with open(os.path.join(outDir, droppedRecordsStr)+".csv", 'w', newline='') as csvfile:
+    print("fieldnames: {}".format(rowFields))
+    writer = csv.DictWriter(csvfile, fieldnames = list(rowFields))
+    
+    writer.writeheader()
+    for row in droppedRecords:
+        writer.writerow(row)
+
 
 #for i in cancelledOrDiverted:
 #    pprint.pprint(processedData[i])
