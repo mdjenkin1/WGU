@@ -398,27 +398,6 @@ for csvFile in os.listdir(rawDir):
                 processedFields['SchedArrive'] = tmpDT['SchedArrive_dest'].astimezone(utc)
                 processedFields['SchedElapsedTime'] = tmpDT['ElapsedTime_Sched']
 
-                # Actual travel times
-                # take stock of what we have
-                #actDT = {}
-                #haveVal = {}
-                #calc = {}
-                #actTimes = ("DepTime", "ArrTime")
-                #actDeltas = ["TaxiOut","AirTime", "TaxiIn", "ActualElapsedTime", "ArrDelay", "DepDelay"]
-
-                #for field in actTimes:
-                #    actDT[field], haveVal[field]  = GetTime(row[field])
-                
-                #for field in actDeltas:
-                #    actDT[field], haveVal[field] = GetTime(row[field])
-
-                # Did we leave on the same day as scheduled?
-                # Did we arrive on the scheduled day
-                
-                #for field in actTimes:
-                #    if haveVal[field]:
-                #        calc[field + 'Delay'] = actDT[field] - tmpDT['Sch' + field]
-
                 processedData.append(processedFields)
                 fieldsToWrite.update(list(processedFields.keys()))
             i += 1
