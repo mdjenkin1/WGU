@@ -547,3 +547,17 @@ There's one error case involving ambiguous DST not covered by our logic this far
 ### Actual Travel Datetimes
 
 With scheduled date times in place, what's left are the date times of actual travel. The data for these fields are captured, so the first question to settle is if we have data. The second question is if the actual depart and arrive dates match the scheduled dates. Third, are the travel times sane?  
+The eight actual travel features we have can be broken up into 3 categories:
+
+| Feature | Category |
+|--|--|
+| DepTime | Captured Timestamp |
+| ArrTime | Captured Timestamp |
+| TaxiOut | Time Passed (component) |
+| AirTime | Time Passed (component) |
+| TaxiIn | Time Passed (component) |
+| ActualElapsedTime | Time Passed (sum) |
+| ArrDelay | Time Difference |
+| DepDelay | Time Difference |
+
+The category of time passed can be further broken down, one is a sum of the times, the others are components of the elapsed times.  

@@ -389,8 +389,7 @@ for csvFile in os.listdir(rawDir):
 
                 # Actual travel times
                 # Did we leave on the same day as scheduled?
-                # Did we arrive on the 
-                ActualDepartDay
+                # Did we arrive on the scheduled day
 
 
                     #print("Scheduled times for {}".format(journeyLeg))
