@@ -82,6 +82,16 @@ def GetTime(timeIn):
         goodTime = False
     return timeOut, goodTime
 
+def GetTimeDelta(timeIn):
+    """convert an integer count of minutes passed to a time delta"""
+    goodTime = True
+    try:
+        timeOut = dt.timedelta(minutes = int(timeIn))
+    except:
+        timeOut = dt.timedelta(minutes = 0)
+        goodTime = False
+    return timeOut, goodTime
+
 def IsDstAmbiguousTime(dtime, dtz):
     exitBool = False
     try:
@@ -118,8 +128,8 @@ def CorrectDstAmbiguousTime(event, dtime, dtz, timeDiff):
         else:
             return dtz.localize(dtime, is_dst=True)
 
-#rawDir = ("../RawData")
-rawDir = ("../TestData")
+rawDir = ("../RawData")
+#rawDir = ("../TestData")
 cfgDir = ("./StaticFiles")
 selectAirports = ['SLC']
 processedData = []
@@ -145,8 +155,8 @@ fieldsToCopy = [
             
             ### In Minutes
             # Delays
-            "CarrierDelay", "WeatherDelay", "NASDelay", 
-            "SecurityDelay", "LateAircraftDelay",
+            #"CarrierDelay", "WeatherDelay", "NASDelay", 
+            #"SecurityDelay", "LateAircraftDelay",
             # Travel time
             #"ActualElapsedTime", "AirTime", "CRSArrTime"
 
@@ -154,6 +164,7 @@ fieldsToCopy = [
             #"CancellationCode", "Cancelled",
             #"Diverted"
 ]
+
 fieldsToWrite = set()
 
 cancelCodes = {
@@ -388,117 +399,27 @@ for csvFile in os.listdir(rawDir):
                 processedFields['SchedElapsedTime'] = tmpDT['ElapsedTime_Sched']
 
                 # Actual travel times
+                # take stock of what we have
+                #actDT = {}
+                #haveVal = {}
+                #calc = {}
+                #actTimes = ("DepTime", "ArrTime")
+                #actDeltas = ["TaxiOut","AirTime", "TaxiIn", "ActualElapsedTime", "ArrDelay", "DepDelay"]
+
+                #for field in actTimes:
+                #    actDT[field], haveVal[field]  = GetTime(row[field])
+                
+                #for field in actDeltas:
+                #    actDT[field], haveVal[field] = GetTime(row[field])
+
                 # Did we leave on the same day as scheduled?
                 # Did we arrive on the scheduled day
-
-
-                    #print("Scheduled times for {}".format(journeyLeg))
-                    #pprint.pprint(tmpDT)
-                    #print("Difference in scheduled elapsed time for {}.".format(journeyLeg))
-                    #print("Provided elapsed time: {}".format(tmpDT['ElapsedTime_Sched']))
-                    #print("Calculated elapsed time: {}".format(tmpDT['ElapsedTime_SchedCalc']))
-                    #print("")
-                #else: print("Sane times for {}".format(journeyLeg))
-                #print("")
-
-
-                #tmpDT['arrTz'] = pytz.timezone(airports[row['Dest']]['OlsenTz'])
-                #tmpDT['SchArr'] = tmpDT['arrTz'].localize(tmpDT['naiveSchArr'])
-                #tmpDT['SchedArrive'] = tmpDT['SchArr'].astimezone(utc)
                 
-                #tmpDT['ElapsedTime_SchedCalc'] = tmpDT['SchedArrive'] - tmpDT['SchedDepart']
-
-
-
-                #print("Scheduled depart at {} local {} UTC".format(tmpDT['SchDep'], tmpDT['SchedDepart']))
-                #print("Scheduled arrive at {} local {} UTC".format(tmpDT['SchArr'], tmpDT['SchedArrive']))
-
-                # If it thinks we traveled backwards in time, add one day.
-                # This is because the clock restarts at midnight.
-                #while (tmpDT['ElapsedTime_SchedCalc'] < dt.timedelta()):
-                #    tmpDT['SchedArrive'] = tmpDT['SchedArrive'] + dt.timedelta(days=1)
-                #    tmpDT['ElapsedTime_SchedCalc'] = tmpDT['SchedArrive'] - tmpDT['SchedDepart']
-                    #print("Added a day to arrival for sanity {}".format(tmpDT['SchedArrive']))
-                
-                # 2003 DST dates, logic check
-                #dstStart = dt.datetime(year=2003,month=4,day=6,hour=3)
-                #dstEnd = dt.datetime(year=2003,month=10,day=26,hour=1)
-                # Set date ranges around daylight savings time
-                #dstRng = tmpDT['SchedTime'] + dt.timedelta(hours=1)
-                #dstStartTop = dstStart + dstRng
-                #dstStartBottom = dstStart - dstRng
-                #dstEndTop = dstEnd + dstRng
-                #dstEndBottom = dstEnd - dstRng
-                # if the local arrival or departure datetime is within 1 hour + the scheduled elapsed time of dst end/start times, show me
-                #if tmpDT['depTz'].localize(dstStartBottom) < tmpDT['SchDep'] < tmpDT['depTz'].localize(dstStartTop) or tmpDT['arrTz'].localize(dstStartBottom) < tmpDT['SchArr'] < tmpDT['arrTz'].localize(dstStartTop):
-                #    print("Nearing daylight savings")
-                #    print("Flying from {} to {}".format(row['Origin'], row['Dest']))
-                #    print("local depart time: {} Timezone: {}".format(tmpDT['SchDep'], tmpDT['SchDep'].tzinfo))
-                #    print("local arrive time: {} Timezone: {}".format(tmpDT['SchArr'], tmpDT['SchArr'].tzinfo))
-                #    print("depart time UTC: {}".format(tmpDT['SchedDepart']))
-                #    print("arrive time UTC: {}".format(tmpDT['SchedArrive']))
-                #    print("Calculated scheduled elapsed time: {}".format(tmpDT['ElapsedTime_SchedCalc']))
-                #    print("Provided scheduled elapsed time: {}".format(tmpDT['SchedTime']))
-                #    print("")
-                #if tmpDT['depTz'].localize(dstEndBottom) < tmpDT['SchDep'] < tmpDT['depTz'].localize(dstEndTop) or tmpDT['arrTz'].localize(dstEndBottom) < tmpDT['SchArr'] < tmpDT['arrTz'].localize(dstEndTop):
-                #    print("Ending daylight savings")
-                #    print("Flying from {} to {}".format(row['Origin'], row['Dest']))
-                #    print("local depart time: {} Timezone: {}".format(tmpDT['SchDep'], tmpDT['SchDep'].tzinfo))
-                #    print("local arrive time: {} Timezone: {}".format(tmpDT['SchArr'], tmpDT['SchArr'].tzinfo))
-                #    print("depart time UTC: {}".format(tmpDT['SchedDepart']))
-                #    print("arrive time UTC: {}".format(tmpDT['SchedArrive']))
-                #    print("Calculated scheduled elapsed time: {}".format(tmpDT['ElapsedTime_SchedCalc']))
-                #    print("Provided scheduled elapsed time: {}".format(tmpDT['SchedTime']))
-                #    print("")
-
-                #print("Calculated scheduled elapsed time: {}".format(tmpDT['ElapsedTime_SchedCalc']))
-                #print("Provided scheduled elapsed time: {}".format(tmpDT['SchedTime']))
-                #print("")
-
-                #pprint.pprint(tmpDT)
-
-                #print("Depart local: {}".format(tmpDT['SchDep']))
-                #print("Depart utc: {}".format(processedFields['SchedDepart']))
-
-                # If only we had good time data to start with
-                #for stage in flightTimes.keys():
-                #    tmpTime = {}
-                #    if row[stage+"Time"] != "NA":
-                #        try:
-                #            rawTime = int(row[stage+"Time"])
-                #            tmpTime.update(SplitTime(rawTime))
-                #            if tmpTime["Hour"] == 24: tmpTime.update({"Hour": 00})
-                #            stageDateTime = dt.datetime(
-                #                year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"]),
-                #                hour = tmpTime["Hour"], minute = tmpTime["Min"]
-                #            )
-                #        except:
-                #            print("row: {}\nTimeField: {}\nrawTime: {}\ntmpTime: {}\n".format(i, stage+"Time", rawTime, tmpTime))
-                #            pprint.pprint(row)
-                #            pprint.pprint(processedFields)
-                #        else:
-                #            processedFields.update({flightTimes[stage]: stageDateTime})
-                #            processedFields.update({flightTimes[stage]+"Time": tmpTime["Hour"]*100 + tmpTime["Min"]})
-                #    else:
-                #        stageDateTime = dt.datetime(
-                #            year = int(row["Year"]), month = int(row["Month"]), day = int(row["DayofMonth"])
-                #        )
-                #        processedFields.update({flightTimes[stage]: stageDateTime})
-                #        processedFields.update({flightTimes[stage]+"Time": "NA"})
-
-                #if processedFields["ActualArrive"] < processedFields["ActualDepart"]:
-                #    processedFields.update({"ActualArrive": processedFields["ActualArrive"] + dt.timedelta(days=1)})
-
-                #if processedFields["SchedArrive"] < processedFields["SchedDepart"]:
-                #    processedFields.update({"SchedArrive": processedFields["SchedArrive"] + dt.timedelta(days=1)})
-
-                #for stage in flightTimes.keys():
-                #    processedFields.update({
-                #        flightTimes[stage]: processedFields[flightTimes[stage]].strftime(dtOutString)
-                #    })
+                #for field in actTimes:
+                #    if haveVal[field]:
+                #        calc[field + 'Delay'] = actDT[field] - tmpDT['Sch' + field]
 
                 processedData.append(processedFields)
-                #i += 1
                 fieldsToWrite.update(list(processedFields.keys()))
             i += 1
         print("")

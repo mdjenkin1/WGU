@@ -560,4 +560,10 @@ The eight actual travel features we have can be broken up into 3 categories:
 | ArrDelay | Time Difference |
 | DepDelay | Time Difference |
 
-The category of time passed can be further broken down, one is a sum of the times, the others are components of the elapsed times.  
+The category of time passed can be further broken down, one is a sum of the times, the others are components of the elapsed times. Assessing what data we have can be done through the lens of these three categories. The completeness of data for these fields is where pandas is missed.  
+
+## Down Scale
+
+One final consideration is if actual travel times matter. The point of this project is to use data visualization to tell a story. The data cleaning performed this far should be more than sufficient to show the growth of an airport over time. Accurate and timely departure and arrivals would be a nice to have, but isn't necessary to complete this course.  
+
+Another thing worth considering is refactoring the data cleanup script. In it's current form, it is functional. It also isn't the target product of this project. Best to leave it as is and produce the pictures necessary to complete this course.
