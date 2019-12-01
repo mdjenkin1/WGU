@@ -566,4 +566,10 @@ The category of time passed can be further broken down, one is a sum of the time
 
 One final consideration is if actual travel times matter. The point of this project is to use data visualization to tell a story. The data cleaning performed this far should be more than sufficient to show the growth of an airport over time. Accurate and timely departure and arrivals would be a nice to have, but isn't necessary to complete this course.  
 
-Another thing worth considering is refactoring the data cleanup script. In it's current form, it is functional. It also isn't the target product of this project. Best to leave it as is and produce the pictures necessary to complete this course.
+Another thing worth considering is refactoring the data cleanup script. In it's current form, it is functional. It also isn't the target product of this project. Consideration was to leave it as is and produce the pictures necessary to complete this course.
+
+### Further Corrections
+
+Having decided to focus only on scheduled times, I opened the full data set to the preparation script. I addressed some minor exceptions but then 1995 was starting to process. A large number of non-sane elapsed times were found in 1995. To complicate further, they're not multiples of 3600 and therefore do not suggest DST ambiguity.
+
+First, I modified the DST ambiguity logic to remove the assumption of whole hours is necessary for DST anomalies. I also added logging for when no potential DST anomaly is found. From these changes, I found another data source issue. No scheduled times.  

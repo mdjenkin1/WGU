@@ -128,8 +128,8 @@ def CorrectDstAmbiguousTime(event, dtime, dtz, timeDiff):
         else:
             return dtz.localize(dtime, is_dst=True)
 
-rawDir = ("../RawData")
-#rawDir = ("../TestData")
+#rawDir = ("../RawData")
+rawDir = ("../TestData")
 cfgDir = ("./StaticFiles")
 selectAirports = ['SLC']
 processedData = []
@@ -355,43 +355,59 @@ for csvFile in os.listdir(rawDir):
                 tmpDT['SchedArrive_dest'] = destTz.localize(naiveSchedArrive)
 
                 # Is the scheduled elapsed time sane
-                tmpDT['ElapsedTime_Sched'] = dt.timedelta(minutes=int(row['CRSElapsedTime']))
                 tmpDT['ElapsedTime_SchedCalc'] = tmpDT['SchedArrive_dest'] - tmpDT['SchedDepart_dest']
-                elapsedTimesDiff = (tmpDT['ElapsedTime_Sched'] - tmpDT['ElapsedTime_SchedCalc']).total_seconds()
+                try:
+                    tmpDT['ElapsedTime_Sched'] = dt.timedelta(minutes=int(row['CRSElapsedTime']))
+                except:
+                    print("Invalid scheduled elapsed time provided: {}".format(row['CRSElapsedTime']))
+                    for label, dtime, dtz in (["depart", naiveSchedDepart, orgTz],["arrive", naiveSchedArrive, destTz]):
+                        if IsDstAmbiguousTime(dtime, dtz):
+                            print("Ambiguous {} time: {} {}".format(label, dtime, dtz))
+                            print("Check sanity of flight {} elapsed time: {}".format(journeyLeg, tmpDT['ElapsedTime_SchedCalc']))
+                        else:
+                            print("Scheduled {} time is not DST ambiguous: {} {}".format(label, dtime, dtz))
+                    elapsedTimesDiff = 0
+                    tmpDT['ElapsedTime_Sched'] = None
+                else:
+                    elapsedTimesDiff = (tmpDT['ElapsedTime_Sched'] - tmpDT['ElapsedTime_SchedCalc']).total_seconds()
 
                 if elapsedTimesDiff != 0:
                     print("")
                     print("Non-sane elapsed times, difference in seconds: {}".format(elapsedTimesDiff))
-                    # Is the error one of DST Ambiguity?
-                    # Is the error one of data capture?
+
+                    # Negative provided elapsed time suggests improper data capture. For our intent, drop the record and move on.
                     if tmpDT['ElapsedTime_Sched'] <= dt.timedelta(minutes=0):
                         print("Negative elapsed time, dropping record: {}".format(row))
                         droppedRecords.append(row)
                         continue
-                    
-                    # One or Two hour differences in elapsed times suggests an error of DST ambiguity
-                    if elapsedTimesDiff % 3600 == 0:
-                        for label, dtime, dtz in (["depart", naiveSchedDepart, orgTz],["arrive", naiveSchedArrive, destTz]):
-                            if IsDstAmbiguousTime(dtime, dtz):
-                                print("Ambiguous {} time: {} {}".format(label, dtime, dtz))
-                                correctedTime = CorrectDstAmbiguousTime(label, dtime, dtz, elapsedTimesDiff)
-                                if label == "depart":
-                                    tmpDT['SchedDepart_local'] = correctedTime
-                                    tmpDT['SchedDepart_dest'] = tmpDT['SchedDepart_local'].astimezone(destTz)
-                                if label == "arrive":
-                                    tmpDT['SchedArrive_dest'] = correctedTime
-                                
-                                newElapsedTime = tmpDT['SchedArrive_dest'] - tmpDT['SchedDepart_dest']
-                                if (tmpDT['ElapsedTime_Sched'] - newElapsedTime).total_seconds() == 0:
-                                    print("Corrected ambiguous DST time.")
-                                else: print ("Did not correct ambiguous DST time")
-                        
 
-                            if IsDstNonExistentTime(dtime, dtz):
-                                print("Nonexistant {} time: {} {}".format(label, dtime, dtz))
-                                print("Dropping record: {}".format(row))
-                                droppedRecords.append(row)
-                                continue
+                    # One or Two hour differences in elapsed times suggests an error of DST ambiguity
+                    #if elapsedTimesDiff % 3600 == 0:
+                    #    for label, dtime, dtz in (["depart", naiveSchedDepart, orgTz],["arrive", naiveSchedArrive, destTz]):
+
+                    for label, dtime, dtz in (["depart", naiveSchedDepart, orgTz],["arrive", naiveSchedArrive, destTz]):
+                        if IsDstAmbiguousTime(dtime, dtz):
+                            print("Ambiguous {} time: {} {}".format(label, dtime, dtz))
+                            correctedTime = CorrectDstAmbiguousTime(label, dtime, dtz, elapsedTimesDiff)
+                            if label == "depart":
+                                tmpDT['SchedDepart_local'] = correctedTime
+                                tmpDT['SchedDepart_dest'] = tmpDT['SchedDepart_local'].astimezone(destTz)
+                            if label == "arrive":
+                                tmpDT['SchedArrive_dest'] = correctedTime
+                            
+                            newElapsedTime = tmpDT['SchedArrive_dest'] - tmpDT['SchedDepart_dest']
+                            if (tmpDT['ElapsedTime_Sched'] - newElapsedTime).total_seconds() == 0:
+                                print("Corrected ambiguous DST time.")
+                            else: print ("Did not correct ambiguous DST time")
+
+                        elif IsDstNonExistentTime(dtime, dtz):
+                            print("Nonexistant {} time: {} {}".format(label, dtime, dtz))
+                            print("Dropping record: {}".format(row))
+                            droppedRecords.append(row)
+                            continue
+                        else:
+                            print("DST anomaly not determined")
+                            print("{} {} {} {}".format(journeyLeg, label, dtime, dtz))
 
                 # Scheduled times in place
                 processedFields['SchedDepart'] = tmpDT['SchedDepart_dest'].astimezone(utc)

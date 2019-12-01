@@ -27,3 +27,6 @@ trash
 **/*.csv.bz2
 **/*.csv
 !**/carriers.csv
+!**/airports.csv
+
+**/testrun*
