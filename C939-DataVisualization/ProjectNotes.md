@@ -546,5 +546,4 @@ There's one error case involving ambiguous DST not covered by our logic this far
 
 ### Actual Travel Datetimes
 
-With scheduled date times in place, what's left are the date times of actual travel.
-
+With scheduled date times in place, what's left are the date times of actual travel. The data for these fields are captured, so the first question to settle is if we have data. The second question is if the actual depart and arrive dates match the scheduled dates. Third, are the travel times sane?  

@@ -65,8 +65,7 @@ def DescribeLeg(origin, dest):
         origin + "-" + dest : {
             "CalculatedDistance": calcDist,
             "Bearing": degBearing,
-            "DirectionOfTravel": direction,
-            "EstTimeZonesCrossed": 24
+            "DirectionOfTravel": direction
         }
     }
 
@@ -341,8 +340,6 @@ for csvFile in os.listdir(rawDir):
                     print("Bad Arrival Time Recorded")
                     continue
 
-                
-
                 naiveSchedArrive = dt.datetime.combine(schedArriveDate, tmpDT['CRSArrTime'])
                 tmpDT['SchedArrive_dest'] = destTz.localize(naiveSchedArrive)
 
@@ -357,7 +354,7 @@ for csvFile in os.listdir(rawDir):
                     # Is the error one of DST Ambiguity?
                     # Is the error one of data capture?
                     if tmpDT['ElapsedTime_Sched'] <= dt.timedelta(minutes=0):
-                        print("Dropping record: {}".format(row))
+                        print("Negative elapsed time, dropping record: {}".format(row))
                         droppedRecords.append(row)
                         continue
                     
@@ -384,7 +381,17 @@ for csvFile in os.listdir(rawDir):
                                 print("Dropping record: {}".format(row))
                                 droppedRecords.append(row)
                                 continue
-                              
+
+                # Scheduled times in place
+                processedFields['SchedDepart'] = tmpDT['SchedDepart_dest'].astimezone(utc)
+                processedFields['SchedArrive'] = tmpDT['SchedArrive_dest'].astimezone(utc)
+                processedFields['SchedElapsedTime'] = tmpDT['ElapsedTime_Sched']
+
+                # Actual travel times
+                # Did we leave on the same day as scheduled?
+                # Did we arrive on the 
+                ActualDepartDay
+
 
                     #print("Scheduled times for {}".format(journeyLeg))
                     #pprint.pprint(tmpDT)
