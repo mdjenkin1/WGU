@@ -572,4 +572,46 @@ Another thing worth considering is refactoring the data cleanup script. In it's 
 
 Having decided to focus only on scheduled times, I opened the full data set to the preparation script. I addressed some minor exceptions but then 1995 was starting to process. A large number of non-sane elapsed times were found in 1995. To complicate further, they're not multiples of 3600 and therefore do not suggest DST ambiguity.
 
-First, I modified the DST ambiguity logic to remove the assumption of whole hours is necessary for DST anomalies. I also added logging for when no potential DST anomaly is found. From these changes, I found another data source issue. No scheduled times.  
+First, I modified the DST ambiguity logic to remove the assumption of whole hours is necessary for DST anomalies. I also added logging for when no potential DST anomaly is found. From these changes, I found another data source issue. No scheduled times. On closer inspection of the source data, it's more accurate to say the scheduled times are 0.  
+
+A little bit of Select-String and regex extracted the 269 lines describing DFW to SLC with a scheduled depart time of zero.  
+
+```{powershell}
+gci .\1995.csv | sls -pattern 'DFW,SLC' | %{$_ -match ".*?:(1995.*)"} | %{$matches[1]}> 1995dfw_slc.csv
+gci .\1995dfw_slc.csv | sls -pattern '1995,\d{1,2},\d{1,2},\d,(NA|\d{1,4}),(NA|\d),(NA|\d{1,4}),' | %{$_ -match ".*?:(1995.*)"} | %{$matches[1]} > 1995_dfw_zeroschdep.csv
+```
+
+A few features stand out at me. These are all the same carrier 'AA'. When they share a flight number, they have nearly the same actual depart and arrival times. The individual flight numbers are scheduled for a series of consecutive days. There is occasional interruption in these series of flights with no time or flight information. In these cases, the flight appears to have been cancelled.  
+
+Following these patterns, there's enough information to extrapolate scheduled flight data. There's not enough with our current processing structure. Given the volume of affected flights, these should be set aside for some post processing.  
+
+Looking through the current preprocessing script monolith, it's clear that I'm straining its scalability. The need for context processed values does not slot in cleanly. On one hand, I can rewrite the script in place and continue to encounter scalability issues. On the other, I can refactor the script. Make it more modular and adaptable to changing data needs.  
+
+## Scope isn't shrinking it's shifting
+
+To start the refactor, let us first consider what we're after. When I started this data exploration, I was aimless. I had a general idea of the information I might be able to get. To get some direction, I decided to focus on tardiness of flight travel. This was narrowed to one airport. Tardiness requires more information than I've been able to accurately extract. So a further narrowing of scope was made to illustrate a single airport's growth over time.  
+
+To illustrate an airport's growth over time, the fields I will need are:
+
+* Origin
+* Destination
+* Scheduled Depart Datetime
+* Scheduled Arrival Datetime
+* Carrier
+
+Some details I would like to include:
+
+* Arrived Late
+  * How Late
+* Departed Late
+  * How Late
+* Cancelled
+  * Why
+* Diverted
+* Distance
+
+From what I've seen of the data, most of the "would likes" are simple adds. The two that are not are the "late" and "how late". Both late values are a boolean yes or no and scenarios that might result in a null. By leveraging some null flavors, we can include the "late" data with minimal extra code. To start, the only null flavor I should assume is a missing set of times.  
+
+In preparing the data, I've identified three types of records. First, a record that can be considered on its own. Second, records that only make sense on in the context of similar records. Finally, records that are mangled and could be discarded.  
+
+On the initial pass, records of the first type should be processed as they are identified and records of the second type should be sequestered. Once the first pass is complete, information that can be extrapolated from context can be added and that data prepared. At this point, we should have a data set that is manageable by Tableau and I can begin on the true deliverable for this course's project.  

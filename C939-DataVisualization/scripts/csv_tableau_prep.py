@@ -132,7 +132,6 @@ def CorrectDstAmbiguousTime(event, dtime, dtz, timeDiff):
 rawDir = ("../TestData")
 cfgDir = ("./StaticFiles")
 selectAirports = ['SLC']
-processedData = []
 
 dtOutString = "%Y-%m-%d %H:%M"
 
@@ -140,7 +139,11 @@ outDir = ("../PreprocessedData")
 airportsStr = "_".join(selectAirports)
 csvOut = "preparedFlightData" + airportsStr
 droppedRecordsStr = "droppedRecords" + airportsStr
+postProcessStr = "postProcess" + airportsStr
+processedData = []
 droppedRecords = []
+postProcess = []
+
 
 rowFields = set()
 
@@ -360,12 +363,19 @@ for csvFile in os.listdir(rawDir):
                     tmpDT['ElapsedTime_Sched'] = dt.timedelta(minutes=int(row['CRSElapsedTime']))
                 except:
                     print("Invalid scheduled elapsed time provided: {}".format(row['CRSElapsedTime']))
-                    for label, dtime, dtz in (["depart", naiveSchedDepart, orgTz],["arrive", naiveSchedArrive, destTz]):
-                        if IsDstAmbiguousTime(dtime, dtz):
-                            print("Ambiguous {} time: {} {}".format(label, dtime, dtz))
-                            print("Check sanity of flight {} elapsed time: {}".format(journeyLeg, tmpDT['ElapsedTime_SchedCalc']))
-                        else:
-                            print("Scheduled {} time is not DST ambiguous: {} {}".format(label, dtime, dtz))
+                    # Possible NA scheduled time from "Cancelled" flight. Additional context necessary
+                    if row['CRSElapsedTime'] == 'NA' and row['Cancelled'] == 1:
+                        print("Cancelled flight, Record requires context processing")
+                        #postProcess.append(row)
+                        continue
+
+                    # I do not know why this DST ambiguity check is here. I do not believe it needs to be here.
+                    #for label, dtime, dtz in (["depart", naiveSchedDepart, orgTz],["arrive", naiveSchedArrive, destTz]):
+                    #    if IsDstAmbiguousTime(dtime, dtz):
+                    #        print("Ambiguous {} time: {} {}".format(label, dtime, dtz))
+                    #        print("Check sanity of flight {} elapsed time: {}".format(journeyLeg, tmpDT['ElapsedTime_SchedCalc']))
+                    #    else:
+                    #        print("Scheduled {} time is not DST ambiguous: {} {}".format(label, dtime, dtz))
                     elapsedTimesDiff = 0
                     tmpDT['ElapsedTime_Sched'] = None
                 else:
@@ -375,39 +385,45 @@ for csvFile in os.listdir(rawDir):
                     print("")
                     print("Non-sane elapsed times, difference in seconds: {}".format(elapsedTimesDiff))
 
+                    # Scheduled Depart time and Scheduled Arrive time == 0, special post processing required
+                    if int(row['CRSArrTime']) == 0 and int(row['CRSArrTime']) == 0:
+                        print("Scheduled depart and arrive times = 0")
+                        print("Record requires context processing")
+                        postProcess.append(row)
+                        continue
+
                     # Negative provided elapsed time suggests improper data capture. For our intent, drop the record and move on.
                     if tmpDT['ElapsedTime_Sched'] <= dt.timedelta(minutes=0):
                         print("Negative elapsed time, dropping record: {}".format(row))
                         droppedRecords.append(row)
                         continue
 
+                    # Errors of non-existent time have NOT been encountered. Saving incase this changes
+                    #if IsDstNonExistentTime(dtime, dtz):
+                    #    print("Nonexistant {} time: {} {}".format(label, dtime, dtz))
+                    #   print("Dropping record: {}".format(row))
+                    #    droppedRecords.append(row)
+                    #    continue
+
                     # One or Two hour differences in elapsed times suggests an error of DST ambiguity
                     #if elapsedTimesDiff % 3600 == 0:
-                    #    for label, dtime, dtz in (["depart", naiveSchedDepart, orgTz],["arrive", naiveSchedArrive, destTz]):
+                    if IsDstAmbiguousTime(naiveSchedDepart, orgTz):
+                        print("Ambiguous {} time: {} {}".format("depart", naiveSchedDepart, orgTz))
+                        correctedTime = CorrectDstAmbiguousTime("depart", naiveSchedDepart, orgTz, elapsedTimesDiff)
+                        tmpDT['SchedDepart_local'] = correctedTime
+                        tmpDT['SchedDepart_dest'] = tmpDT['SchedDepart_local'].astimezone(destTz)
+                        print("Corrected ambiguous departure DST time.")
 
-                    for label, dtime, dtz in (["depart", naiveSchedDepart, orgTz],["arrive", naiveSchedArrive, destTz]):
-                        if IsDstAmbiguousTime(dtime, dtz):
-                            print("Ambiguous {} time: {} {}".format(label, dtime, dtz))
-                            correctedTime = CorrectDstAmbiguousTime(label, dtime, dtz, elapsedTimesDiff)
-                            if label == "depart":
-                                tmpDT['SchedDepart_local'] = correctedTime
-                                tmpDT['SchedDepart_dest'] = tmpDT['SchedDepart_local'].astimezone(destTz)
-                            if label == "arrive":
-                                tmpDT['SchedArrive_dest'] = correctedTime
-                            
-                            newElapsedTime = tmpDT['SchedArrive_dest'] - tmpDT['SchedDepart_dest']
-                            if (tmpDT['ElapsedTime_Sched'] - newElapsedTime).total_seconds() == 0:
-                                print("Corrected ambiguous DST time.")
-                            else: print ("Did not correct ambiguous DST time")
+                    if IsDstAmbiguousTime(naiveSchedArrive, destTz):
+                        print("Ambiguous {} time: {} {}".format("arrive", naiveSchedArrive, destTz))
+                        correctedTime = CorrectDstAmbiguousTime("arrive", naiveSchedArrive, destTz, elapsedTimesDiff)
+                        tmpDT['SchedArrive_dest'] = correctedTime
+                        print("Corrected ambiguous arrival DST time.")
 
-                        elif IsDstNonExistentTime(dtime, dtz):
-                            print("Nonexistant {} time: {} {}".format(label, dtime, dtz))
-                            print("Dropping record: {}".format(row))
-                            droppedRecords.append(row)
-                            continue
-                        else:
-                            print("DST anomaly not determined")
-                            print("{} {} {} {}".format(journeyLeg, label, dtime, dtz))
+                    tmpDT['ElapsedTime_SchedCalc'] = tmpDT['SchedArrive_dest'] - tmpDT['SchedDepart_dest']
+                    if (tmpDT['ElapsedTime_Sched'] - tmpDT['ElapsedTime_SchedCalc']).total_seconds() == 0:
+                        print("Corrected elapsed time difference.")
+                    else: print ("Elapsed time mismatch remains")
 
                 # Scheduled times in place
                 processedFields['SchedDepart'] = tmpDT['SchedDepart_dest'].astimezone(utc)
@@ -442,6 +458,15 @@ with open(os.path.join(outDir, droppedRecordsStr)+".csv", 'w', newline='') as cs
     for row in droppedRecords:
         writer.writerow(row)
 
+print("")
+print("writing post processing records to csv")
+with open(os.path.join(outDir, postProcessStr)+".csv", 'w', newline='') as csvfile:
+    print("fieldnames: {}".format(rowFields))
+    writer = csv.DictWriter(csvfile, fieldnames = list(rowFields))
+    
+    writer.writeheader()
+    for row in postProcess:
+        writer.writerow(row)
 
 #for i in cancelledOrDiverted:
 #    pprint.pprint(processedData[i])
