@@ -6,8 +6,18 @@ compassPoints = (
     "West", "NorthWest"
 )
 
-def GetDirection(degree, compass):
-    dirIndex = round(degree * len(compass) / 360) % len(compass)
+def GetDirection(bearing, compass=compassPoints):
+    """
+    Given a degree bearing and a compass with number of points equal to a multiple of 2:
+    Return which point on that compass most closely describes that bearing
+    """
+
+    # A circle can be divided into N number of compass points of arc N/360
+    # Multiplying the bearing by the size of each arc, will determine in which arc the bearing resides
+    # If the number of points/arcs is a multiple of 2 then rounding will provide a clean 
+    # break between arcs at half values.
+    # Finally, taking the modulo will return an index of the corresponding compass arc.
+    dirIndex = round(bearing * len(compass) / 360) % len(compass)
     return compass[dirIndex]
 
 
