@@ -598,6 +598,7 @@ To illustrate an airport's growth over time, the fields I will need are:
 * Scheduled Depart Datetime
 * Scheduled Arrival Datetime
 * Carrier
+* Direction of Travel
 
 Some details I would like to include:
 
@@ -615,3 +616,11 @@ From what I've seen of the data, most of the "would likes" are simple adds. The 
 In preparing the data, I've identified three types of records. First, a record that can be considered on its own. Second, records that only make sense on in the context of similar records. Finally, records that are mangled and could be discarded.  
 
 On the initial pass, records of the first type should be processed as they are identified and records of the second type should be sequestered. Once the first pass is complete, information that can be extrapolated from context can be added and that data prepared. At this point, we should have a data set that is manageable by Tableau and I can begin on the true deliverable for this course's project.  
+
+### while readline, eat up all my time
+
+With the end data planned, I've started my refactor with the supporting processing structures. There's still a puzzle of wrangling the data in a manor where I'm not performing superfluous calculations and still be able to cleanly extract records with special processing needs. After that, it's a question of how best to present the data to Tableau.  
+
+In all my life, "do while readline" has been a good tool for me. It's brutish and has a nack of finding all the flaws in a dataset. It just doesn't seem to be up to task for my current needs. Every reiteration is prompted by a lack of scalability. Every reiteration needs more and more acrobatics. A more structured backend for my dataset is in order. It's with these considerations in mind that I've decided to reach for mongodb.  
+
+The consideration for Mongodb over other database solutions (e.g. SQLite) is the ability to care less about what fields I do and do not have. One major problem is with the date times. I still need to convert date times to UTC as that's what mongodb assumes. Some research on that capability will be necessary. If I'm not able to perform the transform prior to loading, then I'm sure I'll be able to transform the records in place and after the fact.  
