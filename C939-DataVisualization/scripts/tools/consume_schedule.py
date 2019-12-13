@@ -7,7 +7,8 @@ def consume_schedule_csv(csvFile):
         Perform minimal data preparation on raw csv files for loading to mongodb
     '''
     rawSchedule = []
-    with csv.DictReader(open(csvFile, 'r')) as reader:
+    with open(csvFile, 'r') as infile:
+        reader = csv.DictReader(infile)
         for row in reader:
             record = {
                 'BaseDate': dt.datetime(year = int(row['Year']), month = int(row['Month']), day = int(row['DayofMonth'])),
@@ -27,14 +28,15 @@ def consume_schedule_csv(csvFile):
                 'Cancelled': row['Cancelled'],
                 'CancelCode': row['CancellationCode'],
                 'Diverted': row['Diverted'],
-                'DelayTime_Arrival': row['ArrDelayTime'],
-                'DelayTime_Depart': row['DepDelayTime'],
-                'DelayTime_Carrier': row['CarrierDelayTime'],
-                'DelayTime_Weather': row['WeatherDelayTime'],
-                'DelayTime_NAS': row['NASDelayTime'],
-                'DelayTime_Security': row['SecurityDelayTime'],
-                'DelayTime_LateAircraft': row['LateAircraftDelayTime']
+                'DelayTime_Arrival': row['ArrDelay'],
+                'DelayTime_Depart': row['DepDelay'],
+                'DelayTime_Carrier': row['CarrierDelay'],
+                'DelayTime_Weather': row['WeatherDelay'],
+                'DelayTime_NAS': row['NASDelay'],
+                'DelayTime_Security': row['SecurityDelay'],
+                'DelayTime_LateAircraft': row['LateAircraftDelay']
             }
-        rawSchedule.append(record)
+            rawSchedule.append(record)
 
+    print("number of records: {}".format(len(rawSchedule)))
     return rawSchedule
