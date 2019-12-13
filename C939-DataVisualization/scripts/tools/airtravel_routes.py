@@ -1,3 +1,6 @@
+#!/usr/bin/python
+
+import math
 
 compassPoints = (
     "North", "NorthEast",
@@ -21,65 +24,54 @@ def GetDirection(bearing, compass=compassPoints):
     return compass[dirIndex]
 
 
-def DescribeLeg(origin, dest, compass=compassPoints):
+def GetRouteDescription(origin, dest, compass=compassPoints):
 
     """
-    Given an origin and destination airport, provide:
+    Given origin and destination airport records, provide:
     the bearing: 'Bearing'
     the direction of travel: 'DirectionOfTravel'
     the flight distance: 'CalculatedDistance'
+
+    airport records are dictionaries with the following values:
+    iata: Three character IATA code
+    lat: Latitude in radians
+    long: Longitude in radians
 
     Use the Haversine formula to determine the distance and bearing
     https://www.movable-type.co.uk/scripts/latlong.html
     """
 
-    if origin not in airports or dest not in airports:
-        raise Exception("Unknown airport. Cannot determine direction of travel.")
-
-    # Radius of the earth in miles
+    # Approximate radius of the Earth in miles
     Radius = 3959
-
-    # Origin longitude and latitude in radians
-    oLat = airports[origin]["lat"]
-    oLong = airports[origin]["long"]
-
-    # Destination longitude and latitude in radians
-    dLat = airports[dest]["lat"]
-    dLong = airports[dest]["long"]
     
     # Delta longitude and latitude in radians
-    deltaLat = dLat - oLat
-    deltaLong = dLong - oLong
+    lat_delta = dest['lat'] - origin['lat']
+    long_delta = dest['long'] - origin['long']
 
     # Haversine formula to calculate distance
-    a = (math.sin(deltaLat/2))**2 + math.cos(oLat) * math.cos(dLat) * (math.sin(deltaLong/2))**2
+    a = (math.sin(lat_delta/2))**2 + math.cos(origin['lat']) * math.cos(dest['lat']) * (math.sin(long_delta/2))**2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
     calcDist = round(Radius * c)
 
     # Direction
-    v1 = math.sin(deltaLong) * math.cos(dLat)
-    v2 = math.cos(oLat) * math.sin(dLat) - math.sin(oLat) * math.cos(dLat) * math.cos(deltaLong)
+    v1 = math.sin(long_delta) * math.cos(dest['lat'])
+    v2 = math.cos(origin['lat']) * math.sin(dest['lat']) - math.sin(origin['lat']) * math.cos(dest['lat']) * math.cos(long_delta)
     degBearing = round(math.atan2(v1, v2) * 180 / math.pi)
-    #if degBearing < 0: degBearing += 360 
-
     direction = GetDirection(degBearing, compass)
 
-    oTz = tf.timezone_at(lng=oLong, lat=oLat)
-    dTz = tf.timezone_at(lng=dLong, lat=dLat)
-
-    outDict = {
-        origin + "-" + dest : {
+    RouteDescription = {
+            "Destination": dest['iata'],
+            "Origin": origin['iata'],
             "CalculatedDistance": calcDist,
             "Bearing": degBearing,
             "DirectionOfTravel": direction
-        }
     }
 
-    return outDict
+    return RouteDescription
 
 def GetTime(timeIn):
     """convert a 4 digit integer or string to time. Return midnight if "NA" or invalid. 
-    Include a boolean to flag false midnight return"""
+    Include a boorigin['lean'] to flag false midnight return"""
     goodTime = True
     try:
         timeOut = dt.datetime.strptime(timeIn.zfill(4),"%H%M").time()
