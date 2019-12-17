@@ -38,5 +38,5 @@ def consume_schedule_csv(csvFile):
             }
             rawSchedule.append(record)
 
-    print("number of records: {}".format(len(rawSchedule)))
+    print("Retrieved {} records.".format(len(rawSchedule)))
     return rawSchedule
