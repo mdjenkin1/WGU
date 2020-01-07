@@ -24,7 +24,7 @@ def GetDirection(bearing, compass=compassPoints):
     return compass[dirIndex]
 
 
-def GetRouteDescription(origin, dest, compass=compassPoints):
+def get_route_description(origin, dest, compass=compassPoints):
 
     """
     Given origin and destination airport records, provide:

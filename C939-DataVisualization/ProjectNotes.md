@@ -624,3 +624,59 @@ With the end data planned, I've started my refactor with the supporting processi
 In all my life, "do while readline" has been a good tool for me. It's brutish and has a nack of finding all the flaws in a dataset. It just doesn't seem to be up to task for my current needs. Every reiteration is prompted by a lack of scalability. Every reiteration needs more and more acrobatics. A more structured backend for my dataset is in order. It's with these considerations in mind that I've decided to reach for mongodb.  
 
 The consideration for Mongodb over other database solutions (e.g. SQLite) is the ability to care less about what fields I do and do not have. One major problem is with the date times. I still need to convert date times to UTC as that's what mongodb assumes. Some research on that capability will be necessary. If I'm not able to perform the transform prior to loading, then I'm sure I'll be able to transform the records in place and after the fact.  
+
+## Loading Mongo
+
+It's been a while since I've looked at this project. What I find my past self left for me is a new python script to load the raw csv to a local mongodb instance. It's at the point where I just need to create some supporting collections, perform data validations and cleanup. So plenty left to do.  
+
+Starting with the supporting collections, airports and carriers required minimal to no additional code. The first snag is with a shortcut taken for dealing with airports of unknown timezones. Timezones in the Pacific Ocean were not included with TimezoneFinder. As we've expanded from only traffic involving SLC to the full dataset, the number of problem airports should also be expected to have increased.  
+
+The first error encountered concerns the route with a null destination. None of the entries in the Airport collection are null. None of the scheduled flights have a null origin or destination. So there must be airports missing from the airport collection.  
+
+### Mongo Refresher
+
+It's been a while since I've used Mongodb. No better way to relearn it than trying to find a way to generate a list of unique airport codes from the RawSchedules and exclude any that appear in the Airport list.  
+
+```{JSON}
+db.RawSchedules.aggregate([
+	{
+		'$group':{
+			'_id':{'origin':'$Airport_Origin', 'destination':'$Airport_Destination'}
+		}
+	},
+	{
+		$lookup: {
+			from: "Airports",
+			localField: "_id.origin",
+			foreignField: "iata",
+			as: "origin_detail"
+		}
+	},
+	{
+		$lookup: {
+			from: "Airports",
+			localField: "_id.destination",
+			foreignField: "iata",
+			as: "destination_detail"
+		}
+	},
+	{$limit: 3}
+])
+```
+
+Using lookup to add a field. Just need to determine which fields are null and return the matching origin/destination.  
+
+```{JSON}
+db.RawSchedules.aggregate([
+	{
+		$group:{
+			_id: null,
+			destination: {$addToSet: "$Airport_Destination"},
+			origins: {$addToSet: "$Airport_Origin"}
+		}
+	}
+])
+```
+
+Create sets of all origins and all destinations iata codes.  
+Just need to merge the sets and return all iata codes not found in the Airports collection.  
