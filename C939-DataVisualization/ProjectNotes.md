@@ -659,8 +659,7 @@ db.RawSchedules.aggregate([
 			foreignField: "iata",
 			as: "destination_detail"
 		}
-	},
-	{$limit: 3}
+	}
 ])
 ```
 
@@ -674,7 +673,19 @@ db.RawSchedules.aggregate([
 			destination: {$addToSet: "$Airport_Destination"},
 			origins: {$addToSet: "$Airport_Origin"}
 		}
-	}
+	},
+    {
+        $project: {
+            airports: { $reduce: {
+                input: [$destination, $origins],
+                initialValue: []
+                in: {$setUnion : []}
+            }
+
+            }
+        }
+    }
+    }
 ])
 ```
 

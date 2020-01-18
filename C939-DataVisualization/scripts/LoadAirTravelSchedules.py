@@ -74,10 +74,9 @@ if __name__ == "__main__":
         for route in raw_routes:
             o = db['Airports'].find_one({'iata' : route['_id']['origin']})
             d = db['Airports'].find_one({'iata' : route['_id']['destination']})
+            pprint.pprint(route)
             print("Origin: {}".format(o))
             print("Destination: {}".format(d))
-            pprint.pprint(o)
-            pprint.pprint(d)
             routes.append(get_route_description(o, d))
 
         pprint.pprint(routes)
