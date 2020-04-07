@@ -691,3 +691,11 @@ db.RawSchedules.aggregate([
 
 Create sets of all origins and all destinations iata codes.  
 Just need to merge the sets and return all iata codes not found in the Airports collection.  
+
+-----------------------------------------------------------------------------------------------
+
+## The Return
+
+-----------------------------------------------------------------------------------------------
+
+After a couple of months away I'm ready to return to this. Sometimes you get so close to a project that you can't see what you're doing. The goal is to create an image. Imperfect information is all that's necessary. Working with imperfect information is the lesson.  
