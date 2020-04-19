@@ -699,3 +699,14 @@ Just need to merge the sets and return all iata codes not found in the Airports 
 -----------------------------------------------------------------------------------------------
 
 After a couple of months away I'm ready to return to this. Sometimes you get so close to a project that you can't see what you're doing. The goal is to create an image. Imperfect information is all that's necessary. Working with imperfect information is the lesson.  
+
+## What mess did I leave myself
+
+Four main collections
+
+* Airports - Set timezone and location information while consuming airports data.
+* Carriers - IATA Codes and Names
+* Schedules - Raw Schedule data from CSV
+* Routes - Get unique routes from schedule information and create route descriptions
+
+
