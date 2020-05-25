@@ -25,9 +25,12 @@ def consume_airport_csv(file="airports"):
         for row in reader:
             # Determine the timezone of the airport
             timezone = tf.timezone_at(lng=float(row["long"]), lat=float(row["lat"]))
+
             if not timezone:
                 # Timezonefinder does not include the Pacific ocean. This a manual correction.
-                OlsenTz = "Pacific/Samoa" if row["iata"] in ("Z08", "PPG", "FAQ") else "Pacific/Saipan"
+                # "FAQ","PPG","Z08" : Pacific/Samoa
+                # "GRO","GSN","GUM","TNI","TT01" : Pacific/Saipan
+                timezone = "Pacific/Samoa" if row["iata"] in ("Z08", "PPG", "FAQ") else "Pacific/Saipan"
             
             airports.append({
                 'iata': row['iata'],
@@ -35,7 +38,7 @@ def consume_airport_csv(file="airports"):
                 'city' : row['city'],
                 'state' : row['state'],
                 'country' : row['country'],
-                'lat' : math.radians(float(row['lat'])),
-                'long' : math.radians(float(row['long'])),
+                'lat' : float(row['lat']),
+                'long' : float(row['long']),
                 'timezone' : timezone })
     return airports

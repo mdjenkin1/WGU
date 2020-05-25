@@ -1,0 +1,14 @@
+> db.airports.find({'timezone':null})
+{ "_id" : ObjectId("5eb1a55fe875eb5b8b94c52b"), "iata" : "FAQ", "airport" : "Fitiuta", "city" : "Fitiuta Village", "state" : "AS", "country" : "USA", "lat" : 14.21577583, "long" : -169.4239058, "timezone" : null }
+{ "_id" : ObjectId("5eb1a55fe875eb5b8b94c5ca"), "iata" : "GRO", "airport" : "Rota International", "city" : "Rota Island", "state" : "CQ", "country" : "USA", "lat" : 14.1743075, "long" : -145.2425353, "timezone" : null }
+{ "_id" : ObjectId("5eb1a55fe875eb5b8b94c5cd"), "iata" : "GSN", "airport" : "Saipan International", "city" : "Obyan", "state" : "CQ", "country" : "USA", "lat" : 15.11900139, "long" : -145.7293561, "timezone" : null }
+{ "_id" : ObjectId("5eb1a55fe875eb5b8b94c5d5"), "iata" : "GUM", "airport" : "Guam International", "city" : "Agana", "state" : "GU", "country" : "USA", "lat" : 13.48345, "long" : -144.7959825, "timezone" : null }
+{ "_id" : ObjectId("5eb1a55fe875eb5b8b94c9c0"), "iata" : "PPG", "airport" : "Pago Pago International", "city" : "Pago Pago", "state" : "AS", "country" : "USA", "lat" : 14.33102278, "long" : -170.7105258, "timezone" : null }
+{ "_id" : ObjectId("5eb1a55fe875eb5b8b94cb87"), "iata" : "TNI", "airport" : "West Tinian", "city" : "Peipeinimaru", "state" : "CQ", "country" : "USA", "lat" : 14.99685028, "long" : -145.6180383, "timezone" : null }
+{ "_id" : ObjectId("5eb1a55fe875eb5b8b94cba2"), "iata" : "TT01", "airport" : "Pagan Airstrip", "city" : "Shomu-Shon", "state" : "CQ", "country" : "USA", "lat" : 18.12444444, "long" : -145.7686111, "timezone" : null }
+{ "_id" : ObjectId("5eb1a55fe875eb5b8b94cc7e"), "iata" : "Z08", "airport" : "Ofu", "city" : "Ofu Village", "state" : "AS", "country" : "USA", "lat" : 14.18435056, "long" : -169.6700236, "timezone" : null }
+>
+
+"FAQ","PPG","Z08"
+
+"GRO","GSN","GUM","TNI","TT01"

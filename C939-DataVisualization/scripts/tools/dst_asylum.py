@@ -1,5 +1,19 @@
 #!/usr/bin/python
 
+import pytz
+
+def DstSaneTime(naiveTime, timezone):
+    try:
+        localTime = timezone.localize(naiveTime, is_dst=None)
+    except pytz.exceptions.AmbiguousTimeError:
+        localTime = timezone.localize(naiveTime)
+        dstSane = False
+    except pytz.exceptions.NonExistentTimeError:
+        localTime = timezone.localize(naiveTime)
+        dstSane = False
+    finally:
+        return localTime,dstSane
+
 def IsDstAmbiguousTime(dtime, dtz):
     """ leverage pytz.exceptions to check for anomalous DST time """
     exitBool = False

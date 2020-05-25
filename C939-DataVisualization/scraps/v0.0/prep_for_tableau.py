@@ -1,3 +1,7 @@
+"""
+    Original attempt using Pandas Dataframes to load and scrub data.
+"""
+
 import csv
 import os
 import sys

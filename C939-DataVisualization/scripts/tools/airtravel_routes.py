@@ -45,8 +45,8 @@ def get_route_description(origin, dest, compass=compassPoints):
     Radius = 3959
     
     # Delta longitude and latitude in radians
-    lat_delta = dest['lat'] - origin['lat']
-    long_delta = dest['long'] - origin['long']
+    lat_delta = math.radians(dest['lat']) - math.radians(origin['lat'])
+    long_delta = math.radians(dest['long']) - math.radians(origin['long'])
 
     # Haversine formula to calculate distance
     a = (math.sin(lat_delta/2))**2 + math.cos(origin['lat']) * math.cos(dest['lat']) * (math.sin(long_delta/2))**2
@@ -60,11 +60,11 @@ def get_route_description(origin, dest, compass=compassPoints):
     direction = GetDirection(degBearing, compass)
 
     RouteDescription = {
-            "Destination": dest['iata'],
-            "Origin": origin['iata'],
-            "CalculatedDistance": calcDist,
-            "Bearing": degBearing,
-            "DirectionOfTravel": direction
+            "destination": dest['iata'],
+            "origin": origin['iata'],
+            "distance_calculated": calcDist,
+            "bearing": degBearing,
+            "direction": direction
     }
 
     return RouteDescription

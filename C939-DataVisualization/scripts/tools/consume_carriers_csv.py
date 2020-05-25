@@ -6,7 +6,7 @@ Load Airport data to mongodb
 
 import csv
 
-def consume_carriers_csv(file="carriers"):
+def consume_carriers_csv(file):
     """ 
         Carrier codes and Carrier names
     """
@@ -18,6 +18,6 @@ def consume_carriers_csv(file="carriers"):
         for row in reader:
             carriers.append({
                 'code': row['Code'],
-                'carrier': row['Description']})
+                'name': row['Description']})
 
     return carriers
