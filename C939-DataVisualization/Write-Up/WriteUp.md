@@ -343,4 +343,8 @@ While the bar chart doesnt offer nearly the detail as text percents, it does mak
  
 ![12b_inbound_bars.png](./imgs/12b_inbound_bars.png)  
 
-The same can be said flying into Alaska. Chances are you're catching a flight from Seattle.
+The same can be said about flying into Alaska. Chances are you're catching a flight from Seattle.
+
+## Putting it Together
+
+The majority of Alaskan air travel is centered around one airport, Ted Stevens Anchorage International (ANC). We can further divide the travel into 2 major types, interstate and intrastate. With the focus on a single airport, travel can also be divided into inbound and outbound. Interstate travel can also be divided into categories of "is/not Seattle-Tacoma Intl (SEA)". Intrastate travel can be divided into categories of "is Juneau International (JUN)", "is Fairbanks International (FAI)" and "is neither JUN or FAI". What remains is translating this information visually.  
