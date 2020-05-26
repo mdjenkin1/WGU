@@ -289,4 +289,35 @@ So Alaska's air travel is roughly evenly split between intrastate and interstate
 
 But what about change in flight volume through out the year? In manipulating the format of my investigative graphs, I found the individual date part extracts rather limiting. I could investigate via year or month but seasons and quarters would require additional calculation. Travel trends through out the day are also locked to me.  
 
-It seems the better practice would be to extract the full date and/or times and convert as needed. The question is on setup cost of times vs the pay off. For the current use case, flight times would allow mapping flight patterns throughout the day. The cost is spending the time to validate and correct the DST sanity of each time, determine which timestamp is relevant to Alaska and convert to local time. The obscene cost would also include scraping an additional data source of historical sun up|down times. 
+It seems the better practice would be to extract the full date and/or times and convert as needed. The question is on setup cost of times vs the pay off. For the current use case, flight times would allow mapping flight patterns throughout the day. The cost is spending the time to validate and correct the DST sanity of each time, determine which timestamp is relevant to Alaska and convert to local time. The obscene cost would also include wrangling an additional data source of historical sun up|down times.  
+
+Having reformed the extraction query, it was time to update the travel type visualization to find a timeframe that provided a good view into the changing data.  
+
+
+![09d_state_travel.png](./imgs/09d_state_travel.png)  
+
+Showing the change in flight volume by year does show an increasing rate in flight travel. I removed the weekday break down. It didn't offer a visually different dimension. Addition of a quarterly dimension does give new insight. 2009 only exists in our Q1 dataset. Q1 and Q4 has much lower travel compared to the other quarters and travel tends to peak in Q3.  
+
+![09e_state_travel.png](./imgs/09e_state_travel.png)  
+
+Adding a split between interstate and intrastate travel gives an interesting comparison between the two types of travel. The boom in Alaskan flight travel that happened in the early 1990's is almost entirely driven by interstate travel. Intrastate travel does show growth with the travel boom of the 90's and remains mostly consistent for a decade before dropping off.  
+
+It could be described as a rush to populate Alaska in the 90's. After population growth stabilized, the state relied on intrastate flights until infrastructure was built. Even though the intrastate flights dropped off, the airports remain busy through the spring and summer months with interstate travel. Given the remoteness of Alaska, this warm month interstate travel could be cargo or tourist based. There's not enough information to make such a determination.  
+
+To wrap up this inter/intra state travel exploration, I took a look at how inbound, outbound and intrastate travel stacked up.  
+
+![09f_state_travel.png](./imgs/09f_state_travel.png)  
+![09g_state_travel.png](./imgs/09g_state_travel.png)  
+
+What I find interesting is how the data seems to tell a different story depending on which type of travel is on top. There's an amount of lie to the top area. From the line graphs, it's easy to see interstate travel dominates the Spring and Summer and intrastate travel dominates the Fall and Winter. In the stacked area graph with intrastate travel on top, it almost seems as if intrastate travel dominates in the Summer. That could also be due to the break down of interstate travel into its directional components.  
+
+![09h_state_travel.png](./imgs/09h_state_travel.png)  
+![09i_state_travel.png](./imgs/09i_state_travel.png)  
+
+Replacing the component interstate travel with total interstate travel does away with this illusion of dominating intrastate travel. Chalk this as a lesson in why you should compare like for like. To find a similar component analysis for intrastate travel would need another way of thinking about interstate travel.  
+
+### Component Intrastate Travel
+
+Interstate travel too and from Alaska has been classified as inbound and outbound. In a more abstract sense, this is travel to and from a remote part of the greater whole. A like for like on intrastate travel would be flights from less remote to more remote airports. But how best define more or less remote airports?  
+
+

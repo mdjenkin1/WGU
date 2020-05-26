@@ -1,0 +1,1009 @@
+<?xml version='1.0' encoding='utf-8' ?>
+
+<!-- build 20202.20.0415.1946                               -->
+<workbook source-build='2020.2.0 (20202.20.0415.1946)' source-platform='win' version='18.1' xmlns:user='http://www.tableausoftware.com/xml/user'>
+  <document-format-change-manifest>
+    <_.fcp.MarkAnimation.true...MarkAnimation />
+    <_.fcp.ObjectModelEncapsulateLegacy.true...ObjectModelEncapsulateLegacy />
+    <_.fcp.ObjectModelTableType.true...ObjectModelTableType />
+    <_.fcp.SchemaViewerObjectModel.true...SchemaViewerObjectModel />
+    <SheetIdentifierTracking />
+    <SortTagCleanup />
+    <WindowsPersistSimpleIdentifiers />
+  </document-format-change-manifest>
+  <preferences>
+    <preference name='ui.encoding.shelf.height' value='24' />
+    <preference name='ui.shelf.height' value='26' />
+  </preferences>
+  <datasources>
+    <datasource caption='Alaskan_Flights' inline='true' name='federated.1jwssxb0fay8gf1ebsokl1tveyit' version='18.1'>
+      <connection class='federated'>
+        <named-connections>
+          <named-connection caption='Alaskan_Flights' name='textscan.1rz4vw71qly8nc15msebt0adesqh'>
+            <connection class='textscan' directory='C:/Users/Michael/Documents/GitHub/WGU-Projects/C939-DataVisualization/Write-Up' filename='Alaskan_Flights.csv' password='' server='' />
+          </named-connection>
+        </named-connections>
+        <_.fcp.ObjectModelEncapsulateLegacy.false...relation connection='textscan.1rz4vw71qly8nc15msebt0adesqh' name='Alaskan_Flights.csv' table='[Alaskan_Flights#csv]' type='table'>
+          <columns character-set='UTF-8' header='yes' locale='en_US' separator=','>
+            <column datatype='string' name='carrier code' ordinal='0' />
+            <column datatype='string' name='carrier name' ordinal='1' />
+            <column datatype='string' name='destination city' ordinal='2' />
+            <column datatype='string' name='destination code' ordinal='3' />
+            <column datatype='string' name='destination country' ordinal='4' />
+            <column datatype='string' name='destination name' ordinal='5' />
+            <column datatype='string' name='destination state' ordinal='6' />
+            <column datatype='string' name='destination Timezone' ordinal='7' />
+            <column datatype='string' name='direction' ordinal='8' />
+            <column datatype='integer' name='flight number' ordinal='9' />
+            <column datatype='string' name='origin airport code' ordinal='10' />
+            <column datatype='string' name='origin airport name' ordinal='11' />
+            <column datatype='string' name='origin city' ordinal='12' />
+            <column datatype='string' name='origin country' ordinal='13' />
+            <column datatype='string' name='origin state' ordinal='14' />
+            <column datatype='string' name='origin tz' ordinal='15' />
+            <column datatype='string' name='route' ordinal='16' />
+            <column datatype='string' name='tail number' ordinal='17' />
+            <column datatype='date' name='year' ordinal='18' />
+            <column datatype='integer' name='bearing' ordinal='19' />
+            <column datatype='real' name='destination latitude' ordinal='20' />
+            <column datatype='real' name='destination longitude' ordinal='21' />
+            <column datatype='integer' name='distance' ordinal='22' />
+            <column datatype='real' name='origin latitude' ordinal='23' />
+            <column datatype='real' name='origin longitude' ordinal='24' />
+            <column datatype='integer' name='travel time' ordinal='25' />
+          </columns>
+        </_.fcp.ObjectModelEncapsulateLegacy.false...relation>
+        <_.fcp.ObjectModelEncapsulateLegacy.true...relation connection='textscan.1rz4vw71qly8nc15msebt0adesqh' name='Alaskan_Flights.csv' table='[Alaskan_Flights#csv]' type='table'>
+          <columns character-set='UTF-8' header='yes' locale='en_US' separator=','>
+            <column datatype='string' name='carrier code' ordinal='0' />
+            <column datatype='string' name='carrier name' ordinal='1' />
+            <column datatype='string' name='destination city' ordinal='2' />
+            <column datatype='string' name='destination code' ordinal='3' />
+            <column datatype='string' name='destination country' ordinal='4' />
+            <column datatype='string' name='destination name' ordinal='5' />
+            <column datatype='string' name='destination state' ordinal='6' />
+            <column datatype='string' name='destination Timezone' ordinal='7' />
+            <column datatype='string' name='direction' ordinal='8' />
+            <column datatype='integer' name='flight number' ordinal='9' />
+            <column datatype='string' name='origin airport code' ordinal='10' />
+            <column datatype='string' name='origin airport name' ordinal='11' />
+            <column datatype='string' name='origin city' ordinal='12' />
+            <column datatype='string' name='origin country' ordinal='13' />
+            <column datatype='string' name='origin state' ordinal='14' />
+            <column datatype='string' name='origin tz' ordinal='15' />
+            <column datatype='string' name='route' ordinal='16' />
+            <column datatype='string' name='tail number' ordinal='17' />
+            <column datatype='date' name='year' ordinal='18' />
+            <column datatype='integer' name='bearing' ordinal='19' />
+            <column datatype='real' name='destination latitude' ordinal='20' />
+            <column datatype='real' name='destination longitude' ordinal='21' />
+            <column datatype='integer' name='distance' ordinal='22' />
+            <column datatype='real' name='origin latitude' ordinal='23' />
+            <column datatype='real' name='origin longitude' ordinal='24' />
+            <column datatype='integer' name='travel time' ordinal='25' />
+          </columns>
+        </_.fcp.ObjectModelEncapsulateLegacy.true...relation>
+        <metadata-records>
+          <metadata-record class='capability'>
+            <remote-name />
+            <remote-type>0</remote-type>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias />
+            <aggregation>Count</aggregation>
+            <contains-null>true</contains-null>
+            <attributes>
+              <attribute datatype='string' name='character-set'>&quot;UTF-8&quot;</attribute>
+              <attribute datatype='string' name='collation'>&quot;en_US&quot;</attribute>
+              <attribute datatype='string' name='field-delimiter'>&quot;,&quot;</attribute>
+              <attribute datatype='string' name='header-row'>&quot;true&quot;</attribute>
+              <attribute datatype='string' name='locale'>&quot;en_US&quot;</attribute>
+              <attribute datatype='string' name='single-char'>&quot;&quot;</attribute>
+            </attributes>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>carrier code</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[carrier code]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>carrier code</remote-alias>
+            <ordinal>0</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>carrier name</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[carrier name]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>carrier name</remote-alias>
+            <ordinal>1</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>destination city</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[destination city]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>destination city</remote-alias>
+            <ordinal>2</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>destination code</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[destination code]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>destination code</remote-alias>
+            <ordinal>3</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>destination country</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[destination country]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>destination country</remote-alias>
+            <ordinal>4</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>destination name</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[destination name]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>destination name</remote-alias>
+            <ordinal>5</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>destination state</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[destination state]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>destination state</remote-alias>
+            <ordinal>6</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>destination Timezone</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[destination Timezone]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>destination Timezone</remote-alias>
+            <ordinal>7</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>direction</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[direction]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>direction</remote-alias>
+            <ordinal>8</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>flight number</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[flight number]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>flight number</remote-alias>
+            <ordinal>9</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>origin airport code</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[origin airport code]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>origin airport code</remote-alias>
+            <ordinal>10</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>origin airport name</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[origin airport name]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>origin airport name</remote-alias>
+            <ordinal>11</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>origin city</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[origin city]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>origin city</remote-alias>
+            <ordinal>12</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>origin country</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[origin country]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>origin country</remote-alias>
+            <ordinal>13</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>origin state</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[origin state]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>origin state</remote-alias>
+            <ordinal>14</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>origin tz</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[origin tz]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>origin tz</remote-alias>
+            <ordinal>15</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>route</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[route]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>route</remote-alias>
+            <ordinal>16</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>tail number</remote-name>
+            <remote-type>129</remote-type>
+            <local-name>[tail number]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>tail number</remote-alias>
+            <ordinal>17</ordinal>
+            <local-type>string</local-type>
+            <aggregation>Count</aggregation>
+            <scale>1</scale>
+            <width>1073741823</width>
+            <contains-null>true</contains-null>
+            <collation flag='0' name='LEN_RUS' />
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>year</remote-name>
+            <remote-type>133</remote-type>
+            <local-name>[year]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>year</remote-alias>
+            <ordinal>18</ordinal>
+            <local-type>date</local-type>
+            <aggregation>Year</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>bearing</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[bearing]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>bearing</remote-alias>
+            <ordinal>19</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>destination latitude</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[destination latitude]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>destination latitude</remote-alias>
+            <ordinal>20</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>destination longitude</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[destination longitude]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>destination longitude</remote-alias>
+            <ordinal>21</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>distance</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[distance]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>distance</remote-alias>
+            <ordinal>22</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>origin latitude</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[origin latitude]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>origin latitude</remote-alias>
+            <ordinal>23</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>origin longitude</remote-name>
+            <remote-type>5</remote-type>
+            <local-name>[origin longitude]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>origin longitude</remote-alias>
+            <ordinal>24</ordinal>
+            <local-type>real</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+          <metadata-record class='column'>
+            <remote-name>travel time</remote-name>
+            <remote-type>20</remote-type>
+            <local-name>[travel time]</local-name>
+            <parent-name>[Alaskan_Flights.csv]</parent-name>
+            <remote-alias>travel time</remote-alias>
+            <ordinal>25</ordinal>
+            <local-type>integer</local-type>
+            <aggregation>Sum</aggregation>
+            <contains-null>true</contains-null>
+            <_.fcp.ObjectModelEncapsulateLegacy.true...object-id>[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]</_.fcp.ObjectModelEncapsulateLegacy.true...object-id>
+          </metadata-record>
+        </metadata-records>
+      </connection>
+      <aliases enabled='yes' />
+      <column caption='Weekday' datatype='string' name='[Calculation_274156682149371906]' role='dimension' type='nominal'>
+        <calculation class='tableau' formula='DATENAME(&apos;weekday&apos;,[year])' />
+      </column>
+      <column caption='Travel Type' datatype='string' name='[Calculation_274156682149867523]' role='dimension' type='nominal'>
+        <calculation class='tableau' formula='IF ([origin state] == [destination state]) THEN &quot;Intrastate&quot;&#13;&#10;ELSEIF ([origin state] == &quot;AK&quot;) THEN &quot;Outbound&quot;&#13;&#10;ELSEIF ([destination state] == &quot;AK&quot;) THEN &quot;Inbound&quot;&#13;&#10;ELSE &quot;Other&quot;&#13;&#10;END' />
+      </column>
+      <column datatype='string' name='[State Travel]' role='dimension' type='nominal'>
+        <calculation class='categorical-bin' column='[Calculation_274156682149867523]' new-bin='true'>
+          <bin default-name='false' value='&quot;Interstate&quot;'>
+            <value>&quot;Inbound&quot;</value>
+            <value>&quot;Outbound&quot;</value>
+          </bin>
+        </calculation>
+      </column>
+      <_.fcp.ObjectModelTableType.true...column caption='Alaskan_Flights.csv' datatype='table' name='[__tableau_internal_object_id__].[Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB]' role='measure' type='quantitative' />
+      <column caption='Bearing' datatype='integer' name='[bearing]' role='measure' type='quantitative' />
+      <column caption='Carrier Code' datatype='string' name='[carrier code]' role='dimension' type='nominal' />
+      <column caption='Carrier Name' datatype='string' name='[carrier name]' role='dimension' type='nominal' />
+      <column caption='Destination City' datatype='string' name='[destination city]' role='dimension' semantic-role='[City].[Name]' type='nominal' />
+      <column caption='Destination Code' datatype='string' name='[destination code]' role='dimension' type='nominal' />
+      <column caption='Destination Country' datatype='string' name='[destination country]' role='dimension' semantic-role='[Country].[ISO3166_2]' type='nominal' />
+      <column aggregation='Avg' caption='Destination Latitude' datatype='real' name='[destination latitude]' role='measure' semantic-role='[Geographical].[Latitude]' type='quantitative' />
+      <column aggregation='Avg' caption='Destination Longitude' datatype='real' name='[destination longitude]' role='measure' semantic-role='[Geographical].[Longitude]' type='quantitative' />
+      <column caption='Destination Name' datatype='string' name='[destination name]' role='dimension' type='nominal' />
+      <column caption='Destination State' datatype='string' name='[destination state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+      <column caption='Direction' datatype='string' name='[direction]' role='dimension' type='nominal' />
+      <column caption='Distance' datatype='integer' name='[distance]' role='measure' type='quantitative' />
+      <column caption='Flight Number' datatype='integer' name='[flight number]' role='dimension' type='ordinal' />
+      <column caption='Origin Airport Code' datatype='string' name='[origin airport code]' role='dimension' type='nominal' />
+      <column caption='Origin Airport Name' datatype='string' name='[origin airport name]' role='dimension' type='nominal' />
+      <column caption='Origin City' datatype='string' name='[origin city]' role='dimension' semantic-role='[City].[Name]' type='nominal' />
+      <column caption='Origin Country' datatype='string' name='[origin country]' role='dimension' semantic-role='[Country].[ISO3166_2]' type='nominal' />
+      <column aggregation='Avg' caption='Origin Latitude' datatype='real' name='[origin latitude]' role='measure' semantic-role='[Geographical].[Latitude]' type='quantitative' />
+      <column aggregation='Avg' caption='Origin Longitude' datatype='real' name='[origin longitude]' role='measure' semantic-role='[Geographical].[Longitude]' type='quantitative' />
+      <column caption='Origin State' datatype='string' name='[origin state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+      <column caption='Origin Tz' datatype='string' name='[origin tz]' role='dimension' type='nominal' />
+      <column caption='Route' datatype='string' name='[route]' role='dimension' type='nominal' />
+      <column caption='Tail Number' datatype='string' name='[tail number]' role='dimension' type='nominal' />
+      <column caption='Travel Time' datatype='integer' name='[travel time]' role='measure' type='quantitative' />
+      <column caption='date' datatype='date' name='[year]' role='dimension' type='ordinal' />
+      <column-instance column='[Calculation_274156682149867523]' derivation='None' name='[none:Calculation_274156682149867523:nk]' pivot='key' type='nominal' />
+      <column-instance column='[year]' derivation='Year' name='[yr:year:ok]' pivot='key' type='ordinal' />
+      <layout _.fcp.SchemaViewerObjectModel.false...dim-percentage='0.5' _.fcp.SchemaViewerObjectModel.false...measure-percentage='0.4' dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
+      <style>
+        <style-rule element='mark'>
+          <encoding attr='color' field='[none:Calculation_274156682149867523:nk]' type='palette'>
+            <map to='#4e79a7'>
+              <bucket>&quot;Inbound&quot;</bucket>
+            </map>
+            <map to='#e15759'>
+              <bucket>&quot;Outbound&quot;</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>&quot;Intrastate&quot;</bucket>
+            </map>
+          </encoding>
+        </style-rule>
+      </style>
+      <semantic-values>
+        <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
+      </semantic-values>
+      <filter class='categorical' column='[yr:year:ok]' filter-group='2'>
+        <groupfilter from='1987' function='range' level='[yr:year:ok]' to='2008' user:ui-domain='database' user:ui-enumeration='inclusive' user:ui-marker='enumerate' />
+      </filter>
+      <_.fcp.ObjectModelEncapsulateLegacy.true...object-graph>
+        <objects>
+          <object caption='Alaskan_Flights.csv' id='Alaskan_Flights.csv_CF6ECA3581F0488988333D9C5BF716EB'>
+            <properties context=''>
+              <relation connection='textscan.1rz4vw71qly8nc15msebt0adesqh' name='Alaskan_Flights.csv' table='[Alaskan_Flights#csv]' type='table'>
+                <columns character-set='UTF-8' header='yes' locale='en_US' separator=','>
+                  <column datatype='string' name='carrier code' ordinal='0' />
+                  <column datatype='string' name='carrier name' ordinal='1' />
+                  <column datatype='string' name='destination city' ordinal='2' />
+                  <column datatype='string' name='destination code' ordinal='3' />
+                  <column datatype='string' name='destination country' ordinal='4' />
+                  <column datatype='string' name='destination name' ordinal='5' />
+                  <column datatype='string' name='destination state' ordinal='6' />
+                  <column datatype='string' name='destination Timezone' ordinal='7' />
+                  <column datatype='string' name='direction' ordinal='8' />
+                  <column datatype='integer' name='flight number' ordinal='9' />
+                  <column datatype='string' name='origin airport code' ordinal='10' />
+                  <column datatype='string' name='origin airport name' ordinal='11' />
+                  <column datatype='string' name='origin city' ordinal='12' />
+                  <column datatype='string' name='origin country' ordinal='13' />
+                  <column datatype='string' name='origin state' ordinal='14' />
+                  <column datatype='string' name='origin tz' ordinal='15' />
+                  <column datatype='string' name='route' ordinal='16' />
+                  <column datatype='string' name='tail number' ordinal='17' />
+                  <column datatype='date' name='year' ordinal='18' />
+                  <column datatype='integer' name='bearing' ordinal='19' />
+                  <column datatype='real' name='destination latitude' ordinal='20' />
+                  <column datatype='real' name='destination longitude' ordinal='21' />
+                  <column datatype='integer' name='distance' ordinal='22' />
+                  <column datatype='real' name='origin latitude' ordinal='23' />
+                  <column datatype='real' name='origin longitude' ordinal='24' />
+                  <column datatype='integer' name='travel time' ordinal='25' />
+                </columns>
+              </relation>
+            </properties>
+          </object>
+        </objects>
+      </_.fcp.ObjectModelEncapsulateLegacy.true...object-graph>
+    </datasource>
+  </datasources>
+  <worksheets>
+    <worksheet name='Intra/Inter Growth'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Alaskan_Flights' name='federated.1jwssxb0fay8gf1ebsokl1tveyit' />
+          </datasources>
+          <datasource-dependencies datasource='federated.1jwssxb0fay8gf1ebsokl1tveyit'>
+            <column caption='Travel Type' datatype='string' name='[Calculation_274156682149867523]' role='dimension' type='nominal'>
+              <calculation class='tableau' formula='IF ([origin state] == [destination state]) THEN &quot;Intrastate&quot;&#13;&#10;ELSEIF ([origin state] == &quot;AK&quot;) THEN &quot;Outbound&quot;&#13;&#10;ELSEIF ([destination state] == &quot;AK&quot;) THEN &quot;Inbound&quot;&#13;&#10;ELSE &quot;Other&quot;&#13;&#10;END' />
+            </column>
+            <column datatype='string' name='[State Travel]' role='dimension' type='nominal'>
+              <calculation class='categorical-bin' column='[Calculation_274156682149867523]' new-bin='true'>
+                <bin default-name='false' value='&quot;Interstate&quot;'>
+                  <value>&quot;Inbound&quot;</value>
+                  <value>&quot;Outbound&quot;</value>
+                </bin>
+              </calculation>
+            </column>
+            <column-instance column='[Calculation_274156682149867523]' derivation='Count' name='[cnt:Calculation_274156682149867523:qk]' pivot='key' type='quantitative' />
+            <column caption='Destination State' datatype='string' name='[destination state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column caption='Origin State' datatype='string' name='[origin state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column-instance column='[year]' derivation='Quarter' name='[qr:year:ok]' pivot='key' type='ordinal' />
+            <column caption='date' datatype='date' name='[year]' role='dimension' type='ordinal' />
+            <column-instance column='[year]' derivation='Year' name='[yr:year:ok]' pivot='key' type='ordinal' />
+          </datasource-dependencies>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Area' />
+            <encodings>
+              <color column='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[State Travel]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-color' value='#4e79a7' />
+                <format attr='mark-labels-cull' value='true' />
+                <format attr='mark-labels-show' value='false' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[federated.1jwssxb0fay8gf1ebsokl1tveyit].[cnt:Calculation_274156682149867523:qk]</rows>
+        <cols>([federated.1jwssxb0fay8gf1ebsokl1tveyit].[qr:year:ok] / [federated.1jwssxb0fay8gf1ebsokl1tveyit].[yr:year:ok])</cols>
+      </table>
+      <simple-id uuid='{95127270-D112-4D78-BEFC-0D22ED2BCB1C}' />
+    </worksheet>
+    <worksheet name='Intra/Inter Travel, Quarters and Years'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Alaskan_Flights' name='federated.1jwssxb0fay8gf1ebsokl1tveyit' />
+          </datasources>
+          <datasource-dependencies datasource='federated.1jwssxb0fay8gf1ebsokl1tveyit'>
+            <column caption='Travel Type' datatype='string' name='[Calculation_274156682149867523]' role='dimension' type='nominal'>
+              <calculation class='tableau' formula='IF ([origin state] == [destination state]) THEN &quot;Intrastate&quot;&#13;&#10;ELSEIF ([origin state] == &quot;AK&quot;) THEN &quot;Outbound&quot;&#13;&#10;ELSEIF ([destination state] == &quot;AK&quot;) THEN &quot;Inbound&quot;&#13;&#10;ELSE &quot;Other&quot;&#13;&#10;END' />
+            </column>
+            <column datatype='string' name='[State Travel]' role='dimension' type='nominal'>
+              <calculation class='categorical-bin' column='[Calculation_274156682149867523]' new-bin='true'>
+                <bin default-name='false' value='&quot;Interstate&quot;'>
+                  <value>&quot;Inbound&quot;</value>
+                  <value>&quot;Outbound&quot;</value>
+                </bin>
+              </calculation>
+            </column>
+            <column-instance column='[Calculation_274156682149867523]' derivation='Count' name='[cnt:Calculation_274156682149867523:qk]' pivot='key' type='quantitative' />
+            <column caption='Destination State' datatype='string' name='[destination state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column caption='Origin State' datatype='string' name='[origin state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column-instance column='[year]' derivation='Quarter' name='[qr:year:ok]' pivot='key' type='ordinal' />
+            <column caption='date' datatype='date' name='[year]' role='dimension' type='ordinal' />
+            <column-instance column='[year]' derivation='Year' name='[yr:year:ok]' pivot='key' type='ordinal' />
+          </datasource-dependencies>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Line' />
+            <encodings>
+              <color column='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[State Travel]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-color' value='#4e79a7' />
+                <format attr='mark-labels-cull' value='true' />
+                <format attr='mark-labels-show' value='false' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[federated.1jwssxb0fay8gf1ebsokl1tveyit].[cnt:Calculation_274156682149867523:qk]</rows>
+        <cols>([federated.1jwssxb0fay8gf1ebsokl1tveyit].[qr:year:ok] / [federated.1jwssxb0fay8gf1ebsokl1tveyit].[yr:year:ok])</cols>
+      </table>
+      <simple-id uuid='{84982A60-5C5B-42E2-8937-F5CA85782396}' />
+    </worksheet>
+    <worksheet name='Sheet 4'>
+      <table>
+        <view>
+          <datasources />
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+          </pane>
+        </panes>
+        <rows />
+        <cols />
+      </table>
+      <simple-id uuid='{CB1EBA97-0548-4FAB-8C7F-6A7392CB8464}' />
+    </worksheet>
+    <worksheet name='State Travel by Weekdays'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Alaskan_Flights' name='federated.1jwssxb0fay8gf1ebsokl1tveyit' />
+          </datasources>
+          <datasource-dependencies datasource='federated.1jwssxb0fay8gf1ebsokl1tveyit'>
+            <column caption='Weekday' datatype='string' name='[Calculation_274156682149371906]' role='dimension' type='nominal'>
+              <calculation class='tableau' formula='DATENAME(&apos;weekday&apos;,[year])' />
+            </column>
+            <column caption='Travel Type' datatype='string' name='[Calculation_274156682149867523]' role='dimension' type='nominal'>
+              <calculation class='tableau' formula='IF ([origin state] == [destination state]) THEN &quot;Intrastate&quot;&#13;&#10;ELSEIF ([origin state] == &quot;AK&quot;) THEN &quot;Outbound&quot;&#13;&#10;ELSEIF ([destination state] == &quot;AK&quot;) THEN &quot;Inbound&quot;&#13;&#10;ELSE &quot;Other&quot;&#13;&#10;END' />
+            </column>
+            <column-instance column='[Calculation_274156682149867523]' derivation='Count' name='[cnt:Calculation_274156682149867523:qk]' pivot='key' type='quantitative' />
+            <column caption='Destination State' datatype='string' name='[destination state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column-instance column='[Calculation_274156682149371906]' derivation='None' name='[none:Calculation_274156682149371906:nk]' pivot='key' type='nominal' />
+            <column-instance column='[Calculation_274156682149867523]' derivation='None' name='[none:Calculation_274156682149867523:nk]' pivot='key' type='nominal' />
+            <column caption='Origin State' datatype='string' name='[origin state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column caption='date' datatype='date' name='[year]' role='dimension' type='ordinal' />
+          </datasource-dependencies>
+          <aggregation value='true' />
+        </view>
+        <style>
+          <style-rule element='cell'>
+            <format attr='width' field='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[none:Calculation_274156682149371906:nk]' value='135' />
+          </style-rule>
+          <style-rule element='header'>
+            <format attr='width' field='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[none:Calculation_274156682149867523:nk]' value='156' />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Automatic' />
+            <encodings>
+              <text column='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[cnt:Calculation_274156682149867523:qk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-labels-show' value='true' />
+              </style-rule>
+              <style-rule element='pane'>
+                <format attr='minwidth' value='-1' />
+                <format attr='maxwidth' value='-1' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[federated.1jwssxb0fay8gf1ebsokl1tveyit].[none:Calculation_274156682149867523:nk]</rows>
+        <cols>[federated.1jwssxb0fay8gf1ebsokl1tveyit].[none:Calculation_274156682149371906:nk]</cols>
+      </table>
+      <simple-id uuid='{7B264E1C-A2AF-47DD-9B0E-D0DE878FA738}' />
+    </worksheet>
+    <worksheet name='Total Travel, Quarters and Years'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Alaskan_Flights' name='federated.1jwssxb0fay8gf1ebsokl1tveyit' />
+          </datasources>
+          <datasource-dependencies datasource='federated.1jwssxb0fay8gf1ebsokl1tveyit'>
+            <column caption='Travel Type' datatype='string' name='[Calculation_274156682149867523]' role='dimension' type='nominal'>
+              <calculation class='tableau' formula='IF ([origin state] == [destination state]) THEN &quot;Intrastate&quot;&#13;&#10;ELSEIF ([origin state] == &quot;AK&quot;) THEN &quot;Outbound&quot;&#13;&#10;ELSEIF ([destination state] == &quot;AK&quot;) THEN &quot;Inbound&quot;&#13;&#10;ELSE &quot;Other&quot;&#13;&#10;END' />
+            </column>
+            <column-instance column='[Calculation_274156682149867523]' derivation='Count' name='[cnt:Calculation_274156682149867523:qk]' pivot='key' type='quantitative' />
+            <column caption='Destination State' datatype='string' name='[destination state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column-instance column='[Calculation_274156682149867523]' derivation='None' name='[none:Calculation_274156682149867523:nk]' pivot='key' type='nominal' />
+            <column caption='Origin State' datatype='string' name='[origin state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column-instance column='[year]' derivation='Quarter' name='[qr:year:ok]' pivot='key' type='ordinal' />
+            <column caption='date' datatype='date' name='[year]' role='dimension' type='ordinal' />
+            <column-instance column='[year]' derivation='Year' name='[yr:year:ok]' pivot='key' type='ordinal' />
+          </datasource-dependencies>
+          <manual-sort column='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[none:Calculation_274156682149867523:nk]' direction='ASC'>
+            <dictionary>
+              <bucket>&quot;Intrastate&quot;</bucket>
+              <bucket>&quot;Inbound&quot;</bucket>
+              <bucket>&quot;Outbound&quot;</bucket>
+            </dictionary>
+          </manual-sort>
+          <aggregation value='true' />
+        </view>
+        <style>
+          <style-rule element='axis'>
+            <encoding attr='space' class='0' field='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[cnt:Calculation_274156682149867523:qk]' field-type='quantitative' max='9286' min='-1674' range-type='fixed' scope='rows' type='space' />
+          </style-rule>
+        </style>
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Line' />
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-color' value='#4e79a7' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[federated.1jwssxb0fay8gf1ebsokl1tveyit].[cnt:Calculation_274156682149867523:qk]</rows>
+        <cols>([federated.1jwssxb0fay8gf1ebsokl1tveyit].[qr:year:ok] / ([federated.1jwssxb0fay8gf1ebsokl1tveyit].[none:Calculation_274156682149867523:nk] / [federated.1jwssxb0fay8gf1ebsokl1tveyit].[yr:year:ok]))</cols>
+      </table>
+      <simple-id uuid='{360B3056-DFF5-4907-BE3F-0BAA51B15913}' />
+    </worksheet>
+    <worksheet name='Travel Growth, Quarters and Years'>
+      <table>
+        <view>
+          <datasources>
+            <datasource caption='Alaskan_Flights' name='federated.1jwssxb0fay8gf1ebsokl1tveyit' />
+          </datasources>
+          <datasource-dependencies datasource='federated.1jwssxb0fay8gf1ebsokl1tveyit'>
+            <column caption='Travel Type' datatype='string' name='[Calculation_274156682149867523]' role='dimension' type='nominal'>
+              <calculation class='tableau' formula='IF ([origin state] == [destination state]) THEN &quot;Intrastate&quot;&#13;&#10;ELSEIF ([origin state] == &quot;AK&quot;) THEN &quot;Outbound&quot;&#13;&#10;ELSEIF ([destination state] == &quot;AK&quot;) THEN &quot;Inbound&quot;&#13;&#10;ELSE &quot;Other&quot;&#13;&#10;END' />
+            </column>
+            <column-instance column='[Calculation_274156682149867523]' derivation='Count' name='[cnt:Calculation_274156682149867523:qk]' pivot='key' type='quantitative' />
+            <column caption='Destination State' datatype='string' name='[destination state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column-instance column='[Calculation_274156682149867523]' derivation='None' name='[none:Calculation_274156682149867523:nk]' pivot='key' type='nominal' />
+            <column caption='Origin State' datatype='string' name='[origin state]' role='dimension' semantic-role='[State].[Name]' type='nominal' />
+            <column-instance column='[year]' derivation='Quarter' name='[qr:year:ok]' pivot='key' type='ordinal' />
+            <column caption='date' datatype='date' name='[year]' role='dimension' type='ordinal' />
+            <column-instance column='[year]' derivation='Year' name='[yr:year:ok]' pivot='key' type='ordinal' />
+          </datasource-dependencies>
+          <manual-sort column='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[none:Calculation_274156682149867523:nk]' direction='ASC'>
+            <dictionary>
+              <bucket>&quot;Inbound&quot;</bucket>
+              <bucket>&quot;Outbound&quot;</bucket>
+              <bucket>&quot;Intrastate&quot;</bucket>
+              <bucket>%all%</bucket>
+            </dictionary>
+          </manual-sort>
+          <aggregation value='true' />
+        </view>
+        <style />
+        <panes>
+          <pane selection-relaxation-option='selection-relaxation-allow'>
+            <view>
+              <breakdown value='auto' />
+            </view>
+            <mark class='Area' />
+            <encodings>
+              <color column='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[none:Calculation_274156682149867523:nk]' />
+            </encodings>
+            <style>
+              <style-rule element='mark'>
+                <format attr='mark-color' value='#4e79a7' />
+                <format attr='mark-labels-cull' value='true' />
+                <format attr='mark-labels-show' value='false' />
+              </style-rule>
+            </style>
+          </pane>
+        </panes>
+        <rows>[federated.1jwssxb0fay8gf1ebsokl1tveyit].[cnt:Calculation_274156682149867523:qk]</rows>
+        <cols>([federated.1jwssxb0fay8gf1ebsokl1tveyit].[qr:year:ok] / [federated.1jwssxb0fay8gf1ebsokl1tveyit].[yr:year:ok])</cols>
+      </table>
+      <simple-id uuid='{88DACFDB-EFE0-44CA-A94F-77B396C5F6FB}' />
+    </worksheet>
+  </worksheets>
+  <windows saved-dpi-scale-factor='1.5' source-height='44'>
+    <window class='worksheet' name='State Travel by Weekdays'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='30'>
+            <card type='title' />
+          </strip>
+        </edge>
+      </cards>
+      <simple-id uuid='{33D50224-9976-4B77-B7D6-7D47E7E3814A}' />
+    </window>
+    <window class='worksheet' name='Total Travel, Quarters and Years'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='30'>
+            <card type='title' />
+          </strip>
+        </edge>
+      </cards>
+      <simple-id uuid='{05513C81-2161-4534-9B14-8F42B684EDE4}' />
+    </window>
+    <window class='worksheet' name='Intra/Inter Travel, Quarters and Years'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='30'>
+            <card type='title' />
+          </strip>
+        </edge>
+        <edge name='right'>
+          <strip size='160'>
+            <card pane-specification-id='0' param='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[State Travel]' type='color' />
+          </strip>
+        </edge>
+      </cards>
+      <simple-id uuid='{BF22B4A8-6CA3-4615-9D5B-A19453CB0EF2}' />
+    </window>
+    <window class='worksheet' maximized='true' name='Travel Growth, Quarters and Years'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='30'>
+            <card type='title' />
+          </strip>
+        </edge>
+        <edge name='right'>
+          <strip size='160'>
+            <card pane-specification-id='0' param='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[none:Calculation_274156682149867523:nk]' type='color' />
+          </strip>
+        </edge>
+      </cards>
+      <simple-id uuid='{434EA4F5-439E-44E6-A78D-52AE4A17B317}' />
+    </window>
+    <window class='worksheet' name='Intra/Inter Growth'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='30'>
+            <card type='title' />
+          </strip>
+        </edge>
+        <edge name='right'>
+          <strip size='160'>
+            <card pane-specification-id='0' param='[federated.1jwssxb0fay8gf1ebsokl1tveyit].[State Travel]' type='color' />
+          </strip>
+        </edge>
+      </cards>
+      <simple-id uuid='{83266E1E-5E07-4122-993F-6C20C2FC9DF6}' />
+    </window>
+    <window class='worksheet' name='Sheet 4'>
+      <cards>
+        <edge name='left'>
+          <strip size='160'>
+            <card type='pages' />
+            <card type='filters' />
+            <card type='marks' />
+          </strip>
+        </edge>
+        <edge name='top'>
+          <strip size='2147483647'>
+            <card type='columns' />
+          </strip>
+          <strip size='2147483647'>
+            <card type='rows' />
+          </strip>
+          <strip size='30'>
+            <card type='title' />
+          </strip>
+        </edge>
+      </cards>
+      <simple-id uuid='{83871837-38E3-4D8F-9F6B-969FE288650A}' />
+    </window>
+  </windows>
+</workbook>
