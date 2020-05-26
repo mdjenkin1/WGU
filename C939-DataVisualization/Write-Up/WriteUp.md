@@ -316,8 +316,31 @@ What I find interesting is how the data seems to tell a different story dependin
 
 Replacing the component interstate travel with total interstate travel does away with this illusion of dominating intrastate travel. Chalk this as a lesson in why you should compare like for like. To find a similar component analysis for intrastate travel would need another way of thinking about interstate travel.  
 
-### Component Intrastate Travel
+### Components of Intrastate Travel
 
-Interstate travel too and from Alaska has been classified as inbound and outbound. In a more abstract sense, this is travel to and from a remote part of the greater whole. A like for like on intrastate travel would be flights from less remote to more remote airports. But how best define more or less remote airports?  
+Interstate travel too and from Alaska has been classified as inbound and outbound. In a more abstract sense, this is travel to and from a remote part of the greater whole. A like for like on intrastate travel would be flights from less remote to more remote airports. But how best define remote airports?  
 
+My first idea is to ask; which airports have the most intrastate traffic? 
 
+![10a_intrastate_volume.png](./imgs/10a_intrastate_volume.png)  
+
+With just a simple glance, the winner is Ted Stevens Anchorage International (ANC). Almost every airport has a flight too and from this central hub. Before getting ahead of ourselves, what about Fairbanks International (FAI) and Juneau International (JNU)? While they may not have the variety of intrastate destinations as ANC, together they're involved with approximately 26% of intrastate travel.  
+
+![10b_intrastate_volume.png](./imgs/10b_intrastate_volume.png)  
+![11b_JNU_intrastate.png](./imgs/11b_JNU_intrastate.png)  
+![11a_FAI_intrastate.png](./imgs/11a_FAI_intrastate.png)  
+
+When looking at the two international airports individually. One in three intrastate flights from JNU go to ANC and four out of five intrastate flights from FAI go to ANC. It seems these three airports work together as the back bone for Alaskan air travel.  
+
+### Bringing Back the Interstate
+
+A picture of Alaskan intrastate traffic centered around one airport fed by two international airports has started to take shape. What about the interstate traffic?  
+
+![12a_outbound.png](./imgs/12a_outbound.png)  
+![12a_outbound_bars.png](./imgs/12a_outbound_bars.png)  
+
+While the bar chart doesnt offer nearly the detail as text percents, it does make it easier to see just how prevailent traffic between two airports are. In this case, chances are you'll be going to Seattle-Tacoma Intl (SEA) if you're flying out of Alaska.
+ 
+![12b_inbound_bars.png](./imgs/12b_inbound_bars.png)  
+
+The same can be said flying into Alaska. Chances are you're catching a flight from Seattle.
