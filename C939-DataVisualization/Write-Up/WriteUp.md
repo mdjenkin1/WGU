@@ -422,5 +422,14 @@ Another possible view on changes in Extrahub travel was to show volume for origi
 
 A solution was found by removing the grid. Without a time scale, the grid tells us nothing. Using the grid limited the size scaling. This packed bubble view of our data better shows what was being hinted at with the dual encoding of color and size previously. The break between low volume and high volume extrahub routes are more pronounced. 
 
-One idea to reintegrate time with to a packed bubble view would be animating the changing flight volume. Given the current project purpose and course material, that task would go beyond extracirricular.  
+One idea to reintegrate time with to a packed bubble view would be animating the changing flight volume. One of the challenges of animating the packed bubble view are the individual bubbles do not remain in the same place as they grow and shrink. A solution to that may be breaking up the bubbles by origin.  
+
+![13e_extrahub_by_org.png](.\imgs\13e_extrahub_by_org.png)
+
+However, given the scope of this project and the course material, such an animation would go beyond extracirricular. Another consideration is the extrahub travel is miniscule compared to the intrahub travel we wanted to explore.  
+
+#### Intrahub Travel
+
+![14a_hubcentric_volume_no_interhub.png](./imgs/14a_hubcentric_volume_no_interhub.png)  
+
 
