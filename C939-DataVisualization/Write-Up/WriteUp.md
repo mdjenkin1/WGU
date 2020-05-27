@@ -347,4 +347,80 @@ The same can be said about flying into Alaska. Chances are you're catching a fli
 
 ## Putting it Together
 
-The majority of Alaskan air travel is centered around one airport, Ted Stevens Anchorage International (ANC). We can further divide the travel into 2 major types, interstate and intrastate. With the focus on a single airport, travel can also be divided into inbound and outbound. Interstate travel can also be divided into categories of "is/not Seattle-Tacoma Intl (SEA)". Intrastate travel can be divided into categories of "is Juneau International (JUN)", "is Fairbanks International (FAI)" and "is neither JUN or FAI". What remains is translating this information visually.  
+The majority of Alaskan air travel is centered around one airport, Ted Stevens Anchorage International (ANC). We can further divide the travel into 2 major types, interstate and intrastate. With the focus on a single airport, travel can also be divided into inbound and outbound. Interstate travel can also be divided into categories of "is/not Seattle-Tacoma Intl (SEA)". Intrastate travel can be divided into categories of "is Juneau International (JNU)", "is Fairbanks International (FAI)" and "is neither JNU or FAI". What remains is translating this information visually.  
+
+### Data Prep
+
+#### Extract
+
+With the final scope settled, it's time for another data extract. This time limited to the fields necessary for the story we're telling. Longitude and latitude could be included in the extract, however Tableau retrieves that for us from city and state information.  
+
+```{SQL}
+SELECT
+    `flight.route.route` as "route",
+    `flight.route.destination_airport.iata` as "destination airport code",
+    `flight.route.destination_airport.airport` as "destination airport name",
+    `flight.route.destination_airport.state` as "destination state",
+    `flight.route.destination_airport.city` as "destination city",
+    `flight.route.origin_airport.iata` as "origin airport code",
+    `flight.route.origin_airport.airport` as "origin airport name",
+    `flight.route.origin_airport.state` as "origin state",
+    `flight.route.origin_airport.city` as "origin city",
+    IFNULL(DATE(`times.sched_depart_utc`), DATE(`times.actual_depart_utc`)) as date
+FROM detailed_flights
+WHERE
+    `flight.route.destination_airport.state` LIKE "AK"
+    OR
+    `flight.route.origin_airport.state` LIKE "AK"
+```
+
+This restriction of data resulted in an even more publishable dataset for our final visualization. The exported CSV is only 110 MB in size. Compared to the 270 MB of the previous extract, this is a much more bandwidth friendly set.  
+
+#### Calculated Fields
+
+With a fresh raw extract, we need to create a few groups before we can move on. The groups defined will be an expansion on the previous idea of using ANC as the focal airport. With ANC as the central hub of our model, JNU, FAI and SEA will serve as extensions. With this 3 spoke and hub model we can define each route as one of:  
+
+* Intrahub: Flights involving only the four central airports
+* Interhub: Flights involving only one of the four central airports
+* Extrahub: Flights involving none of the four central airports
+
+With this model, interstate and intrastate classifications become meaningless, and why shouldn't they? State definitions are legal constructs. Not to downplay the role of politics and legality in influencing travel, but it only serves as an influencer. If refugees and immigration are any indicator, people will be compelled to travel solely on legal constructs. The politics between Alaska and the rest of the US considered, legal constructs aren't expected to be a major limiting or influencing factor in travel patterns. Sarah Palin just wasn't that important. Besides, we do not have enough information to make a determination of legal influences on Alaskan travel. Our purpose is to visually describe how Alaskan travel has changed over our period of flight data.  
+
+Before completely abandoning the interstate and intrastate labels, I wouldn't be satisfied without first putting them in hub centric context. Interhub and Extrahub flights can be either interstate or intrastate. For intrahub travel, all routes involving SEA and only routes involving SEA can be called interstate. The inter/intra-state divide adds complexity with no extra dimensionality to intrahub travel. State and hub centric are two disparate models.
+
+Inbound and outbound could add some dimensionality to our hub centric model. While it does nothing for intrahub or extrahub travel, it does give direction to interhub travel. I have an suspicion that interhub travel will remain evenly split between inbound and outbound traffic. However, it could be valuable for comparison to changes in extrahub traffic.  
+
+```{Tableau}
+IF [Hub Origin] AND [Hub Destination] THEN "Intrahub"
+ELSEIF [Hub Origin] AND NOT [Hub Destination] THEN "Outbound"
+ELSEIF NOT [Hub Origin] AND [Hub Destination] THEN "Inbound"
+ELSE "Extrahub"
+END
+```
+
+#### Hubcentric 
+
+![13_hubcentric_directional.png](./imgs/13_hubcentric_directional.png)  
+
+As suspected, inbound/oubound interhub travel doesn't provide any insight for the extra dimensional cost.
+
+![13a_hubcentric.png](./imgs/13a_hubcentric.png)  
+
+However, rejoining the directional interhub travel does show an interesting development. There's a disparate growth between interhub and intrahub travel. This suggests changing travel patterns. Comparatively, extrahub travel has remained consistent. This doesn't mean there hasn't been any change in extrahub travel, just the amount of traffic has remained consistent.  
+
+#### Extrahub Travel
+
+![13b_extrahub.png](.\imgs\13b_extrahub.png)  
+
+In determining how Alaskan extrahub travel has changed overtime it was helpful to display the volume of each route in both color and size. I find this double encoding really makes the the higher volume routes stand out. When encoded with only color, the smaller volume routes seem larger than they are. When encoded with only size, the highest volume routes blend in with the average volume routes. With more white space this wouldn't have been an issue. Instead, there's a large number of middling points. This extra encoding for the same feature allowed the extremes to really stand out among the mundane.  
+ 
+![13c_extrahub_ovd_allyears.png](./imgs/13c_extrahub_ovd_allyears.png)  
+
+Another possible view on changes in Extrahub travel was to show volume for origin vs destination. While there's less noise with moderate volume routes, this view looses the time element and has a lot of wasted space. In this case, the empty space makes it hard to follow which origin airport map to which destinations.  
+
+![13d_extrahub_ovd_allyears.png](./imgs/13d_extrahub_ovd_allyears.png)  
+
+A solution was found by removing the grid. Without a time scale, the grid tells us nothing. Using the grid limited the size scaling. This packed bubble view of our data better shows what was being hinted at with the dual encoding of color and size previously. The break between low volume and high volume extrahub routes are more pronounced. 
+
+One idea to reintegrate time with to a packed bubble view would be animating the changing flight volume. Given the current project purpose and course material, that task would go beyond extracirricular.  
+
