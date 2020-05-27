@@ -422,14 +422,25 @@ Another possible view on changes in Extrahub travel was to show volume for origi
 
 A solution was found by removing the grid. Without a time scale, the grid tells us nothing. Using the grid limited the size scaling. This packed bubble view of our data better shows what was being hinted at with the dual encoding of color and size previously. The break between low volume and high volume extrahub routes are more pronounced. 
 
-One idea to reintegrate time with to a packed bubble view would be animating the changing flight volume. One of the challenges of animating the packed bubble view are the individual bubbles do not remain in the same place as they grow and shrink. A solution to that may be breaking up the bubbles by origin.  
-
 ![13e_extrahub_by_org.png](.\imgs\13e_extrahub_by_org.png)
 
-However, given the scope of this project and the course material, such an animation would go beyond extracirricular. Another consideration is the extrahub travel is miniscule compared to the intrahub travel we wanted to explore.  
-
-#### Intrahub Travel
+One idea to reintegrate time with to a packed bubble view would be animating the changing flight volume. One of the challenges of animating the packed bubble view are the individual bubbles do not remain in the same place as they grow and shrink. A solution to that may be breaking up the bubbles by origin.  
 
 ![14a_hubcentric_volume_no_interhub.png](./imgs/14a_hubcentric_volume_no_interhub.png)  
 
+However, given the scope of this project and the course material, such an animation would go beyond extracirricular. Another consideration is the extrahub travel is miniscule compared to the intrahub travel we wanted to explore.  
 
+#### An Aside on Extrahub Travel
+
+All my life I've lived in Utah. In that time I've been told that Utah's main airport (SLC) is a fast growing international airport. That airport is currently undergoing expansion. I've also known that Utah is a mineral and resource rich state. Every year, there's political contention in public land use. It's preservation vs. consumption. I've never lived in Alaska, but it's famous for being resource rich. I can imagine how Alaskan politics also have resource preservation vs. consumption as a driver.  
+
+I also imagine that resource cultivation is a major driver of Alaskan extrahub air travel and tourism plays a more pronounced role in driving intrahub travel. If this is the case, then periods of greater resource cultivation should align with periods of increased extrahub travel. There's two major bumps in Alaskan extrahub travel. 1988-1994 and 2000-2008. For both bumps in extrahub travel, flights between OME and OTZ were major drivers of that increased traffic. Also curious is the large number of flights from OTZ to OME and so many fewer return flights. Why would planes go to OME and not return? A bit of research to flesh out the story here may be the story we want to tell for this project.  
+
+One place to start on this might be the legal and political influences of resource consumption in Alaska.  
+[https://en.wikipedia.org/wiki/Political_party_strength_in_Alaska](https://en.wikipedia.org/wiki/Political_party_strength_in_Alaska)  
+
+#### Interhub Travel
+
+![14b_hubcentric_volume_w_interhub.png](./imgs/14b_hubcentric_volume_w_interhub.png)
+
+On reintroducing interhub data, my previous consideration of adding a state based dimension is brought back to question. While state based information offers no dimensionality to intrahub travel, it could offer dimensionality to the flow between intrahub and extrahub travel.  
