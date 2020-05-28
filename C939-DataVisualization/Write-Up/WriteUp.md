@@ -439,8 +439,55 @@ I also imagine that resource cultivation is a major driver of Alaskan extrahub a
 One place to start on this might be the legal and political influences of resource consumption in Alaska.  
 [https://en.wikipedia.org/wiki/Political_party_strength_in_Alaska](https://en.wikipedia.org/wiki/Political_party_strength_in_Alaska)  
 
-#### Interhub Travel
+#### Intrahub Travel and System Flow
 
 ![14b_hubcentric_volume_w_interhub.png](./imgs/14b_hubcentric_volume_w_interhub.png)
 
 On reintroducing interhub data, my previous consideration of adding a state based dimension is brought back to question. While state based information offers no dimensionality to intrahub travel, it could offer dimensionality to the flow between intrahub and extrahub travel.  
+
+```{Tableau}
+IF ([Hub Origin] AND [Hub Destination]) THEN "Intrahub"
+ELSEIF ([Hub Origin] OR [Hub Destination]) THEN "Interhub"
+ELSEIF ([Origin State] == "AK" AND [Destination State] == "AK") THEN "Extrahub"
+ELSE "Interstate"
+END
+```
+
+Defining our data with this grouping results in no records labelled as Interstate. This means flights in and out of the Alaskan system passes through the hub. This means any flight involving a hub airport and an alaskan airport is system contained. Flights involving the hub and an interstate airport would be system growth. With this we have a measure of how the Alaskan air travel system has grown over time.
+
+```{Tabeleau}
+IF ([Hub Origin] AND [Hub Destination]) THEN "Intrahub"
+ELSEIF ([Hub Origin] AND [Destination State] == "AK") THEN "Intrasystem"
+ELSEIF ([Origin State] == "AK" AND [Hub Destination]) THEN "Intrasystem"
+ELSEIF ([Hub Origin] AND [Destination State] != "AK") THEN "System Bleed"
+ELSEIF ([Origin State] != "AK" AND [Hub Destination]) THEN "System Feed"
+ELSEIF ([Origin State] == "AK" AND [Destination State] == "AK") THEN "Extrahub"
+ELSE "Interstate"
+END
+```
+
+It's worth noting this measure of system flow is incomplete. First, our source dataset is limited to flights within the US. International flights are not included. Second, interstate flights in and out of SEA are not included. SEA airport is more than just a hub for flights to Alaska. It is also not in Alaska. It's unique in this regard. Growth in traffic at SEA not directly involving Alaska cannot be assumed part of the Alaskan system. How much of the traffic change can be attributed to traffic change at SEA would be its own study.  
+
+![15_system_flow.png](./imgs/15_system_flow.png)
+
+With this definition of flow and system growth, I find it interesting that the feed and bleed of the system has remained relatively equal through the period in question. To be sure that the system has grown, lets take a look at the total flights taken year by year.  
+
+![15a_system_flow_yearly.png](./imgs/15a_system_flow_yearly.png)  
+
+Clearly the volume of flights in this period did increase. With about 40k flights in 1988 and about 55k flights in 2008, there's no arguing that the volume of flights increased. We also see the flow in and out of the system did increase at nearly equal rates. As for the system itself, it seems to have remained mostly constant with some increase in intrahub and interhub travel in the mid 1990's and some decrease a decade later.  
+
+While it's easy to see the growth in external flow in this stacked area chart, the change in internal flow requires more scrutiny. For changes of flight volume, It's easier to notice with lines.  
+
+![15a_flights_per_year.png](./imgs/15a_flights_per_year.png)  
+
+We lose view of total flight volume but gain a better view of changes in the individual types of flight. In both views we see the amount of extrahub traffic has stayed relatively flat while the flow with external systems is increasing. However, only in the line graph do we see a clear rise and fall of intrasystem and intrahub travel.  
+
+![15a_percent_system_flow_yearly.png](./imgs/15a_percent_system_flow_yearly.png)  
+
+The stacked area graph is good for showing the number of flights increased over time and the line graph shows how the various types of flight changed over time. Showing the number of flights over time doesn't describe how the system has changed. All it does is change the zoom level. To get a better understanding of how the system has changed over time, I present the stacked area with percent instead of count.  
+
+Compared to the stacked area with counts, stacked area as percent of traffic tells a more complete picture. It is a like for like comparison, 100% of each year's travel. The graph also benefits from an additional pseudo-axis. Instead of a common reference at zero, we also have a common reference at 100%.  
+
+From this final graph, we now have a high level view of change in Alaskan based air travel for this 20 year period. The flow of air travel in to Alaska has remained equal to the flow of air travel out of Alaska. However, this flow has increased for the entire system. Travel between smaller Alaskan airports has remained mostly constant while there was a drop in travel between hubs.  
+
+There's a number of possible explinations for these changes in the Alaskan system. If I were to explore this further, I would suppose that the Alaskan airways have become more integrated with other systems in the world. Going back to the uniqueness that intrigued me investigate Alaska originally (more airports than destination states), it would be interesting to see how the number of destinations available to Alaska changed. There is defenetly a story there how changes in air travel makes Alaska less remote.  
